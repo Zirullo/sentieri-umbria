@@ -1,4 +1,4 @@
-import { Track, cardinal, fmtDist, haversine } from './geo.js';
+import { Track, bearing, cardinal, fmtDist, haversine } from './geo.js';
 import { Guide } from './nav.js';
 import { Compass } from './compass.js';
 import { drawProfile } from './profile.js';
@@ -152,8 +152,21 @@ function pickTrail(pt, latlng) {
   });
 }
 
-function highlight(t) {
+let selectedDir = null;
+function clearSelection() {
   selectedLayer?.remove();
+  selectedDir?.remove();
+  selectedLayer = selectedDir = null;
+}
+
+// Verso scelto nella scheda: frecce ed estremi anche sulla mappa principale.
+function showDirection(d, reversed) {
+  selectedDir?.remove();
+  selectedDir = directionLayer(buildTrack(d, reversed), map).addTo(map);
+}
+
+function highlight(t) {
+  clearSelection();
   selectedLayer = L.layerGroup([
     L.polyline(t.geom, { color: '#fff', weight: 9, opacity: 0.9, interactive: false }),
     L.polyline(t.geom, { color: '#ff6f00', weight: 5, interactive: false }),
@@ -288,6 +301,15 @@ function renderSheet(d) {
   const fromLabel = tags.from || 'Inizio';
   const toLabel = tags.to || 'Fine';
   const loop = tags.roundtrip === 'yes' || haversine(d.start, d.end) < Math.min(150, d.len / 10);
+  // senso di un anello: segno dell'area (formula di Gauss) con x = longitudine, y = latitudine
+  const ring = d.segments.flat();
+  let area = 0;
+  for (let i = 0; i < ring.length; i++) {
+    const [y1, x1] = ring[i];
+    const [y2, x2] = ring[(i + 1) % ring.length];
+    area += x1 * y2 - x2 * y1;
+  }
+  const ccw = area > 0;
 
   const render = () => {
     const { h, src } = hoursOf(d, reversed);
@@ -306,10 +328,11 @@ function renderSheet(d) {
       ${d.gaps ? `<div class="warn">La traccia ha ${d.gaps} ${d.gaps === 1 ? 'interruzione' : 'interruzioni'} nei dati: lì segui la segnaletica.</div>` : ''}
       ${!saved && !navigator.onLine ? '<div class="warn">Sei offline e questo sentiero non è scaricato: la mappa potrebbe mancare.</div>' : ''}
       ${desc ? `<div class="desc">${esc(desc.length > 280 ? `${desc.slice(0, 280)}…` : desc)}</div>` : ''}
-      ${loop ? '' : `<div class="dir-choice">
-        <button data-rev="0" class="${reversed ? '' : 'on'}">Da ${esc(fromLabel)}</button>
-        <button data-rev="1" class="${reversed ? 'on' : ''}">Da ${esc(toLabel)}</button>
-      </div>`}
+      <div class="dir-title">Verso di percorrenza${loop ? ' (anello)' : ''}</div>
+      <div class="dir-choice">
+        <button data-rev="0" class="${reversed ? '' : 'on'}">${loop ? (ccw ? '↺ antiorario' : '↻ orario') : `${esc(fromLabel)} → ${esc(toLabel)}`}</button>
+        <button data-rev="1" class="${reversed ? 'on' : ''}">${loop ? (ccw ? '↻ orario' : '↺ antiorario') : `${esc(toLabel)} → ${esc(fromLabel)}`}</button>
+      </div>
       <div class="actions">
         <button id="btn-dl" class="${saved ? 'ok' : ''}">${saved ? '✓ Offline' : '⬇ Scarica offline'}</button>
         <a href="${directionsUrl(...(reversed ? d.end : d.start))}" target="_blank" rel="noopener">🚗 Come arrivare</a>
@@ -328,6 +351,7 @@ function renderSheet(d) {
       location.reload();
     });
     renderPlan(d, h, reversed);
+    showDirection(d, reversed);
     for (const b of document.querySelectorAll('.dir-choice button')) b.onclick = () => { reversed = b.dataset.rev === '1'; render(); };
     $('#btn-go').onclick = () => startNav(d, reversed);
     $('#btn-dl').onclick = () => (isDownloaded(d.id) ? removeDownload(d, render) : download(d, render));
@@ -435,6 +459,41 @@ async function startNav(d, reversed) {
   drawProfile($('#profile'), nav.track, null);
 }
 
+// Frecce del verso di percorrenza lungo la traccia (una ogni ~90 px, ricalcolate a ogni zoom)
+// ed etichette Partenza / Arrivo agli estremi.
+function directionLayer(track, m) {
+  const arrows = L.layerGroup();
+  const metersPerPx = (40075016 * Math.cos((track.pts[0][0] * Math.PI) / 180)) / 256;
+  const draw = () => {
+    arrows.clearLayers();
+    const step = Math.max(track.length / 200, 10, (metersPerPx / 2 ** m.getZoom()) * 75);
+    for (let s = step / 2; s < track.length - step / 4; s += step) {
+      const a = track.pointAt(s);
+      // direzione media su ~30 m: le piccole curve non fanno ruotare la freccia a caso
+      const dir = bearing(track.pointAt(Math.max(0, s - 15)), track.pointAt(Math.min(track.length, s + 15)));
+      const html = `<span style="transform:translate(-50%,-50%) rotate(${dir.toFixed(0)}deg)">`
+        + '<svg viewBox="0 0 12 12"><path d="M6 1 L11 10.5 L6 8 L1 10.5 Z"/></svg></span>';
+      L.marker([a[0], a[1]], { icon: L.divIcon({ className: 'dir-arrow', html, iconSize: null }), interactive: false, keyboard: false }).addTo(arrows);
+    }
+  };
+  const a = track.pts[0];
+  const z = track.pts[track.pts.length - 1];
+  const ep = (p, cls, text) => L.marker([p[0], p[1]], {
+    icon: L.divIcon({ className: 'ep-wrap', html: `<span class="ep ${cls}">${text}</span>`, iconSize: null }),
+    interactive: false, keyboard: false, zIndexOffset: 1000,
+  });
+  const group = L.layerGroup([
+    arrows,
+    L.circleMarker([a[0], a[1]], { radius: 8, color: '#fff', weight: 3, fillColor: '#2e7d32', fillOpacity: 1, interactive: false }),
+    L.circleMarker([z[0], z[1]], { radius: 8, color: '#fff', weight: 3, fillColor: '#111', fillOpacity: 1, interactive: false }),
+    ep(a, 'start', 'Partenza'),
+    ep(z, 'end', '🏁 Arrivo'),
+  ]);
+  group.on('add', () => { m.on('zoomend', draw); draw(); });
+  group.on('remove', () => m.off('zoomend', draw));
+  return group;
+}
+
 function drawNavTrack() {
   const m = nav.map;
   for (const l of Object.values(nav.layers)) l.remove();
@@ -447,8 +506,8 @@ function drawNavTrack() {
     line: L.polyline(segs, { color: '#d50000', weight: 6, interactive: false }).addTo(m),
     gaps: L.polyline(gaps, { color: '#d50000', weight: 4, dashArray: '2 10', opacity: 0.8, interactive: false }).addTo(m),
     extras: L.layerGroup((nav.detail.extras || []).map((x) => L.polyline(x.pts, { color: '#d50000', weight: 3, dashArray: '6 8', opacity: 0.7, interactive: false }))).addTo(m),
-    start: L.circleMarker(latlngs[0], { radius: 9, color: '#fff', weight: 3, fillColor: '#2e7d32', fillOpacity: 1 }).bindTooltip('Partenza').addTo(m),
-    end: L.circleMarker(latlngs[latlngs.length - 1], { radius: 9, color: '#fff', weight: 3, fillColor: '#111', fillOpacity: 1 }).bindTooltip('Arrivo').addTo(m),
+    done: L.polyline([], { color: '#9e9e9e', weight: 6, interactive: false }).addTo(m),
+    direction: directionLayer(nav.track, m).addTo(m),
     toTarget: L.polyline([], { color: '#1565c0', weight: 3, dashArray: '4 8', interactive: false }).addTo(m),
     me: L.marker(latlngs[0], { icon: L.divIcon({ className: 'me', html: '<div class="cone"></div><div class="dot"></div>', iconSize: [0, 0] }), interactive: false, opacity: 0 }).addTo(m),
   };
@@ -462,6 +521,13 @@ function onFix(p) {
   nav.last = r;
 
   nav.layers.me.setLatLng(myPos).setOpacity(1);
+  // tratto già percorso in grigio: resta rosso solo quello che manca
+  if (r.mode !== 'approach') {
+    const tr = nav.track;
+    const i = tr.indexAt(r.done);
+    const p = tr.pointAt(r.done);
+    nav.layers.done.setLatLngs([...tr.pts.slice(0, i + 1).map((q) => [q[0], q[1]]), [p[0], p[1]]]);
+  }
   nav.layers.toTarget.setLatLngs(r.mode === 'approach' || r.mode === 'off' ? [myPos, r.target] : []);
   if (nav.follow) nav.map.setView(myPos, Math.max(nav.map.getZoom(), 16), { animate: false });
 
@@ -568,7 +634,7 @@ function bind() {
     const it = e.target.closest('.item');
     if (it) openTrail(Number(it.dataset.id));
   });
-  $('.sheet-close').onclick = () => { $('#sheet').hidden = true; selectedLayer?.remove(); };
+  $('.sheet-close').onclick = () => { $('#sheet').hidden = true; clearSelection(); };
   $('#btn-locate').onclick = () => locate(showMe);
   $('#nav-exit').onclick = stopNav;
   $('#nav-reverse').onclick = () => {

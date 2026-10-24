@@ -99,7 +99,8 @@ main { position: fixed; inset: calc(61px + var(--safe-t)) 0 0 0; }
 .plan input { font: inherit; border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; background: #fff; }
 .desc { font-size: 14px; color: var(--muted); margin: 8px 0; }
 .warn { font-size: 13px; color: #8a5300; background: #fff4e0; padding: 6px 10px; border-radius: 8px; margin: 8px 0; }
-.dir-choice { display: flex; gap: 8px; margin: 12px 0 8px; }
+.dir-title { margin-top: 10px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.dir-choice { display: flex; gap: 8px; margin: 4px 0 8px; }
 .dir-choice button {
   flex: 1; padding: 10px 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); font-size: 14px;
 }
@@ -183,6 +184,20 @@ main { position: fixed; inset: calc(61px + var(--safe-t)) 0 0 0; }
   background: #fff; border: 2px solid; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.35);
   font-weight: 800; font-size: 13px; line-height: 1.2; color: var(--ink);
 }
+/* Verso di percorrenza: frecce lungo la traccia ed estremi */
+.dir-arrow, .ep-wrap { background: none; border: none; }
+.dir-arrow span {
+  display: block; width: 20px; height: 20px; padding: 3px; border-radius: 50%;
+  background: #fff; box-shadow: 0 0 0 1.5px #d50000, 0 1px 3px rgba(0,0,0,.4);
+}
+.dir-arrow svg { display: block; width: 14px; height: 14px; fill: #d50000; }
+.ep {
+  display: inline-block; transform: translate(-50%, -150%); padding: 3px 8px; border-radius: 12px;
+  color: #fff; font-weight: 700; font-size: 12px; white-space: nowrap; box-shadow: 0 1px 4px rgba(0,0,0,.4);
+}
+.ep.start { background: var(--green); }
+.ep.end { background: #111; }
+
 /* Scelta tra più sentieri sotto il dito */
 .pick-popup .leaflet-popup-content { margin: 10px; }
 .pick b { display: block; margin-bottom: 6px; font-size: 14px; }
@@ -200,7 +215,8 @@ main { position: fixed; inset: calc(61px + var(--safe-t)) 0 0 0; }
   .chips { margin: 6px 0; gap: 4px; }
   .chip { font-size: 13px; padding: 3px 8px; }
   .plan { margin: 6px 0; padding: 8px 10px; font-size: 13px; }
-  .dir-choice { margin: 8px 0 6px; }
+  .dir-title { margin-top: 6px; }
+  .dir-choice { margin: 4px 0 6px; }
   .actions { margin-top: 6px; }
   .actions button, .actions a { min-height: 44px; font-size: 14px; }
   .compass { width: 92px; height: 92px; }
