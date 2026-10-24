@@ -14,7 +14,7 @@ test('ogni file precaricato dal service worker esiste (altrimenti l\'installazio
 
 test('ogni modulo JS importato è nel precache', () => {
   const sw = readFileSync(new URL('sw.js', app), 'utf8');
-  for (const f of ['app', 'geo', 'nav', 'compass', 'offline', 'plan', 'profile']) {
+  for (const f of ['app', 'geo', 'nav', 'compass', 'offline', 'plan', 'profile', 'custom']) {
     assert.ok(sw.includes(`'js/${f}.js'`), `js/${f}.js non precaricato`);
   }
 });

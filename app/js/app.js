@@ -4,6 +4,7 @@ import { Compass } from './compass.js';
 import { drawProfile } from './profile.js';
 import { MAX_NATIVE_ZOOM, TILE_URL, deleteTrail, downloadTrail, isDownloaded, registry, syncDataVersion } from './offline.js';
 import { SCALE_LABEL, directionsUrl, fmtHours, fmtTime, parseDuration, sunset, walkHours } from './plan.js';
+import { CUSTOM_SECTOR, importFromHash, loadCustom, removeCustom } from './custom.js';
 
 const $ = (s) => document.querySelector(s);
 const SIM = new URLSearchParams(location.search).has('sim');
@@ -48,25 +49,107 @@ function hoursOf(t, reversed = false) {
 
 /* ---------- Mappa generale ---------- */
 
+const LABEL_MIN_ZOOM = 12;
+const LABEL_MAX = 120;
+const TAP_PX = 28; // raggio di tocco: circa un polpastrello
+
+const shown = (t) => t.custom || !$('#only-cai').checked || t.cai;
+
 function initMap() {
   map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([42.95, 12.55], 9);
   tileLayer().addTo(map);
-  const renderer = L.canvas({ tolerance: 10 });
+  const renderer = L.canvas({ padding: 0.3 });
   for (const t of trails) {
-    t.layer = L.polyline(t.geom, { color: SCALE_COLOR[t.scale] || '#e65100', weight: 3, opacity: 0.85, renderer })
-      .on('click', () => openTrail(t.id))
-      .addTo(map);
+    t.layer = L.polyline(t.geom, { color: SCALE_COLOR[t.scale] || '#e65100', weight: 3, opacity: 0.85, renderer, interactive: false });
   }
+  labels = L.layerGroup().addTo(map);
+  map.on('click', (e) => pickTrail(e.containerPoint, e.latlng));
+  map.on('moveend', renderLabels);
   applyCaiFilter();
+  if (SIM) window.appMap = map;
 }
 
 function applyCaiFilter() {
-  const only = $('#only-cai').checked;
   for (const t of trails) {
-    const show = !only || t.cai;
+    const show = shown(t);
     if (show && !map.hasLayer(t.layer)) t.layer.addTo(map);
     if (!show && map.hasLayer(t.layer)) t.layer.remove();
   }
+  renderLabels();
+}
+
+/* Etichette col numero del sentiero, solo da uno zoom in cui si leggono.
+   Ogni sentiero visibile ha la sua etichetta sulla parte inquadrata, senza sovrapposizioni. */
+let labels;
+function renderLabels() {
+  labels.clearLayers();
+  if (map.getZoom() < LABEL_MIN_ZOOM) return;
+  const size = map.getSize();
+  const view = map.getBounds();
+  const placed = [];
+  const free = (p) => placed.every((q) => Math.abs(q.x - p.x) > 38 || Math.abs(q.y - p.y) > 22);
+  for (const t of trails) {
+    if (!shown(t) || !t.ref) continue;
+    const [s, w, n, e] = t.bbox;
+    if (!view.intersects([[s, w], [n, e]])) continue;
+    const vis = [];
+    for (const seg of t.geom) for (const ll of seg) {
+      const p = map.latLngToContainerPoint(ll);
+      if (p.x > 24 && p.y > 16 && p.x < size.x - 24 && p.y < size.y - 16) vis.push([ll, p]);
+    }
+    const spot = [0.5, 0.3, 0.7, 0.15, 0.85].map((f) => vis[Math.floor(f * (vis.length - 1))]).find((c) => c && free(c[1]));
+    if (!spot) continue;
+    placed.push(spot[1]);
+    const icon = L.divIcon({
+      className: 'trail-label',
+      html: `<span style="border-color:${SCALE_COLOR[t.scale] || '#e65100'}">${esc(t.ref)}</span>`,
+      iconSize: null,
+    });
+    L.marker(spot[0], { icon, keyboard: false }).on('click', (ev) => {
+      L.DomEvent.stop(ev);
+      openTrail(t.id);
+    }).addTo(labels);
+    if (placed.length >= LABEL_MAX) break;
+  }
+}
+
+// Distanza in pixel da un punto dello schermo a un sentiero.
+function pxDistance(t, pt) {
+  let best = Infinity;
+  for (const seg of t.geom) {
+    let prev = null;
+    for (const ll of seg) {
+      const p = map.latLngToContainerPoint(ll);
+      if (prev) best = Math.min(best, L.LineUtil.pointToSegmentDistance(pt, prev, p));
+      prev = p;
+    }
+  }
+  return best;
+}
+
+// Tocco sulla mappa: apre il sentiero più vicino, o fa scegliere se ce n'è più d'uno sotto il dito.
+function pickTrail(pt, latlng) {
+  const view = map.getBounds().pad(0.1);
+  const near = [];
+  for (const t of trails) {
+    if (!shown(t)) continue;
+    const [s, w, n, e] = t.bbox;
+    if (!view.intersects([[s, w], [n, e]])) continue;
+    const d = pxDistance(t, pt);
+    if (d <= TAP_PX) near.push([d, t]);
+  }
+  near.sort((a, b) => a[0] - b[0]);
+  if (!near.length) return;
+  if (near.length === 1) return openTrail(near[0][1].id);
+  const html = `<div class="pick"><b>Quale sentiero?</b>${near.slice(0, 6).map(([, t]) =>
+    `<button data-id="${t.id}"><span class="ref"><span>${esc(t.ref || '–')}</span></span> ${esc(title(t))}</button>`).join('')}</div>`;
+  const popup = L.popup({ closeButton: false, maxWidth: 280, className: 'pick-popup' }).setLatLng(latlng).setContent(html).openOn(map);
+  popup.getElement().addEventListener('click', (ev) => {
+    const b = ev.target.closest('button[data-id]');
+    if (!b) return;
+    map.closePopup();
+    openTrail(Number(b.dataset.id));
+  });
 }
 
 function highlight(t) {
@@ -98,8 +181,7 @@ function itemHtml(t, extra = '') {
 function renderList() {
   const body = $('#list-body');
   const q = normalize($('#search').value.trim());
-  const only = $('#only-cai').checked;
-  let pool = trails.filter((t) => !only || t.cai);
+  let pool = trails.filter(shown);
   if (q) {
     pool = trails.filter((t) => (t.search ??= normalize(`${t.ref} ${t.name} ${t.from} ${t.to} ${t.sector}`)).includes(q));
     pool.sort((a, b) => (normalize(b.ref) === q) - (normalize(a.ref) === q) || (normalize(b.ref).startsWith(q)) - (normalize(a.ref).startsWith(q)));
@@ -128,7 +210,7 @@ function renderList() {
     if (!groups.has(t.sector)) groups.set(t.sector, []);
     groups.get(t.sector).push(t);
   }
-  const order = ['Alto Tevere', 'Alto Chiascio', 'Valle Umbra Nord', 'Valle Spoletina', 'Valnerina', 'Valle del Nera',
+  const order = [CUSTOM_SECTOR, 'Alto Tevere', 'Alto Chiascio', 'Valle Umbra Nord', 'Valle Spoletina', 'Valnerina', 'Valle del Nera',
     'Amerino', 'Orvietano-Tuderte', 'Perugino-Trasimeno', 'Lunga percorrenza', 'Altri sentieri', 'Regioni confinanti'];
   body.innerHTML = order.filter((g) => groups.has(g))
     .map((g) => `<div class="group-title">${esc(g)} (${groups.get(g).length})</div>${groups.get(g).map((t) => itemHtml(t)).join('')}`)
@@ -162,6 +244,8 @@ function showMe(p) {
 /* ---------- Scheda sentiero ---------- */
 
 async function loadDetail(id) {
+  const t = byId.get(id);
+  if (t?.custom) return t;
   const r = await fetch(trailUrl(id));
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return r.json();
@@ -203,7 +287,7 @@ function renderSheet(d) {
   if (myPos && !tags.roundtrip) reversed = haversine(myPos, d.end) < haversine(myPos, d.start);
   const fromLabel = tags.from || 'Inizio';
   const toLabel = tags.to || 'Fine';
-  const loop = tags.roundtrip === 'yes' || haversine(d.start, d.end) < 150;
+  const loop = tags.roundtrip === 'yes' || haversine(d.start, d.end) < Math.min(150, d.len / 10);
 
   const render = () => {
     const { h, src } = hoursOf(d, reversed);
@@ -232,9 +316,17 @@ function renderSheet(d) {
       </div>
       <div class="progress" id="dl-progress" hidden><div></div></div>
       <div class="actions"><button id="btn-go" class="primary">▶ Inizia</button></div>
-      <div class="src">Dati © OpenStreetMap contributors (ODbL) ·
+      ${d.custom ? `<div class="src">Sentiero personale, salvato solo su questo telefono ·
+        <a href="#" id="btn-del-custom">elimina</a></div>`
+    : `<div class="src">Dati © OpenStreetMap contributors (ODbL) ·
         <a href="https://www.openstreetmap.org/relation/${d.id}" target="_blank" rel="noopener">relazione ${d.id}</a>
-        ${tags['survey:date'] ? ` · rilievo ${esc(tags['survey:date'])}` : ''}</div>`;
+        ${tags['survey:date'] ? ` · rilievo ${esc(tags['survey:date'])}` : ''}</div>`}`;
+    $('#btn-del-custom')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!confirm(`Eliminare il sentiero «${d.name}»?`)) return;
+      removeCustom(d.name);
+      location.reload();
+    });
     renderPlan(d, h, reversed);
     for (const b of document.querySelectorAll('.dir-choice button')) b.onclick = () => { reversed = b.dataset.rev === '1'; render(); };
     $('#btn-go').onclick = () => startNav(d, reversed);
@@ -270,7 +362,7 @@ async function download(d, rerender) {
   btn.disabled = true;
   bar.hidden = false;
   try {
-    const res = await downloadTrail(d, trailUrl(d.id), (n, tot) => {
+    const res = await downloadTrail(d, d.custom ? null : trailUrl(d.id), (n, tot) => {
       btn.textContent = `⬇ ${Math.round((n / tot) * 100)}%`;
       bar.firstElementChild.style.width = `${(n / tot) * 100}%`;
     });
@@ -283,7 +375,7 @@ async function download(d, rerender) {
 
 async function removeDownload(d, rerender) {
   if (!confirm('Eliminare la mappa offline di questo sentiero?')) return;
-  await deleteTrail(d.id, trailUrl(d.id));
+  await deleteTrail(d.id, d.custom ? null : trailUrl(d.id));
   toast('Mappa offline eliminata');
   rerender();
 }
@@ -521,7 +613,9 @@ async function main() {
   try {
     const r = await fetch('data/index.json');
     const idx = await r.json();
-    trails = idx.trails;
+    const added = importFromHash();
+    if (added) setTimeout(() => toast(`Sentiero «${added}» aggiunto`), 500);
+    trails = [...loadCustom(), ...idx.trails];
     syncDataVersion(idx.generated).catch(() => {});
   } catch {
     toast('Impossibile caricare l\'elenco dei sentieri', 6000);

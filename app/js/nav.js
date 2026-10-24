@@ -90,7 +90,9 @@ export class Guide {
     const remaining = Math.max(0, tr.length - s);
     // l'arrivo conta solo dopo aver percorso almeno metà del sentiero (negli anelli si parte già "vicino all'arrivo")
     const walked = s - (this.joinS ?? s);
-    if (this.joined && !this.off && remaining < ARRIVE_M && walked > (tr.length - this.joinS) * 0.5) this.arrived = true;
+    // sui percorsi molto corti la soglia d'arrivo si riduce (minimo 8 m, oltre il rumore GPS)
+    const arriveM = Math.max(8, Math.min(ARRIVE_M, tr.length * 0.15));
+    if (this.joined && !this.off && remaining < arriveM && walked > (tr.length - this.joinS) * 0.5) this.arrived = true;
     if (this.arrived) mode = 'arrived';
 
     const end = tr.pts[tr.pts.length - 1];

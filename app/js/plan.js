@@ -21,6 +21,7 @@ export function parseDuration(s) {
 
 export function fmtHours(h) {
   if (h == null || !isFinite(h)) return '–';
+  if (h < 5 / 60) return '< 5 min';
   let hh = Math.floor(h);
   let mm = Math.round(((h - hh) * 60) / 5) * 5;
   if (mm === 60) { hh++; mm = 0; }

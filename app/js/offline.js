@@ -59,10 +59,12 @@ export const isDownloaded = (id) => !!registry()[id]?.complete;
 
 export async function downloadTrail(trail, trailUrl, onProgress, signal) {
   if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
-  const trailCache = await caches.open(TRAIL_CACHE);
-  const res = await fetch(trailUrl);
-  if (!res.ok) throw new Error(`traccia: HTTP ${res.status}`);
-  await trailCache.put(new URL(trailUrl, location.href).href, res);
+  if (trailUrl) { // i sentieri personali non hanno un file sul server
+    const trailCache = await caches.open(TRAIL_CACHE);
+    const res = await fetch(trailUrl);
+    if (!res.ok) throw new Error(`traccia: HTTP ${res.status}`);
+    await trailCache.put(new URL(trailUrl, location.href).href, res);
+  }
 
   const tiles = tilesFor(trail);
   const cache = await caches.open(TILE_CACHE);
@@ -116,8 +118,7 @@ export async function deleteTrail(id, trailUrl) {
     const [z, x, y] = t.split('/').map(Number);
     return cache.delete(tileKey(z, x, y));
   }));
-  const tc = await caches.open(TRAIL_CACHE);
-  await tc.delete(new URL(trailUrl, location.href).href);
+  if (trailUrl) await (await caches.open(TRAIL_CACHE)).delete(new URL(trailUrl, location.href).href);
   saveRegistry(r);
 }
 

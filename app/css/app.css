@@ -176,6 +176,22 @@ main { position: fixed; inset: calc(61px + var(--safe-t)) 0 0 0; }
 .leaflet-container { font: inherit; }
 .leaflet-control-attribution { font-size: 10px; }
 
+/* Etichette dei sentieri sulla mappa */
+.trail-label { background: none; border: none; }
+.trail-label span {
+  display: inline-block; transform: translate(-50%, -50%); padding: 2px 6px; white-space: nowrap;
+  background: #fff; border: 2px solid; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.35);
+  font-weight: 800; font-size: 13px; line-height: 1.2; color: var(--ink);
+}
+/* Scelta tra più sentieri sotto il dito */
+.pick-popup .leaflet-popup-content { margin: 10px; }
+.pick b { display: block; margin-bottom: 6px; font-size: 14px; }
+.pick button {
+  display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 6px 4px;
+  border: none; border-top: 1px solid var(--line); background: none; text-align: left; font-size: 14px;
+}
+.pick .ref { min-width: 40px; font-size: 12px; }
+
 /* Telefoni piccoli: scheda più compatta, così il sentiero resta visibile sopra */
 @media (max-height: 720px) {
   .sheet { max-height: 68vh; padding: 12px 12px calc(12px + var(--safe-b)); }
