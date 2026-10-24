@@ -15,7 +15,10 @@ const SHELL = [
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(SHELL_CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // cache: 'reload' scavalca la cache HTTP (GitHub Pages la tiene 10 minuti), altrimenti si precaricherebbero file vecchi
+  e.waitUntil(caches.open(SHELL_CACHE)
+    .then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' }))))
+    .then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {
@@ -56,7 +59,7 @@ async function trail(req) {
 async function staleWhileRevalidate(req) {
   const c = await caches.open(SHELL_CACHE);
   const hit = await c.match(req, { ignoreSearch: true });
-  const net = fetch(req).then((res) => { if (res.ok) c.put(req, res.clone()); return res; }).catch(() => null);
+  const net = fetch(req, { cache: 'no-cache' }).then((res) => { if (res.ok) c.put(req, res.clone()); return res; }).catch(() => null);
   return hit || (await net) || new Response('offline', { status: 503 });
 }
 

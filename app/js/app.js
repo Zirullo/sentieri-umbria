@@ -500,7 +500,14 @@ async function resumeIfActive() {
 
 async function main() {
   bind();
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if ('serviceWorker' in navigator) {
+    // nuova versione installata: ricarica, ma mai durante una navigazione
+    const hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (hadController && $('#nav').hidden) location.reload();
+    });
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
   try {
     const r = await fetch('data/index.json');
     const idx = await r.json();
