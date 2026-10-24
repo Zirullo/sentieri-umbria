@@ -251,10 +251,14 @@ function renderPlan(d, hours, reversed) {
     const latest = ss ? new Date(ss.getTime() - (hours + 0.5) * 3600000) : null;
     const today = new Date().toDateString() === date.toDateString();
     const late = today && latest && Date.now() > latest.getTime();
-    el.innerHTML = `📅 <input type="date" id="plan-date" value="${date.toISOString().slice(0, 10)}">
+    const ymd = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    el.innerHTML = `📅 <input type="date" id="plan-date" value="${ymd}">
       tramonto <b>${fmtTime(ss)}</b> · parti entro le <b>${fmtTime(latest)}</b>
       ${late ? '<div class="warn">Oggi è tardi per completarlo con la luce.</div>' : ''}`;
-    $('#plan-date').onchange = (e) => { const v = e.target.valueAsDate; if (v) draw(new Date(v.getTime() + 12 * 3600000)); };
+    $('#plan-date').onchange = (e) => {
+      const [y, m, dd] = e.target.value.split('-').map(Number);
+      if (y) draw(new Date(y, m - 1, dd, 12));
+    };
   };
   draw(new Date());
 }
@@ -313,8 +317,10 @@ async function startNav(d, reversed) {
   nav.last = null;
 
   if (!nav.map) {
-    nav.map = L.map('nav-map', { zoomControl: false, preferCanvas: true });
-    tileLayer().addTo(nav.map);
+    // in navigazione i crediti stanno su una riga sola, per lasciare spazio alla mappa
+    nav.map = L.map('nav-map', { zoomControl: false, preferCanvas: true, attributionControl: false });
+    L.control.attribution({ prefix: false }).addAttribution('© OpenTopoMap · © OpenStreetMap').addTo(nav.map);
+    L.tileLayer(TILE_URL, { subdomains: 'abc', maxNativeZoom: MAX_NATIVE_ZOOM, maxZoom: 18, crossOrigin: true }).addTo(nav.map);
     nav.map.on('dragstart', () => { nav.follow = false; });
     if (SIM) {
       nav.map.on('click', (e) => onFix({ coords: { latitude: e.latlng.lat, longitude: e.latlng.lng, accuracy: 5 } }));

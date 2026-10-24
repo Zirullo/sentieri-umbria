@@ -75,6 +75,17 @@ test('interruzione GPS: un salto reale in avanti viene accettato dopo conferma',
   assert.ok(Math.abs(r.done - 1320) < 20, `done ${r.done}`);
 });
 
+test('GPS a risparmio energetico (un fix al minuto): la progressiva avanza comunque', () => {
+  const g = new Guide(L_TRACK);
+  let r;
+  let t = 0;
+  for (let e = 0; e <= 1000; e += 80) { // 80 m tra un fix e l'altro, uno ogni 60 s
+    r = g.update(...move(A, 2, e), 8, t);
+    t += 60000;
+  }
+  assert.ok(Math.abs(r.done - 960) < 20, `done ${r.done}`);
+});
+
 test('fuori sentiero immediato se molto lontano', () => {
   const g = new Guide(L_TRACK);
   g.update(...move(A, 0, 100), 8);

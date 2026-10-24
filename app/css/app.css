@@ -174,3 +174,20 @@ main { position: fixed; inset: calc(61px + var(--safe-t)) 0 0 0; }
   max-width: 90vw; padding: 10px 16px; border-radius: 20px; background: rgba(0,0,0,.85); color: #fff; font-size: 14px;
 }
 .leaflet-container { font: inherit; }
+.leaflet-control-attribution { font-size: 10px; }
+
+/* Telefoni piccoli: scheda più compatta, così il sentiero resta visibile sopra */
+@media (max-height: 720px) {
+  .sheet { max-height: 68vh; padding: 12px 12px calc(12px + var(--safe-b)); }
+  .sheet h2 { font-size: 18px; }
+  .sheet .sub { margin-bottom: 4px; }
+  .chips { margin: 6px 0; gap: 4px; }
+  .chip { font-size: 13px; padding: 3px 8px; }
+  .plan { margin: 6px 0; padding: 8px 10px; font-size: 13px; }
+  .dir-choice { margin: 8px 0 6px; }
+  .actions { margin-top: 6px; }
+  .actions button, .actions a { min-height: 44px; font-size: 14px; }
+  .compass { width: 92px; height: 92px; }
+  .nav-stats .big { font-size: 24px; }
+  .profile { height: 50px; }
+}
