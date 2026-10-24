@@ -121,8 +121,25 @@ export async function deleteTrail(id, trailUrl) {
   saveRegistry(r);
 }
 
-export async function storageEstimate() {
-  if (!navigator.storage?.estimate) return null;
-  const { usage, quota } = await navigator.storage.estimate();
-  return { usage, quota };
+// Quando i dati vengono rigenerati, le tracce già in cache vanno aggiornate per restare coerenti con l'indice.
+export async function syncDataVersion(version) {
+  const KEY = 'data-version';
+  let stored = null;
+  try { stored = localStorage.getItem(KEY); } catch { return; }
+  if (!version || stored === version) return;
+  if (stored && navigator.onLine) {
+    const cache = await caches.open(TRAIL_CACHE);
+    for (const req of await cache.keys()) {
+      try {
+        const res = await fetch(req.url, { cache: 'no-store' });
+        if (res.ok) await cache.put(req.url, res);
+        else if (res.status === 404) await cache.delete(req.url); // sentiero rimosso da OSM
+      } catch {
+        return; // rete caduta: riprova al prossimo avvio
+      }
+    }
+  } else if (stored) {
+    return; // offline: aggiorna quando torna la rete
+  }
+  try { localStorage.setItem(KEY, version); } catch { /* ignorato */ }
 }

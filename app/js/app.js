@@ -2,7 +2,7 @@ import { Track, cardinal, fmtDist, haversine } from './geo.js';
 import { Guide } from './nav.js';
 import { Compass } from './compass.js';
 import { drawProfile } from './profile.js';
-import { MAX_NATIVE_ZOOM, TILE_URL, deleteTrail, downloadTrail, isDownloaded, registry } from './offline.js';
+import { MAX_NATIVE_ZOOM, TILE_URL, deleteTrail, downloadTrail, isDownloaded, registry, syncDataVersion } from './offline.js';
 import { SCALE_LABEL, directionsUrl, fmtHours, fmtTime, parseDuration, sunset, walkHours } from './plan.js';
 
 const $ = (s) => document.querySelector(s);
@@ -101,7 +101,7 @@ function renderList() {
   const only = $('#only-cai').checked;
   let pool = trails.filter((t) => !only || t.cai);
   if (q) {
-    pool = trails.filter((t) => normalize(`${t.ref} ${t.name} ${t.sector}`).includes(q));
+    pool = trails.filter((t) => (t.search ??= normalize(`${t.ref} ${t.name} ${t.from} ${t.to} ${t.sector}`)).includes(q));
     pool.sort((a, b) => (normalize(b.ref) === q) - (normalize(a.ref) === q) || (normalize(b.ref).startsWith(q)) - (normalize(a.ref).startsWith(q)));
     body.innerHTML = pool.length ? pool.slice(0, 100).map((t) => itemHtml(t)).join('') : '<div class="empty">Nessun sentiero trovato</div>';
     return;
@@ -129,7 +129,7 @@ function renderList() {
     groups.get(t.sector).push(t);
   }
   const order = ['Alto Tevere', 'Alto Chiascio', 'Valle Umbra Nord', 'Valle Spoletina', 'Valnerina', 'Valle del Nera',
-    'Amerino', 'Orvietano-Tuderte', 'Perugino-Trasimeno', 'Lunga percorrenza', 'Altri sentieri'];
+    'Amerino', 'Orvietano-Tuderte', 'Perugino-Trasimeno', 'Lunga percorrenza', 'Altri sentieri', 'Regioni confinanti'];
   body.innerHTML = order.filter((g) => groups.has(g))
     .map((g) => `<div class="group-title">${esc(g)} (${groups.get(g).length})</div>${groups.get(g).map((t) => itemHtml(t)).join('')}`)
     .join('');
@@ -503,7 +503,9 @@ async function main() {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
   try {
     const r = await fetch('data/index.json');
-    trails = (await r.json()).trails;
+    const idx = await r.json();
+    trails = idx.trails;
+    syncDataVersion(idx.generated).catch(() => {});
   } catch {
     toast('Impossibile caricare l\'elenco dei sentieri', 6000);
     return;

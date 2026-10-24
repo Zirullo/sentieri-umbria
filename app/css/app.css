@@ -56,7 +56,7 @@ main { position: fixed; inset: calc(61px + var(--safe-t)) 0 0 0; }
 }
 
 /* Elenco */
-.list { position: absolute; inset: 0; overflow-y: auto; background: var(--bg); z-index: 950; padding-bottom: 40px; }
+.list { position: absolute; inset: 0; overflow-y: auto; background: var(--bg); z-index: 1050; padding-bottom: 40px; }
 .seg { display: flex; margin: 12px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
 .seg button { flex: 1; padding: 10px 4px; border: none; background: var(--bg); font-size: 14px; }
 .seg button.on { background: var(--red); color: #fff; }

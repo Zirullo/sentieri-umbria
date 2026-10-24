@@ -11,9 +11,10 @@ import math
 import sys
 from pathlib import Path
 
-import numpy as np
+import shapely
 import tifffile
 from shapely.geometry import LineString
+from shapely.ops import polygonize, unary_union
 
 MAIN_ROLES = {"", "main", "forward", "backward"}
 SIMPLIFY_DETAIL_M = 3
@@ -149,16 +150,46 @@ def ascent_descent(eles, threshold=5.0):
     return round(up), round(down)
 
 
-def sector_of(tags):
+def load_boundary(path: Path):
+    """Poligono dell'Umbria (lon, lat) dalle way 'outer' della relazione amministrativa."""
+    if not path.exists():
+        print(f"Confine regionale non trovato ({path}): nessun controllo fuori regione")
+        return None
+    rel = next(e for e in json.load(open(path, encoding="utf-8"))["elements"] if e["type"] == "relation")
+    lines = [LineString([(p["lon"], p["lat"]) for p in m["geometry"]])
+             for m in rel["members"] if m["type"] == "way" and m.get("role") == "outer"]
+    poly = unary_union(list(polygonize(unary_union(lines))))
+    shapely.prepare(poly)
+    return poly
+
+
+def share_inside(poly, pts):
+    if poly is None:
+        return 1.0
+    lats = [p[0] for p in pts]
+    lons = [p[1] for p in pts]
+    return float(shapely.contains_xy(poly, lons, lats).mean())
+
+
+def sector_of(tags, inside):
     ref = (tags.get("ref") or "").strip()
-    net = tags.get("network")
-    if net in ("iwn", "nwn", "rwn"):
+    # le tappe dei percorsi lunghi che entrano in Umbria anche solo in parte restano tra i percorsi lunghi
+    if tags.get("network") in ("iwn", "nwn", "rwn") and inside >= 0.2:
         return "Lunga percorrenza"
+    if inside < 0.5:
+        return "Regioni confinanti"
     digits = ref.split()[0] if ref else ""
     num = "".join(ch for ch in digits if ch.isdigit())
     if len(num) == 3 and digits[:3].isdigit():
         return SECTORS.get(int(num[0]), "Altri sentieri")
     return "Altri sentieri"
+
+
+def is_cai(tags):
+    """Sentiero del catasto CAI: operatore CAI, codice REI o rilievo CAI dichiarato."""
+    op = tags.get("operator", "").lower()
+    return ("club alpino" in op or op.startswith("cai") or "ref:REI" in tags
+            or "cai" in tags.get("source", "").lower())
 
 
 def r5(v):
@@ -168,6 +199,7 @@ def r5(v):
 def main(osm_path, dem_dir, out_dir):
     osm = json.load(open(osm_path, encoding="utf-8"))
     dem = Dem(Path(dem_dir))
+    umbria = load_boundary(Path(osm_path).with_name("umbria_confine.json"))
     out = Path(out_dir)
     (out / "trails").mkdir(parents=True, exist_ok=True)
 
@@ -225,9 +257,9 @@ def main(osm_path, dem_dir, out_dir):
             "name": tags.get("name") or tags.get("name:it") or "",
             "from": tags.get("from", ""),
             "to": tags.get("to", ""),
-            "sector": sector_of(tags),
+            "sector": sector_of(tags, share_inside(umbria, flat)),
             "scale": tags.get("cai_scale", ""),
-            "cai": "club alpino" in (tags.get("operator", "").lower()) or tags.get("operator", "").upper().startswith("CAI"),
+            "cai": is_cai(tags),
             "len": round(length),
             "up": up,
             "down": down,
