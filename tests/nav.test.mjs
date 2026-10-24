@@ -46,14 +46,33 @@ test('avvicinamento → sul sentiero → fuori → rientro → arrivo', () => {
   r = g.update(...move(A, 8, 340), 8);
   assert.equal(r.mode, 'on');
 
-  // dopo la curva la freccia punta a nord
+  // si cammina fino a oltre la curva: la freccia punta a nord
+  for (let e = 360; e <= 1000; e += 20) g.update(...move(A, 2, e), 8);
+  for (let n = 20; n < 300; n += 20) g.update(...move(A, n, 1002), 8);
   r = g.update(...move(A, 300, 1003), 8);
   assert.equal(r.mode, 'on');
   assert.ok(r.targetBearing < 20 || r.targetBearing > 340, `bearing ${r.targetBearing}`);
   assert.ok(Math.abs(r.done - 1300) < 10, `done ${r.done}`);
 
-  r = g.update(...move(A, 990, 1000), 8);
+  for (let n = 320; n <= 990; n += 20) r = g.update(...move(A, n, 1000), 8);
   assert.equal(r.mode, 'arrived');
+});
+
+test('un punto GPS anomalo vicino a un altro tratto non fa saltare la guida', () => {
+  const g = new Guide(L_TRACK);
+  for (let e = 0; e <= 900; e += 20) g.update(...move(A, 2, e), 8);
+  // fix anomalo che cade sul tratto nord (s ≈ 1200)
+  g.update(...move(A, 200, 990), 8);
+  const r = g.update(...move(A, 2, 920), 8);
+  assert.ok(Math.abs(r.done - 920) < 20, `done ${r.done}`);
+});
+
+test('interruzione GPS: un salto reale in avanti viene accettato dopo conferma', () => {
+  const g = new Guide(L_TRACK);
+  for (let e = 0; e <= 400; e += 20) g.update(...move(A, 2, e), 8);
+  let r;
+  for (const n of [300, 310, 320]) r = g.update(...move(A, n, 1001), 8);
+  assert.ok(Math.abs(r.done - 1320) < 20, `done ${r.done}`);
 });
 
 test('fuori sentiero immediato se molto lontano', () => {
@@ -95,9 +114,75 @@ test('verso invertito', () => {
   assert.ok(Math.abs(r.done - 500) < 10);
 });
 
+test('anello: alla partenza non risulta già arrivato', () => {
+  // quadrato di 4 km che torna al punto di partenza
+  const sq = [];
+  const corners = [[0, 0], [0, 1000], [1000, 1000], [1000, 0], [0, 0]];
+  for (let c = 0; c < 4; c++) {
+    for (let i = 0; i < 50; i++) {
+      const [n0, e0] = corners[c];
+      const [n1, e1] = corners[c + 1];
+      sq.push([...move(A, n0 + ((n1 - n0) * i) / 50, e0 + ((e1 - e0) * i) / 50), 500]);
+    }
+  }
+  sq.push([...A, 500]);
+  const tr = new Track(sq);
+  const g = new Guide(tr);
+  let r = g.update(...move(A, -5, 3), 8);
+  assert.equal(r.mode, 'on');
+  assert.ok(r.done < 50, `done ${r.done}`);
+  for (let s = 0; s < tr.length; s += 50) r = g.update(...tr.pointAt(s).slice(0, 2), 8);
+  r = g.update(...move(A, -5, 3), 8);
+  assert.equal(r.mode, 'arrived');
+});
+
+test('avvicinamento da lontano: la progressiva segue il punto in cui si entra davvero', () => {
+  const g = new Guide(L_TRACK);
+  g.update(...move(A, 800, 700), 8);           // lontano: il punto più vicino è sul tratto nord
+  const r = g.update(...move(A, 4, 150), 8);   // si entra invece a 150 m dall'inizio
+  assert.equal(r.mode, 'on');
+  assert.ok(Math.abs(r.done - 150) < 10, `done ${r.done}`);
+});
+
 test('bearing e distanza di base', () => {
   assert.ok(Math.abs(bearing([43, 12], [44, 12])) < 0.01);
   assert.ok(Math.abs(haversine([43, 12], [43, 13]) - 81300) < 500);
+});
+
+// Generatore pseudo-casuale riproducibile e rumore gaussiano.
+function rng(seed) {
+  let s = seed;
+  return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+}
+function gauss(rand) {
+  return Math.sqrt(-2 * Math.log(rand() + 1e-12)) * Math.cos(2 * Math.PI * rand());
+}
+
+test('rumore GPS nel bosco: nessun falso allarme su 20 sentieri reali', () => {
+  const idx = JSON.parse(readFileSync(new URL('../app/data/index.json', import.meta.url)));
+  const sample = idx.trails.filter((t) => t.cai && t.gaps === 0 && t.len > 3000).slice(0, 20);
+  const rand = rng(42);
+  let fixes = 0;
+  let falseAlarms = 0;
+  let maxErr = 0;
+  for (const t of sample) {
+    const d = JSON.parse(readFileSync(new URL(`../app/data/trails/${t.id}.json`, import.meta.url)));
+    const tr = new Track(d.segments.flat());
+    const g = new Guide(tr);
+    for (let s = 0; s <= tr.length; s += 4) { // ~1 fix al secondo camminando
+      const p = tr.pointAt(s);
+      let n = gauss(rand) * 8;
+      let e = gauss(rand) * 8;
+      if (rand() < 0.01) { n += 30; e += 15; } // salto occasionale (riflessi, canyon)
+      const r = g.update(...move(p, n, e), 12);
+      fixes++;
+      if (r.mode === 'off') falseAlarms++;
+      if (r.mode === 'on') maxErr = Math.max(maxErr, Math.abs(r.done - Math.min(s, tr.length)));
+    }
+  }
+  assert.ok(fixes > 5000, `fix ${fixes}`);
+  assert.ok(maxErr < 120, `errore progressiva ${Math.round(maxErr)} m`);
+  assert.ok(falseAlarms / fixes < 0.002, `falsi allarmi ${falseAlarms} su ${fixes}`);
 });
 
 test('sentiero reale: camminata simulata con deviazione', () => {

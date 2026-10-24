@@ -341,9 +341,13 @@ function drawNavTrack() {
   const m = nav.map;
   for (const l of Object.values(nav.layers)) l.remove();
   const latlngs = nav.track.pts.map((p) => [p[0], p[1]]);
+  const segs = nav.detail.segments.map((s) => s.map((p) => [p[0], p[1]]));
+  // dove i dati OSM sono interrotti il collegamento è solo indicativo: tratteggiato
+  const gaps = segs.slice(1).map((s, i) => [segs[i][segs[i].length - 1], s[0]]);
   nav.layers = {
-    casing: L.polyline(latlngs, { color: '#fff', weight: 10, opacity: 0.9, interactive: false }).addTo(m),
-    line: L.polyline(latlngs, { color: '#d50000', weight: 6, interactive: false }).addTo(m),
+    casing: L.polyline(segs, { color: '#fff', weight: 10, opacity: 0.9, interactive: false }).addTo(m),
+    line: L.polyline(segs, { color: '#d50000', weight: 6, interactive: false }).addTo(m),
+    gaps: L.polyline(gaps, { color: '#d50000', weight: 4, dashArray: '2 10', opacity: 0.8, interactive: false }).addTo(m),
     extras: L.layerGroup((nav.detail.extras || []).map((x) => L.polyline(x.pts, { color: '#d50000', weight: 3, dashArray: '6 8', opacity: 0.7, interactive: false }))).addTo(m),
     start: L.circleMarker(latlngs[0], { radius: 9, color: '#fff', weight: 3, fillColor: '#2e7d32', fillOpacity: 1 }).bindTooltip('Partenza').addTo(m),
     end: L.circleMarker(latlngs[latlngs.length - 1], { radius: 9, color: '#fff', weight: 3, fillColor: '#111', fillOpacity: 1 }).bindTooltip('Arrivo').addTo(m),

@@ -6,6 +6,9 @@ const BACK_ON_M = 20;       // isteresi per tornare "sul sentiero"
 const LOOKAHEAD_M = 35;     // la freccia punta a questo anticipo lungo la traccia
 const ARRIVE_M = 25;
 const MAX_ACCURACY_M = 60;  // fix peggiori non cambiano lo stato
+const MAX_FWD_M = 60;       // avanzamento accettato subito tra due fix
+const MAX_BACK_M = 40;      // arretramento accettato subito (rumore, piccoli ritorni)
+const JUMP_CONFIRM = 3;     // fix coerenti necessari per un salto più grande
 
 export class Guide {
   constructor(track, offTrackM = OFF_TRACK_M) {
@@ -17,25 +20,50 @@ export class Guide {
   reset() {
     this.s = null;          // progressiva sulla traccia
     this.joined = false;    // è già stato sul sentiero almeno una volta
+    this.joinS = null;      // progressiva del primo ingresso sul sentiero
+    this.pending = null;    // salto di progressiva in attesa di conferma
     this.off = false;
     this.offCount = 0;
     this.arrived = false;
   }
 
+  // Aggiorna la progressiva. Piccoli spostamenti si accettano subito; un salto grande
+  // (un punto GPS anomalo vicino a un altro tratto, un'ansa, un tornante) solo se
+  // confermato da JUMP_CONFIRM fix consecutivi coerenti tra loro.
+  _advance(s) {
+    if (!this.joined) {
+      this.s = s;
+      return;
+    }
+    const jump = s - this.s;
+    if (jump >= -MAX_BACK_M && jump <= MAX_FWD_M) {
+      this.s = s;
+      this.pending = null;
+      return;
+    }
+    if (this.pending && Math.abs(s - this.pending.s) < MAX_FWD_M) this.pending = { s, n: this.pending.n + 1 };
+    else this.pending = { s, n: 1 };
+    if (this.pending.n >= JUMP_CONFIRM) {
+      this.s = s;
+      this.pending = null;
+    }
+  }
+
   update(lat, lon, accuracy = 10) {
     const tr = this.track;
-    const near = tr.nearest(lat, lon, this.s);
+    const near = tr.nearest(lat, lon, this.s ?? 0);
     const weak = accuracy > MAX_ACCURACY_M;
     const d = near.d;
 
     if (!weak) {
       if (d <= this.offTrackM) {
         // sul sentiero: la progressiva può solo crescere di poco o restare (evita salti indietro dovuti al rumore)
-        if (this.s == null || near.s > this.s - 40) this.s = near.s;
+        this._advance(near.s);
         if (d <= BACK_ON_M || !this.off) {
           this.off = false;
           this.offCount = 0;
         }
+        if (!this.joined) this.joinS = this.s;
         this.joined = true;
       } else if (this.joined) {
         this.offCount++;
@@ -50,7 +78,7 @@ export class Guide {
     if (!this.joined) {
       mode = 'approach';
       target = [near.lat, near.lon];
-      if (this.s == null) this.s = near.s;
+      this.s = near.s;
     } else if (this.off) {
       mode = 'off';
       target = [near.lat, near.lon];
@@ -61,7 +89,9 @@ export class Guide {
 
     const s = this.s ?? near.s;
     const remaining = Math.max(0, tr.length - s);
-    if (this.joined && !this.off && remaining < ARRIVE_M) this.arrived = true;
+    // l'arrivo conta solo dopo aver percorso almeno metà del sentiero (negli anelli si parte già "vicino all'arrivo")
+    const walked = s - (this.joinS ?? s);
+    if (this.joined && !this.off && remaining < ARRIVE_M && walked > (tr.length - this.joinS) * 0.5) this.arrived = true;
     if (this.arrived) mode = 'arrived';
 
     const end = tr.pts[tr.pts.length - 1];

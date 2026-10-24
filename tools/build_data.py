@@ -107,6 +107,42 @@ def chain_ways(ways):
     return segments
 
 
+def seg_len(seg):
+    return sum(haversine(*a, *b) for a, b in zip(seg, seg[1:]))
+
+
+MIN_FRAGMENT_M = 150
+
+
+def tidy_segments(segments):
+    """Se la relazione è spezzata: scarta i frammenti minuscoli e riordina i pezzi per estremi più vicini,
+    mantenendo il verso originale (dal primo membro della relazione)."""
+    if len(segments) < 2:
+        return segments
+    first_pt = segments[0][0]
+    segs = [s for s in segments if seg_len(s) >= MIN_FRAGMENT_M] or [max(segments, key=seg_len)]
+    segs.sort(key=seg_len, reverse=True)
+    result = [segs.pop(0)]
+    while segs:
+        best = None
+        for i, s in enumerate(segs):
+            start, end = result[0][0], result[-1][-1]
+            for d, where, rev in ((haversine(*end, *s[0]), "end", False), (haversine(*end, *s[-1]), "end", True),
+                                  (haversine(*start, *s[-1]), "start", False), (haversine(*start, *s[0]), "start", True)):
+                if best is None or d < best[0]:
+                    best = (d, i, where, rev)
+        _, i, where, rev = best
+        s = segs.pop(i)
+        s = list(reversed(s)) if rev else s
+        if where == "end":
+            result.append(s)
+        else:
+            result.insert(0, s)
+    if haversine(*first_pt, *result[-1][-1]) < haversine(*first_pt, *result[0][0]):
+        result = [list(reversed(s)) for s in reversed(result)]
+    return result
+
+
 def to_xy(coords, lat0):
     k = math.cos(math.radians(lat0))
     return [(lon * k * 111320.0, lat * 110540.0) for lat, lon in coords]
@@ -220,7 +256,7 @@ def main(osm_path, dem_dir, out_dir):
                 if child:
                     main_ways += [way_coords(c) for c in child.get("members", [])
                                   if c["type"] == "way" and c.get("role", "") in MAIN_ROLES]
-        segments = chain_ways(main_ways)
+        segments = tidy_segments(chain_ways(main_ways))
         if not segments:
             continue
 

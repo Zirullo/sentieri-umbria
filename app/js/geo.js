@@ -58,8 +58,9 @@ export class Track {
   }
 
   // Punto della traccia più vicino a (lat, lon). Se la traccia passa più volte vicino
-  // (andata e ritorno, anelli) preferisce la proiezione più coerente con sHint.
-  nearest(lat, lon, sHint = null) {
+  // (andata e ritorno, anelli) preferisce la proiezione più coerente con sHint;
+  // senza storico preferisce l'inizio (negli anelli partenza e arrivo coincidono).
+  nearest(lat, lon, sHint = 0) {
     const [px, py] = this.toXY(lat, lon);
     const xy = this.xy;
     const cands = [];
@@ -82,8 +83,9 @@ export class Track {
     for (const [d, i, t] of cands) {
       if (d > dmin + 15) continue;
       const s = this.cum[i] + (this.cum[i + 1] - this.cum[i]) * t;
-      // penalizza i salti all'indietro più di quelli in avanti
-      const score = sHint == null ? d : d + (s < sHint ? (sHint - s) * 0.2 : (s - sHint) * 0.05);
+      // tra tratti ugualmente vicini (tornanti, andata e ritorno) preferisce la continuità:
+      // penalizza i salti all'indietro e quelli in avanti oltre 30 m
+      const score = d + (s < sHint ? sHint - s : Math.max(0, s - sHint - 30)) * 0.2;
       if (score < bestScore) {
         bestScore = score;
         best = { d, i, t, s };
