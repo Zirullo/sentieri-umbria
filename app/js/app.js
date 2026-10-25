@@ -5,6 +5,7 @@ import { drawProfile } from './profile.js';
 import { MAX_NATIVE_ZOOM, TILE_URL, deleteTrail, downloadTrail, isDownloaded, registry, syncDataVersion } from './offline.js';
 import { SCALE_LABEL, directionsUrl, fmtHours, fmtTime, parseDuration, sunset, walkHours } from './plan.js';
 import { CUSTOM_SECTOR, importFromHash, loadCustom, removeCustom } from './custom.js';
+import { CLIMBS, DURATIONS, NO_FILTERS, SCALES, activeCount, isLoop, loadFilters, matches, saveFilters } from './filters.js';
 
 const $ = (s) => document.querySelector(s);
 const SIM = new URLSearchParams(location.search).has('sim');
@@ -18,6 +19,8 @@ let map;
 let selectedLayer = null;
 let myPos = null;        // [lat, lon] ultima posizione nota
 let listSort = 'zone';
+let filters = loadFilters();
+let currentId = null;    // sentiero in anteprima o nella scheda
 
 const trailUrl = (id) => `data/trails/${id}.json`;
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -53,7 +56,7 @@ const LABEL_MIN_ZOOM = 12;
 const LABEL_MAX = 120;
 const TAP_PX = 28; // raggio di tocco: circa un polpastrello
 
-const shown = (t) => t.custom || !$('#only-cai').checked || t.cai;
+const shown = (t) => matches(t, filters, hoursOf(t).h);
 
 function initMap() {
   map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([42.95, 12.55], 9);
@@ -65,17 +68,71 @@ function initMap() {
   labels = L.layerGroup().addTo(map);
   map.on('click', (e) => pickTrail(e.containerPoint, e.latlng));
   map.on('moveend', renderLabels);
-  applyCaiFilter();
+  applyFilters();
   if (SIM) window.appMap = map;
 }
 
-function applyCaiFilter() {
+function applyFilters() {
   for (const t of trails) {
     const show = shown(t);
     if (show && !map.hasLayer(t.layer)) t.layer.addTo(map);
     if (!show && map.hasLayer(t.layer)) t.layer.remove();
   }
   renderLabels();
+  const n = activeCount(filters);
+  $('#filter-badge').hidden = !n;
+  $('#filter-badge').textContent = n;
+}
+
+/* ---------- Filtri ---------- */
+
+function renderFilters() {
+  const count = trails.filter(shown).length;
+  const opt = (group, value, label, on) => `<button data-g="${group}" data-v="${value}" class="${on ? 'on' : ''}">${label}</button>`;
+  $('#filters-body').innerHTML = `
+    <h2>Filtri</h2>
+    <div class="f-title">Difficoltà</div>
+    <div class="f-opts">${Object.entries(SCALES).map(([s, label]) => opt('scale', s, `<b>${s}</b> ${label}`, filters.scales.includes(s))).join('')}</div>
+    <div class="f-title">Durata stimata</div>
+    <div class="f-opts">${DURATIONS.map(([, , label], i) => opt('dur', i, label, filters.dur === i)).join('')}</div>
+    <div class="f-title">Salita totale</div>
+    <div class="f-opts">${CLIMBS.map(([, label], i) => opt('climb', i, label, filters.climb === i)).join('')}</div>
+    <label class="f-check"><input type="checkbox" data-g="loop" ${filters.loop ? 'checked' : ''}> Solo anelli (torni alla partenza)</label>
+    <label class="f-check"><input type="checkbox" data-g="cai" ${filters.cai ? 'checked' : ''}> Solo sentieri CAI</label>
+    <div class="actions">
+      <button id="f-reset" ${activeCount(filters) ? '' : 'disabled'}>Azzera</button>
+      <button id="f-done" class="primary">${count ? `Mostra ${count}` : 'Nessun sentiero'}</button>
+    </div>`;
+}
+
+function setFilters(f) {
+  filters = f;
+  saveFilters(f);
+  applyFilters();
+  renderFilters();
+  if (!$('#list').hidden) renderList();
+}
+
+function onFilterClick(e) {
+  if (e.target.id === 'f-done') { $('#filters').hidden = true; return; }
+  if (e.target.id === 'f-reset') { setFilters({ ...NO_FILTERS }); return; }
+  const b = e.target.closest('[data-g]');
+  if (!b) return;
+  const f = { ...filters };
+  const g = b.dataset.g;
+  if (g === 'scale') {
+    const s = b.dataset.v;
+    f.scales = f.scales.includes(s) ? f.scales.filter((x) => x !== s) : [...f.scales, s];
+  } else if (g === 'dur' || g === 'climb') f[g] = Number(b.dataset.v);
+  else f[g] = b.checked;
+  setFilters(f);
+}
+
+function showFilters() {
+  closePeek();
+  $('#sheet').hidden = true;
+  renderFilters();
+  $('#filters').hidden = false;
 }
 
 /* Etichette col numero del sentiero, solo da uno zoom in cui si leggono.
@@ -107,7 +164,7 @@ function renderLabels() {
     });
     L.marker(spot[0], { icon, keyboard: false }).on('click', (ev) => {
       L.DomEvent.stop(ev);
-      openTrail(t.id);
+      previewTrail(t.id);
     }).addTo(labels);
     if (placed.length >= LABEL_MAX) break;
   }
@@ -127,7 +184,8 @@ function pxDistance(t, pt) {
   return best;
 }
 
-// Tocco sulla mappa: apre il sentiero più vicino, o fa scegliere se ce n'è più d'uno sotto il dito.
+// Tocco sulla mappa: anteprima del sentiero più vicino, o scelta se ce n'è più d'uno sotto il dito.
+// Un tocco nel vuoto chiude l'anteprima.
 function pickTrail(pt, latlng) {
   const view = map.getBounds().pad(0.1);
   const near = [];
@@ -139,8 +197,8 @@ function pickTrail(pt, latlng) {
     if (d <= TAP_PX) near.push([d, t]);
   }
   near.sort((a, b) => a[0] - b[0]);
-  if (!near.length) return;
-  if (near.length === 1) return openTrail(near[0][1].id);
+  if (!near.length) return closePeek();
+  if (near.length === 1) return previewTrail(near[0][1].id);
   const html = `<div class="pick"><b>Quale sentiero?</b>${near.slice(0, 6).map(([, t]) =>
     `<button data-id="${t.id}"><span class="ref"><span>${esc(t.ref || '–')}</span></span> ${esc(title(t))}</button>`).join('')}</div>`;
   const popup = L.popup({ closeButton: false, maxWidth: 280, className: 'pick-popup' }).setLatLng(latlng).setContent(html).openOn(map);
@@ -148,7 +206,7 @@ function pickTrail(pt, latlng) {
     const b = ev.target.closest('button[data-id]');
     if (!b) return;
     map.closePopup();
-    openTrail(Number(b.dataset.id));
+    previewTrail(Number(b.dataset.id));
   });
 }
 
@@ -157,6 +215,14 @@ function clearSelection() {
   selectedLayer?.remove();
   selectedDir?.remove();
   selectedLayer = selectedDir = null;
+  dimOthers(false);
+}
+
+// Con un sentiero selezionato gli altri si attenuano, così spicca anche dove sono fitti.
+function dimOthers(on) {
+  if (dimOthers.on === on) return;
+  dimOthers.on = on;
+  for (const t of trails) t.layer?.setStyle({ opacity: on ? 0.35 : 0.85 });
 }
 
 // Verso scelto nella scheda: frecce ed estremi anche sulla mappa principale.
@@ -171,6 +237,54 @@ function highlight(t) {
     L.polyline(t.geom, { color: '#fff', weight: 9, opacity: 0.9, interactive: false }),
     L.polyline(t.geom, { color: '#ff6f00', weight: 5, interactive: false }),
   ]).addTo(map);
+  dimOthers(true);
+}
+
+/* ---------- Anteprima: sentiero evidenziato e riquadro con i dati principali ---------- */
+
+function previewTrail(id, { zoom = false } = {}) {
+  const t = byId.get(id);
+  if (!t) return;
+  showList(false);
+  $('#sheet').hidden = true;
+  $('#filters').hidden = true;
+  map.closePopup();
+  currentId = id;
+  highlight(t);
+  renderPeek(t);
+  fitTrail(t, { cover: $('#peek'), gentle: !zoom });
+}
+
+function renderPeek(t) {
+  const loop = isLoop(t);
+  const route = genericName(t.name) ? '' : [t.from, t.to].filter(Boolean).join(' → ');
+  const sub = [route, t.sector].filter(Boolean).join(' · ');
+  const chips = [
+    t.scale ? `<span class="chip scale" style="background:${SCALE_COLOR[t.scale] || '#e65100'}">${esc(t.scale)} · ${esc(SCALE_LABEL[t.scale] || '')}</span>` : '',
+    `<span class="chip">${fmtDist(t.len)}</span>`,
+    t.up != null ? `<span class="chip">↑ ${t.up} m</span>` : '',
+    `<span class="chip">⏱ ${fmtHours(hoursOf(t).h)}</span>`,
+    loop ? '<span class="chip">↻ anello</span>' : '',
+    myPos ? `<span class="chip">📍 ${fmtDist(distToTrail(t, myPos))} da te</span>` : '',
+    isDownloaded(t.id) ? '<span class="chip ok">✓ offline</span>' : '',
+  ].join('');
+  $('#peek').innerHTML = `
+    <div class="peek-head">
+      <span class="ref"><span>${esc(t.ref || '–')}</span></span>
+      <div class="peek-title"><b>${esc(title(t))}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</div>
+      <button class="icon-btn peek-close" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="chips">${chips}</div>
+    <button class="peek-open">Dettagli e partenza ›</button>`;
+  $('#peek').hidden = false;
+  $('#btn-locate').style.bottom = `${$('#peek').offsetHeight + 24}px`;
+}
+
+function closePeek() {
+  if ($('#peek').hidden) return;
+  $('#peek').hidden = true;
+  $('#btn-locate').style.bottom = '';
+  clearSelection();
 }
 
 /* ---------- Elenco e ricerca ---------- */
@@ -194,6 +308,9 @@ function itemHtml(t, extra = '') {
 function renderList() {
   const body = $('#list-body');
   const q = normalize($('#search').value.trim());
+  const n = activeCount(filters);
+  $('#list-note').hidden = !n || !!q || listSort === 'saved';
+  $('#list-note').textContent = `${n} ${n === 1 ? 'filtro attivo' : 'filtri attivi'} · modifica`;
   let pool = trails.filter(shown);
   if (q) {
     pool = trails.filter((t) => (t.search ??= normalize(`${t.ref} ${t.name} ${t.from} ${t.to} ${t.sector}`)).includes(q));
@@ -252,6 +369,7 @@ function showMe(p) {
   if (!meMarker) meMarker = L.circleMarker(p, { radius: 8, color: '#fff', weight: 3, fillColor: '#1565c0', fillOpacity: 1 }).addTo(map);
   else meMarker.setLatLng(p);
   map.setView(p, Math.max(map.getZoom(), 13));
+  if (!$('#peek').hidden) renderPeek(byId.get(currentId)); // aggiunge la distanza da te
 }
 
 /* ---------- Scheda sentiero ---------- */
@@ -268,6 +386,9 @@ async function openTrail(id) {
   const t = byId.get(id);
   if (!t) return;
   showList(false);
+  $('#peek').hidden = true;
+  $('#btn-locate').style.bottom = '';
+  currentId = id;
   highlight(t);
   const sheet = $('#sheet');
   sheet.hidden = false;
@@ -284,13 +405,21 @@ async function openTrail(id) {
   fitTrail(t);
 }
 
-// Inquadra il sentiero nella parte di mappa non coperta dalla scheda.
-function fitTrail(t) {
-  const sheetH = $('#sheet').hidden ? 0 : $('#sheet').offsetHeight;
+// Inquadra il sentiero nella parte di mappa non coperta dalla scheda (o dall'anteprima).
+// gentle: la mappa si muove solo se il sentiero non è già tutto visibile, e senza avvicinarsi.
+function fitTrail(t, { cover = $('#sheet'), gentle = false } = {}) {
+  const coverH = cover.hidden ? 0 : cover.offsetHeight;
   const top = $('#map').getBoundingClientRect().top;
-  const visibleBottom = window.innerHeight - sheetH - top;
-  const pad = Math.max(20, map.getSize().y - visibleBottom + 20);
-  map.fitBounds([[t.bbox[0], t.bbox[1]], [t.bbox[2], t.bbox[3]]], { paddingTopLeft: [20, 20], paddingBottomRight: [20, pad], maxZoom: 16 });
+  const visibleBottom = window.innerHeight - coverH - top;
+  const size = map.getSize();
+  const pad = Math.max(20, size.y - visibleBottom + 20);
+  const b = L.latLngBounds([t.bbox[0], t.bbox[1]], [t.bbox[2], t.bbox[3]]);
+  if (gentle) {
+    const nw = map.latLngToContainerPoint(b.getNorthWest());
+    const se = map.latLngToContainerPoint(b.getSouthEast());
+    if (nw.x >= 0 && nw.y >= 0 && se.x <= size.x && se.y <= size.y - pad + 20) return;
+  }
+  map.fitBounds(b, { paddingTopLeft: [20, 20], paddingBottomRight: [20, pad], maxZoom: gentle ? map.getZoom() : 16 });
 }
 
 function renderSheet(d) {
@@ -300,7 +429,7 @@ function renderSheet(d) {
   if (myPos && !tags.roundtrip) reversed = haversine(myPos, d.end) < haversine(myPos, d.start);
   const fromLabel = tags.from || 'Inizio';
   const toLabel = tags.to || 'Fine';
-  const loop = tags.roundtrip === 'yes' || haversine(d.start, d.end) < Math.min(150, d.len / 10);
+  const loop = isLoop(d);
   // senso di un anello: segno dell'area (formula di Gauss) con x = longitudine, y = latitudine
   const ring = d.segments.flat();
   let area = 0;
@@ -619,7 +748,7 @@ function bind() {
     if (e.key !== 'Enter') return;
     const q = normalize(e.target.value.trim());
     const exact = trails.find((t) => normalize(t.ref) === q);
-    if (exact) { e.target.blur(); openTrail(exact.id); }
+    if (exact) { e.target.blur(); previewTrail(exact.id, { zoom: true }); }
   });
   for (const b of document.querySelectorAll('.seg button')) {
     b.onclick = () => {
@@ -629,12 +758,20 @@ function bind() {
       renderList();
     };
   }
-  $('#only-cai').onchange = () => { applyCaiFilter(); renderList(); };
+  $('#btn-filter').onclick = () => ($('#filters').hidden ? showFilters() : ($('#filters').hidden = true));
+  $('#filters').addEventListener('click', onFilterClick);
+  $('#filters .sheet-close').onclick = () => { $('#filters').hidden = true; };
+  $('#list-note').onclick = showFilters;
   $('#list-body').addEventListener('click', (e) => {
     const it = e.target.closest('.item');
-    if (it) openTrail(Number(it.dataset.id));
+    if (it) previewTrail(Number(it.dataset.id), { zoom: true });
   });
-  $('.sheet-close').onclick = () => { $('#sheet').hidden = true; clearSelection(); };
+  $('#peek').addEventListener('click', (e) => {
+    if (e.target.closest('.peek-close')) closePeek();
+    else if (e.target.closest('.peek-open')) openTrail(currentId);
+  });
+  // chiusa la scheda si torna all'anteprima dello stesso sentiero
+  $('#sheet .sheet-close').onclick = () => { $('#sheet').hidden = true; previewTrail(currentId); };
   $('#btn-locate').onclick = () => locate(showMe);
   $('#nav-exit').onclick = stopNav;
   $('#nav-reverse').onclick = () => {
@@ -658,6 +795,7 @@ async function resumeIfActive() {
   if (!a || Date.now() - a.at > 12 * 3600000 || !byId.has(a.id)) return;
   try {
     const d = await loadDetail(a.id);
+    currentId = a.id;
     highlight(byId.get(a.id));
     renderSheet(d);
     $('#sheet').hidden = false;

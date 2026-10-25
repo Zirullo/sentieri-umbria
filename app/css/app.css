@@ -45,6 +45,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
   width: 44px; height: 44px; flex: none; border: 1px solid var(--line);
   border-radius: 22px; background: var(--bg); font-size: 20px;
 }
+#btn-filter { position: relative; display: grid; place-items: center; padding: 0; }
+#btn-filter svg { width: 20px; height: 20px; fill: none; stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.badge {
+  position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px;
+  background: var(--red); color: #fff; font-size: 12px; font-weight: 700; line-height: 18px;
+}
 
 main { position: fixed; inset: calc(61px + var(--safe-t)) 0 0 0; }
 #map, #nav-map { position: absolute; inset: 0; background: #e8e4da; }
@@ -60,7 +66,10 @@ main { position: fixed; inset: calc(61px + var(--safe-t)) 0 0 0; }
 .seg { display: flex; margin: 12px; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
 .seg button { flex: 1; padding: 10px 4px; border: none; background: var(--bg); font-size: 14px; }
 .seg button.on { background: var(--red); color: #fff; }
-.filter { display: block; padding: 0 16px 8px; color: var(--muted); font-size: 14px; }
+.list-note {
+  display: block; margin: 0 12px 8px; padding: 8px 12px; width: calc(100% - 24px); border: none; border-radius: 10px;
+  background: var(--red-soft); color: var(--red); font-size: 14px; font-weight: 600; text-align: left;
+}
 .group-title {
   position: sticky; top: 0; padding: 8px 16px; background: var(--bg-2);
   font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted);
@@ -117,6 +126,37 @@ main { position: fixed; inset: calc(61px + var(--safe-t)) 0 0 0; }
 .progress > div { height: 100%; width: 0; background: var(--green); transition: width .2s; }
 .src { font-size: 12px; color: var(--muted); margin-top: 12px; }
 .src a { color: inherit; }
+
+/* Anteprima del sentiero */
+.peek {
+  position: absolute; left: 10px; right: 10px; bottom: calc(10px + var(--safe-b)); z-index: 1000;
+  padding: 10px 12px; border-radius: 14px; background: var(--bg); box-shadow: 0 2px 12px rgba(0,0,0,.3);
+}
+.peek-head { display: flex; gap: 10px; align-items: center; }
+.peek-title { flex: 1; min-width: 0; }
+.peek-title b, .peek-title small { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.peek-title small { color: var(--muted); font-size: 13px; }
+.peek-close { width: 36px; height: 36px; font-size: 16px; }
+.peek .chips { margin: 8px 0; gap: 4px; }
+.peek .chip { font-size: 13px; padding: 3px 8px; }
+.chip.ok { background: var(--green-soft); color: var(--green); }
+.peek-open {
+  display: block; width: 100%; min-height: 44px; border: 1px solid var(--red); border-radius: 12px;
+  background: var(--bg); color: var(--red); font-weight: 700; font-size: 15px;
+}
+
+/* Filtri */
+.filters h2 { margin-bottom: 0; }
+.f-title { margin: 8px 0 4px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.f-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.f-opts button {
+  min-height: 36px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 18px; background: var(--bg); font-size: 14px;
+}
+.f-opts button.on { border-color: var(--red); background: var(--red); color: #fff; }
+.f-check { display: flex; align-items: center; gap: 10px; min-height: 36px; margin-top: 4px; font-size: 15px; }
+.f-check input { width: 20px; height: 20px; accent-color: var(--red); }
+.filters .actions { margin-top: 10px; }
+.actions button:disabled { opacity: .45; }
 
 /* Navigazione */
 .nav { position: fixed; inset: 0; z-index: 1200; background: var(--bg); display: flex; flex-direction: column; }

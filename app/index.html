@@ -15,7 +15,11 @@
 <body>
   <!-- Ricerca e selezione -->
   <header class="topbar">
-    <input id="search" type="search" placeholder="Cerca numero o nome (es. 501, Vettore)" autocomplete="off" enterkeyhint="search">
+    <input id="search" type="search" placeholder="Cerca numero o nome" autocomplete="off" enterkeyhint="search">
+    <button id="btn-filter" class="icon-btn" aria-label="Filtri">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8.5V19l-4 2v-7.5Z"/></svg>
+      <span id="filter-badge" class="badge" hidden></span>
+    </button>
     <button id="btn-view" class="icon-btn" aria-label="Mostra elenco">☰</button>
   </header>
 
@@ -27,11 +31,19 @@
         <button data-sort="near">Vicino a me</button>
         <button data-sort="saved">Scaricati</button>
       </div>
-      <label class="filter"><input type="checkbox" id="only-cai"> Solo sentieri CAI</label>
+      <button id="list-note" class="list-note" hidden></button>
       <div id="list-body"></div>
     </section>
     <button id="btn-locate" class="fab" aria-label="La mia posizione">◎</button>
+    <!-- Anteprima del sentiero toccato: dati principali, senza aprire la scheda -->
+    <div id="peek" class="peek" hidden></div>
   </main>
+
+  <!-- Filtri -->
+  <section id="filters" class="sheet filters" hidden>
+    <button class="sheet-close icon-btn" aria-label="Chiudi">✕</button>
+    <div id="filters-body"></div>
+  </section>
 
   <!-- Scheda del sentiero -->
   <section id="sheet" class="sheet" hidden>
