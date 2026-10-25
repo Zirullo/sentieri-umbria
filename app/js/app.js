@@ -81,6 +81,27 @@ function initMap() {
   if (SIM) window.appMap = map;
 }
 
+// Pulsante "inquadra": i sentieri che passano i filtri. Con molti sentieri conta dove stanno
+// (partenza, arrivo e centro di ciascuno, tolto il 2% più lontano per lato): pochi itinerari lunghi
+// non allargano la vista a mezza Italia. Con pochi si inquadrano interi.
+function fitShown() {
+  const vis = trails.filter(shown);
+  if (!vis.length) return toast(`Nessun ${W.one} con questi filtri`);
+  closePeek();
+  const many = vis.length >= 10;
+  const pts = many
+    ? vis.flatMap((t) => [t.start, t.end, [(t.bbox[0] + t.bbox[2]) / 2, (t.bbox[1] + t.bbox[3]) / 2]])
+    : vis.flatMap((t) => [[t.bbox[0], t.bbox[1]], [t.bbox[2], t.bbox[3]]]);
+  const cut = many ? 0.02 : 0;
+  const range = (i) => {
+    const v = pts.map((p) => p[i]).sort((a, b) => a - b);
+    return [v[Math.floor(cut * (v.length - 1))], v[Math.ceil((1 - cut) * (v.length - 1))]];
+  };
+  const [s, n] = range(0);
+  const [w, e] = range(1);
+  map.fitBounds([[s, w], [n, e]], { padding: [20, 20], maxZoom: 15 });
+}
+
 function applyFilters() {
   for (const t of trails) {
     const show = shown(t);
@@ -849,7 +870,8 @@ function bind() {
   $('#filters').addEventListener('click', onFilterClick);
   $('#filters .sheet-close').onclick = () => { $('#filters').hidden = true; };
   $('#list-note').onclick = showFilters;
-  for (const b of document.querySelectorAll('.map-btn')) b.onclick = () => toggleMapPanel(b);
+  for (const b of document.querySelectorAll('#btn-layers, #nav-layers')) b.onclick = () => toggleMapPanel(b);
+  $('#btn-fit').onclick = fitShown;
   // un tocco fuori dal riquadro della mappa lo chiude
   document.addEventListener('pointerdown', (e) => {
     const panel = $('#map-panel');

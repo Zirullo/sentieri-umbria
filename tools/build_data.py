@@ -297,6 +297,46 @@ def main_road_share(members, way_tags):
     return round(main / total, 2) if total else None
 
 
+def drop_return_legs(index, details, near_m=1000, overlap=0.85, tol_m=50):
+    """Andata e ritorno mappati come due relazioni (A–B e B–A sullo stesso tracciato): resta solo la più vecchia,
+    il verso si sceglie nella scheda. Due percorsi sono una coppia se ognuno parte dove l'altro arriva e
+    ognuno sta per almeno `overlap` entro `tol_m` dall'altro."""
+    def cells(entry):
+        grid = {}
+        for seg in details[entry["id"]]["segments"]:
+            for p in seg:
+                grid.setdefault((round(p[0] * 500), round(p[1] * 500)), []).append(p)
+        return grid
+
+    def share_near(a, grid):
+        # celle di ~200 m: basta guardare la cella del punto e le otto vicine
+        pts = [p for seg in details[a["id"]]["segments"] for p in seg]
+        near = 0
+        for p in pts:
+            ci, cj = round(p[0] * 500), round(p[1] * 500)
+            cand = [q for di in (-1, 0, 1) for dj in (-1, 0, 1) for q in grid.get((ci + di, cj + dj), ())]
+            if any(haversine(p[0], p[1], q[0], q[1]) < tol_m for q in cand):
+                near += 1
+        return near / len(pts)
+
+    grids = {}
+    dropped = set()
+    for a in sorted(index, key=lambda e: e["id"]):
+        if a["id"] in dropped:
+            continue
+        for b in index:
+            if b["id"] <= a["id"] or b["id"] in dropped or b.get("kind") != a.get("kind"):
+                continue
+            if haversine(*a["start"], *b["end"]) > near_m or haversine(*a["end"], *b["start"]) > near_m:
+                continue
+            ga = grids.setdefault(a["id"], cells(a))
+            gb = grids.setdefault(b["id"], cells(b))
+            if share_near(a, gb) >= overlap and share_near(b, ga) >= overlap:
+                print(f"andata e ritorno: tengo {a['id']} {a['name']!r}, tolgo {b['id']} {b['name']!r}")
+                dropped.add(b["id"])
+    index[:] = [e for e in index if e["id"] not in dropped]
+
+
 def bike_codes(index):
     """Codice breve per etichette ed elenco: il numero ufficiale se c'è ed è unico,
     altrimenti C1, C2… per le ciclovie e M1, M2… per la MTB, in ordine di relazione OSM (stabile)."""
@@ -425,6 +465,8 @@ def main(osm_path, dem_dir, out_dir, bike=False):
         details[rid] = {"tags": info, "segments": detail_segs, "extras": extras}
 
     if bike:
+        # solo in bici: a piedi itinerari diversi (CAI, cammini) condividono tratti in senso opposto
+        drop_return_legs(index, details)
         bike_codes(index)
     # file di dettaglio scritti alla fine, quando i codici delle etichette sono definitivi
     for entry in index:
