@@ -530,11 +530,14 @@ function renderSheet(d) {
     area += x1 * y2 - x2 * y1;
   }
   const ccw = area > 0;
+  // descrizione (tools/describe.py): chiusa a poche righe finché non si chiede di leggerla tutta
+  const desc = d.desc || tags['description:it'] || tags.description || tags['note:it'] || '';
+  const longDesc = desc.length > 220 || desc.includes('\n');
+  let descOpen = false;
 
   const render = () => {
     const { h, src } = hoursOf(d, reversed);
     const saved = isDownloaded(d.id);
-    const desc = tags['description:it'] || tags.description || tags['note:it'] || '';
     $('#sheet-body').innerHTML = `
       <h2>${esc(d.ref)} · ${esc(title(d))}</h2>
       <div class="sub">${esc(reversed ? toLabel : fromLabel)} → ${esc(reversed ? fromLabel : toLabel)}${loop ? ' (anello)' : ''} · ${esc(d.sector)}</div>
@@ -549,7 +552,8 @@ function renderSheet(d) {
       <div class="plan" id="plan"></div>
       ${d.gaps ? `<div class="warn">La traccia ha ${d.gaps} ${d.gaps === 1 ? 'interruzione' : 'interruzioni'} nei dati: lì segui la segnaletica.</div>` : ''}
       ${!saved && !navigator.onLine ? `<div class="warn">Sei offline e questo ${W.one} non è scaricato: la mappa potrebbe mancare.</div>` : ''}
-      ${desc ? `<div class="desc">${esc(desc.length > 280 ? `${desc.slice(0, 280)}…` : desc)}</div>` : ''}
+      ${desc ? `<div class="desc${longDesc && !descOpen ? ' clamp' : ''}">${esc(desc)}</div>` : ''}
+      ${longDesc ? `<button class="desc-more" id="desc-more">${descOpen ? 'Riduci' : 'Leggi tutto'}</button>` : ''}
       <div class="dir-title">Verso di percorrenza${loop ? ' (anello)' : ''}</div>
       <div class="dir-choice">
         <button data-rev="0" class="${reversed ? '' : 'on'}">${loop ? (ccw ? '↺ antiorario' : '↻ orario') : `${esc(fromLabel)} → ${esc(toLabel)}`}</button>
@@ -575,6 +579,7 @@ function renderSheet(d) {
     renderPlan(d, h, reversed);
     showDirection(d, reversed);
     for (const b of document.querySelectorAll('.dir-choice button')) b.onclick = () => { reversed = b.dataset.rev === '1'; render(); };
+    $('#desc-more')?.addEventListener('click', () => { descOpen = !descOpen; render(); });
     $('#btn-go').onclick = () => startNav(d, reversed);
     $('#btn-dl').onclick = () => (isDownloaded(d.id) ? removeDownload(d, render) : download(d, render));
   };

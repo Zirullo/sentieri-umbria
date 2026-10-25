@@ -1,8 +1,10 @@
 """Scarica da Overpass tutte le relazioni route=hiking che toccano l'Umbria, e il confine regionale.
-Con --bici scarica invece i percorsi in bici (route=bicycle e route=mtb).
+Con --bici scarica invece i percorsi in bici (route=bicycle e route=mtb), con --luoghi i luoghi
+con un nome in Umbria e dintorni (paesi, cime, rifugi, fonti, chiese…) per le descrizioni.
 
 Uso: python -I tools/fetch_osm.py data/raw/osm_umbria.json [data/raw/umbria_confine.json]
      python -I tools/fetch_osm.py --bici data/raw/osm_umbria_bici.json
+     python -I tools/fetch_osm.py --luoghi data/raw/luoghi.json
 """
 import sys
 import time
@@ -25,6 +27,23 @@ out tags;
 """
 
 BIKE_QUERY = QUERY.replace('["route"="hiking"]', '["route"~"^(bicycle|mtb)$"]')
+
+# Luoghi con un nome in Umbria e dintorni: tools/describe.py vi cerca quelli di data/descrizioni.json
+# che il tracciato di un percorso tocca.
+PLACES_QUERY = """
+[out:json][timeout:600][bbox:42.3,11.8,43.8,13.4];
+(
+  nwr["place"~"^(city|town|village|hamlet)$"]["name"];
+  nwr["natural"~"^(peak|saddle|spring|cave_entrance|gorge|water)$"]["name"];
+  nwr["mountain_pass"="yes"]["name"];
+  nwr["tourism"~"^(alpine_hut|wilderness_hut|viewpoint|attraction)$"]["name"];
+  nwr["historic"]["name"];
+  nwr["amenity"="place_of_worship"]["name"];
+  nwr["waterway"="waterfall"]["name"];
+  nwr["leisure"="nature_reserve"]["name"];
+);
+out center tags;
+"""
 
 BOUNDARY_QUERY = """
 [out:json][timeout:300];
@@ -61,8 +80,10 @@ def fetch(query: str, out_path: str) -> None:
 
 
 if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if a != "--bici"]
-    if "--bici" in sys.argv:
+    args = [a for a in sys.argv[1:] if a not in ("--bici", "--luoghi")]
+    if "--luoghi" in sys.argv:
+        fetch(PLACES_QUERY, args[0])
+    elif "--bici" in sys.argv:
         fetch(BIKE_QUERY, args[0])  # il confine è lo stesso dei sentieri
     else:
         fetch(QUERY, args[0])

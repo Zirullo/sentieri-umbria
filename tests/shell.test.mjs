@@ -38,6 +38,14 @@ test('le due app hanno la stessa struttura e cartelle sorelle', () => {
   }
 });
 
+test('ogni percorso ha una descrizione (tools/describe.py dopo build_data.py)', () => {
+  for (const dir of APPS) {
+    const { trails } = JSON.parse(read(`${dir}data/index.json`));
+    const missing = trails.filter((t) => !JSON.parse(read(`${dir}data/trails/${t.id}.json`)).desc);
+    assert.deepEqual(missing.map((t) => `${t.ref} ${t.name}`), [], `${dir}: percorsi senza descrizione`);
+  }
+});
+
 test('la versione delle app è 1.0 o 1.xx (1.01, 1.02, …)', async () => {
   const { VERSION } = await import(new URL('js/config.js', app));
   assert.match(VERSION, /^1\.(0|\d\d)$/);

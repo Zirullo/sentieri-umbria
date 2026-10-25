@@ -57,6 +57,20 @@ python -I tools/fetch_osm.py --bici data/raw/osm_umbria_bici.json
 python -P -E tools/build_data.py --bici data/raw/osm_umbria_bici.json data/raw/dem app/bici/data
 ```
 
+Poi le descrizioni (`build_data.py` riscrive i file dei percorsi senza):
+
+```sh
+python -I tools/fetch_osm.py --luoghi data/raw/luoghi.json  # facoltativo: luoghi lungo i percorsi
+python -P -E tools/describe.py data/descrizioni.json app/piedi/data data/raw/luoghi.json
+python -P -E tools/describe.py data/descrizioni.json app/bici/data data/raw/luoghi.json
+```
+
+I testi stanno in `data/descrizioni.json`: note su cammini, luoghi, zone e settori, scritte da zero
+a partire da informazioni trovate online (niente testo copiato da altri siti). Ogni percorso riceve
+il testo del cammino di cui fa parte, fino a tre note sui luoghi che tocca (partenza, arrivo, `via`,
+o luoghi lungo il tracciato) e, se non ce ne sono, quella della zona o del settore; in coda le
+avvertenze delle note OSM (frane, tratti chiusi). Un test controlla che nessun percorso resti senza.
+
 Insieme ai percorsi si scaricano gallerie e ponti: lì la quota si interpola tra gli estremi,
 perché il DEM darebbe quella della montagna sopra la galleria o del fondovalle sotto il ponte.
 Si scaricano anche le etichette di tutte le strade dei percorsi, per calcolare la quota su strade

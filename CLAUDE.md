@@ -16,6 +16,8 @@ python -m http.server 8765 --directory app --bind 127.0.0.1   # poi http://127.0
 Rigenerare i dati: vedi README. `build_data.py` va lanciato con `python -P -E` (non `-I`):
 `imagecodecs` è installato con `--user` e `-I` ignorerebbe i pacchetti utente.
 `data/raw/` (OSM, confine regionale, DEM Copernicus ~230 MB) è in `.gitignore`.
+Dopo `build_data.py` rilanciare sempre `tools/describe.py` (descrizioni da `data/descrizioni.json`):
+i testi vanno scritti con parole proprie, mai copiati da altri siti.
 
 ## Ambiente Windows
 

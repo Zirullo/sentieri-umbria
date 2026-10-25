@@ -1,0 +1,646 @@
+{
+  "_nota": "Testi originali per le descrizioni dei percorsi (tools/describe.py), scritti a partire da informazioni raccolte online e riformulate: niente testo copiato. itinerari: cammini a tappe riconosciuti dal nome (regex su nome, codice e note OSM, vince il primo). luoghi: note sui luoghi, usate quando il nome compare in partenza, arrivo, via o nome del percorso, o quando il luogo è lungo il tracciato. zone: aree con centro e raggio, usate se mancano note sui luoghi. settori: ultimo ripiego, per zona dell'elenco.",
+  "itinerari": [
+    {
+      "cerca": "sentiero de(gl|lg)i ulivi|^S\\.U\\.$",
+      "testo": "Il Sentiero degli Ulivi, ideato dalle sezioni CAI di Spoleto e Foligno, attraversa in cinque tappe la fascia di colline coltivate a olivo tra Spoleto e Assisi, quasi sempre tra 500 e 600 m di quota. È un paesaggio agricolo storico, il primo in Italia riconosciuto dalla FAO tra i patrimoni agricoli di importanza mondiale: terrazzamenti, muri a secco, castelli e borghi affacciati sulla Valle Umbra."
+    },
+    {
+      "cerca": "via di francesco in bici",
+      "testo": "Versione in bicicletta della Via di Francesco: segue a grandi linee il cammino a piedi tra La Verna, Assisi e la valle reatina, scegliendo strade secondarie e sterrati adatti a una bici da trekking o a una mountain bike."
+    },
+    {
+      "cerca": "via di francesco|via di roma|^VdF$",
+      "testo": "La Via di Francesco unisce i luoghi legati alla vita del santo: da nord scende dal santuario della Verna ad Assisi passando per Città di Castello e Gubbio, da sud risale da Roma per la valle reatina, Piediluco e Spoleto. Eremi, conventi e borghi lungo il percorso ricordano soste e predicazioni tramandate dalla tradizione."
+    },
+    {
+      "cerca": "sentiero francescano della pace",
+      "testo": "Ripercorre il viaggio che, secondo la tradizione, Francesco compì nell'inverno tra il 1206 e il 1207 da Assisi a Gubbio, dopo aver rinunciato ai beni del padre. Segue la valle del Chiascio passando per Valfabbrica; a Gubbio la tradizione colloca l'incontro con il lupo presso la chiesetta della Vittorina. Ogni anno, a inizio settembre, vi si svolge un pellegrinaggio a piedi."
+    },
+    {
+      "cerca": "pietra bianca",
+      "testo": "Il Cammino della Pietra Bianca è un anello di circa 120 km in 14 tappe nel sud dell'Umbria, tra la valle del Tevere e i Monti Amerini. Il nome viene dal calcare chiaro della zona, usato per torri, casali, ponti, muri a secco e per il fondo delle strade bianche. Si può percorrere in entrambi i sensi, partendo da qualunque borgo, e ogni tappa ha il suo timbro sulla credenziale."
+    },
+    {
+      "cerca": "cammino di germanico",
+      "testo": "Il Cammino di Germanico è un anello di circa 70 km attorno ad Amelia, tra i borghi delle pendici meridionali dei Monti Amerini, con la valle del Tevere sempre in vista. È dedicato alla statua in bronzo del generale romano Germanico, ritrovata nel 1963 vicino alle mura di Amelia e oggi nel museo archeologico della città. Le quote restano sotto i 700 m: si cammina in ogni stagione."
+    },
+    {
+      "cerca": "protomartiri",
+      "testo": "Il Cammino dei Protomartiri Francescani è un anello di circa 100 km in sei tappe con partenza e arrivo a Terni. Ricorda i cinque frati uccisi a Marrakech nel 1220, considerati i primi martiri dell'ordine francescano: quattro venivano da paesi toccati dal cammino (Calvi, Stroncone, San Gemini e Narni). È nato nel 2010, dopo l'arrivo delle loro reliquie nella chiesa di Sant'Antonio a Terni."
+    },
+    {
+      "cerca": "via del trasimeno",
+      "testo": "La Via del Trasimeno è un anello di circa 160 km in sette tappe attorno al lago, su strade secondarie e sterrate tra oliveti, boschi di querce e castagni e borghi fortificati; comprende la traversata in battello per l'Isola Maggiore. Per tradizione si parte da Passignano e si gira in senso orario."
+    },
+    {
+      "cerca": "amerina|cammino della luce",
+      "testo": "La Via Amerina era la strada romana che dalla zona di Roma saliva verso Amelia, l'antica Ameria da cui prende il nome, aperta dopo la conquista dell'Etruria meridionale nel III secolo a.C. su tracciati più antichi. Nell'alto Medioevo fu l'asse del corridoio bizantino che teneva uniti Roma e Ravenna attraverso le terre longobarde; oggi una parte si percorre a piedi come Cammino della Luce."
+    },
+    {
+      "cerca": "larth",
+      "testo": "Il Cammino dell'Intrepido Larth è un anello di circa 60 km in tre tappe tra Orvieto, Bolsena e Civita di Bagnoregio, a cavallo tra Umbria e Lazio, sempre a quote basse. Prende il nome da Larth Cupures, guerriero etrusco del V secolo a.C. la cui stele è conservata nel museo Faina di Orvieto."
+    },
+    {
+      "cerca": "san benedetto - tappa|^CSB$",
+      "testo": "Il Cammino di San Benedetto unisce in circa 300 km i tre luoghi chiave della vita del santo: Norcia, dove nacque, Subiaco, dove visse da eremita, e Montecassino, dove fondò l'abbazia. Le prime tappe attraversano la Valnerina e gli altopiani al confine con il Lazio."
+    },
+    {
+      "cerca": "lauretana toscana",
+      "testo": "La Via Lauretana toscana va da Siena a Cortona attraverso le Crete senesi e la Valdichiana: era uno dei rami della rete di strade percorse dai pellegrini diretti alla Santa Casa di Loreto."
+    },
+    {
+      "cerca": "lauretana",
+      "testo": "La Via Lauretana era la strada dei pellegrini diretti alla Santa Casa di Loreto: da Assisi e Foligno saliva sull'Appennino per Colfiorito e scendeva nelle Marche. È considerata uno dei più antichi cammini mariani; nel 1581 la percorse anche Montaigne, che la descrisse nel suo diario di viaggio."
+    },
+    {
+      "cerca": "terre mutate",
+      "testo": "Il Cammino nelle Terre Mutate unisce Fabriano e L'Aquila attraverso l'Appennino colpito dai terremoti del 2009 e del 2016-2017. Nato da una marcia del 2012, è diventato un itinerario permanente che passa per Norcia, Castelluccio e Amatrice e sostiene i paesi e le attività che rinascono dopo il sisma."
+    },
+    {
+      "cerca": "cammino dei cappuccini",
+      "testo": "Il Cammino dei Cappuccini attraversa le Marche da Fossombrone ad Ascoli Piceno toccando i conventi dove nacque l'ordine dei frati cappuccini; tra il monastero di Fonte Avellana e Fabriano sconfina brevemente in Umbria."
+    },
+    {
+      "cerca": "francescano della marca",
+      "testo": "Il Cammino Francescano della Marca va da Assisi ad Ascoli Piceno, circa 170 km, sulle strade che Francesco percorse predicando nelle Marche meridionali; il primo tratto, fino a Colfiorito, coincide in parte con la Via Lauretana."
+    },
+    {
+      "cerca": "grande anello in bicicletta|\\(GAB\\)",
+      "testo": "Il Grande Anello dei Sibillini in bici è il giro in mountain bike del massiccio in cinque tappe, tra Umbria e Marche: sterrati e strade di montagna che richiedono più allenamento che tecnica di guida."
+    },
+    {
+      "cerca": "grande anello dei sibillini|^GAS$",
+      "testo": "Il Grande Anello dei Sibillini è un giro di circa 124 km in nove tappe attorno al massiccio, tra Umbria e Marche, da un paese o un rifugio all'altro. Alcuni rifugi sono stati danneggiati dal terremoto del 2016: prima di partire conviene verificare dove si può dormire."
+    },
+    {
+      "cerca": "sicai ciclo",
+      "testo": "Tappa del Sentiero Italia CAI in bici, la versione per mountain bike del grande sentiero che percorre l'Appennino: segue sterrati e mulattiere vicino al tracciato a piedi, con punti tappa nei paesi e nei rifugi."
+    },
+    {
+      "cerca": "sentiero italia",
+      "testo": "Il Sentiero Italia CAI attraversa tutta la penisola e le isole per oltre 7.000 km. In Umbria passa per le faggete dell'Alta Valle del Tevere, il Monte Cucco, l'altopiano di Colfiorito e la Valnerina fino ai Sibillini, sconfinando più volte nelle Marche."
+    },
+    {
+      "cerca": "romea",
+      "testo": "La Via Romea Germanica ripercorre il viaggio dell'abate Alberto di Stade, che nel 1236 andò dalla Germania a Roma e ne lasciò la descrizione. In Umbria costeggia il Trasimeno e scende per Città della Pieve e Ficulle fino a Orvieto."
+    },
+    {
+      "cerca": "cammino d'assisi, san miniato",
+      "testo": "Questo cammino collega San Miniato, sulla Via Francigena, ad Assisi: attraversa San Gimignano, le Crete senesi, la Val d'Orcia con Pienza e Montepulciano e arriva in Umbria dal Trasimeno."
+    },
+    {
+      "cerca": "^cammino di assisi$|^CAssisi$",
+      "testo": "Il Cammino di Assisi è un lungo itinerario di pellegrinaggio che arriva ad Assisi da nord: parte da Dovadola, in Romagna, scavalca l'Appennino e scende lungo l'Alta Valle del Tevere."
+    },
+    {
+      "cerca": "cammino di francesco - ",
+      "testo": "Itinerario del Cammino di Francesco, la rete di percorsi tra i santuari francescani della valle reatina (Greccio, Fonte Colombo, La Foresta, Poggio Bustone) e i collegamenti verso l'Umbria e Roma."
+    },
+    {
+      "cerca": "^E1|european long distance path e1",
+      "testo": "Il sentiero europeo E1 attraversa il continente da Capo Nord alla Sicilia; in Italia segue in gran parte la dorsale dell'Appennino."
+    },
+    {
+      "cerca": "grande escursione appenninica",
+      "testo": "La Grande Escursione Appenninica (GEA) percorre in circa 25 tappe il crinale dell'Appennino tosco-emiliano e toscano, fino a Bocca Trabaria, al confine con l'Umbria."
+    },
+    {
+      "cerca": "sentiero dei briganti",
+      "testo": "Il Sentiero dei Briganti attraversa l'Alta Tuscia, tra Lazio e Toscana: boschi e campagne dove nell'Ottocento trovavano rifugio briganti come Domenico Tiburzi."
+    },
+    {
+      "cerca": "^CBS$|sentieri di bacco|infiniti orizzonti|colline del sole|tormento ed estasi|valle incantata",
+      "testo": "Tappa del Cammino dei Borghi Silenti, anello di circa 90 km tra Tenaglie, Melezzole, Morre, Civitella del Lago e Baschi, nei boschi, negli oliveti e nei vigneti tra la valle del Tevere e i Monti Amerini. Il punto più alto è il Monte Croce di Serra, 994 m."
+    },
+    {
+      "cerca": "raccordo ciclabile di spoleto",
+      "testo": "Raccordo che attorno a Spoleto collega la ciclovia Spoleto–Assisi con la ex ferrovia Spoleto–Norcia."
+    },
+    {
+      "cerca": "sentieri amerini",
+      "testo": "Fa parte della rete escursionistica dei Sentieri Amerini, sui monti e le colline attorno ad Amelia."
+    },
+    {
+      "cerca": "spoleto ?- ?norcia|^SN$|^CSN$",
+      "testo": "Segue la vecchia ferrovia Spoleto–Norcia, a scartamento ridotto ed elettrica, aperta nel 1926 e chiusa nel 1968: per scendere dalla montagna alla Valnerina usava gallerie elicoidali e viadotti, tanto da essere chiamata il «Gottardo dell'Umbria». Riaperta come pista ciclopedonale nel 2014, conta 19 gallerie (la più lunga di circa 2 km: serve una luce) e 24 tra ponti e viadotti. Dopo il terremoto del 2016 alcuni tratti sono chiusi: verificare prima di partire."
+    },
+    {
+      "cerca": "ciclovia spoleto-assisi",
+      "testo": "Ciclovia di circa 50 km quasi tutta in piano nella Valle Umbra, in gran parte sugli argini dei canali di bonifica, con Trevi, Montefalco, Bevagna e Cannara a portata di deviazione. Fa parte della dorsale ciclabile che, con la ex ferrovia, arriva fino a Norcia."
+    },
+    {
+      "cerca": "ciclovia del tevere",
+      "testo": "La Ciclovia del Tevere segue la valle del fiume da Città di Castello verso Umbertide e Perugia, per circa 85 km, con alcuni tratti sterrati e qualche breve salita."
+    },
+    {
+      "cerca": "ciclabile del trasimeno|perugia - trasimeno|grande anello del trasimeno",
+      "testo": "Il Trasimeno è il quarto lago d'Italia per superficie e il più grande della penisola: poco profondo, circondato da colline di oliveti e borghi fortificati, con tre isole. Attorno corre un anello ciclabile di circa 60 km su piste dedicate e strade secondarie."
+    },
+    {
+      "cerca": "predica agli uccelli|piandarca",
+      "testo": "Segue la strada da Assisi verso Cannara fino a Pian d'Arca, dove la tradizione colloca la predica di Francesco agli uccelli, raccontata nei Fioretti e dipinta da Giotto nella basilica superiore di Assisi."
+    },
+    {
+      "cerca": "tescio-chiascio",
+      "testo": "Percorso verde lungo i fiumi Tescio e Chiascio ai piedi di Assisi, tra argini, campi e filari, con la basilica di San Francesco sullo sfondo."
+    },
+    {
+      "cerca": "grand tour rando",
+      "testo": "Tracciato della Grand Tour Rando, randonnée che ha come punto di riferimento la Cascata delle Marmore: una prova di resistenza in bici a ritmo libero, non una gara, sulle strade della Valnerina e del Ternano."
+    },
+    {
+      "cerca": "^ABT ",
+      "testo": "Tappa dell'Appennino Bike Tour, itinerario cicloturistico in decine di tappe dalla Liguria alla Sicilia lungo la dorsale appenninica, su strade secondarie con dislivelli importanti; lungo il percorso ci sono punti di assistenza e di ricarica per e-bike."
+    },
+    {
+      "cerca": "eurovelo 7",
+      "testo": "EuroVelo 7, la «Via del Sole», è la ciclovia europea che va da Capo Nord a Malta; in Italia scende lungo tutta la penisola fino alla Sicilia."
+    },
+    {
+      "cerca": "freeride funivia",
+      "testo": "Discesa da freeride lungo la funivia del Monte Ingino, sopra Gubbio: tratto breve, ripido e tecnico, solo per biker esperti con protezioni."
+    },
+    {
+      "cerca": "^emmeemme$",
+      "testo": "Breve pista da downhill: tracciato ripido e tecnico, solo per biker esperti con protezioni."
+    },
+    {
+      "cerca": "tre laghi",
+      "testo": "Anello in mountain bike tra la Valdichiana e il Trasimeno, attorno ai laghi di Montepulciano, di Chiusi e del Trasimeno, su sterrati e strade di campagna."
+    }
+  ],
+  "zone": [
+    {
+      "nome": "Monte Cucco",
+      "lat": 43.37,
+      "lon": 12.73,
+      "raggio_km": 6,
+      "testo": "Il Monte Cucco (1.566 m) è il cuore di un parco regionale di oltre 10.000 ettari tra Costacciaro, Sigillo, Fossato di Vico e Scheggia: faggete, praterie in quota, pareti da cui si lanciano deltaplani e parapendii, e sotto la montagna una delle grotte carsiche più profonde d'Europa, oltre 900 m."
+    },
+    {
+      "nome": "Monte Catria",
+      "lat": 43.47,
+      "lon": 12.7,
+      "raggio_km": 5,
+      "testo": "Il Monte Catria (1.701 m), sul confine tra Umbria e Marche, è uno dei massicci calcarei più alti dell'Appennino umbro-marchigiano, coperto da faggete; alle sue pendici sorge il monastero di Fonte Avellana."
+    },
+    {
+      "nome": "Serrasanta",
+      "lat": 43.245,
+      "lon": 12.81,
+      "raggio_km": 5,
+      "luogo": "Valsorda"
+    },
+    {
+      "nome": "Monte Pennino",
+      "lat": 43.1,
+      "lon": 12.89,
+      "raggio_km": 5,
+      "testo": "Il Monte Pennino (1.571 m) è la cima più alta dei monti di Nocera Umbra, sullo spartiacque tra Umbria e Marche: pascoli d'altura, faggete e, ai piedi, le sorgenti che hanno fatto di Nocera la «città delle acque»."
+    },
+    {
+      "nome": "Monte Subasio",
+      "lat": 43.05,
+      "lon": 12.67,
+      "raggio_km": 6,
+      "testo": "Il Monte Subasio (1.290 m), alle spalle di Assisi e Spello, è un parco regionale: in basso oliveti e lecci, più su boschi e una sommità di ampi prati da pascolo con le grandi doline del Mortaro, un tempo usate per conservare la neve. Dalla cima si vedono la Valle Umbra e buona parte dell'Appennino."
+    },
+    {
+      "nome": "Colfiorito",
+      "lat": 43.03,
+      "lon": 12.89,
+      "raggio_km": 7,
+      "luogo": "Colfiorito"
+    },
+    {
+      "nome": "Monteluco",
+      "lat": 42.735,
+      "lon": 12.755,
+      "raggio_km": 2.5,
+      "luogo": "Monteluco"
+    },
+    {
+      "nome": "Monte Fionchi",
+      "lat": 42.7,
+      "lon": 12.81,
+      "raggio_km": 4,
+      "testo": "Il Monte Fionchi (1.337 m), a est di Spoleto, separa la Valle Umbra dalla Valnerina: i suoi versanti sono coperti di boschi e la cima prativa offre una vista ampia su entrambe le valli."
+    },
+    {
+      "nome": "Monte Coscerno",
+      "lat": 42.76,
+      "lon": 12.89,
+      "raggio_km": 7,
+      "testo": "Il Monte Coscerno (1.685 m) domina la media Valnerina: sui suoi fianchi si trovano piccoli borghi di pastori come Gavelli e Poggiodomo, antiche vie della transumanza e ampi pascoli in quota."
+    },
+    {
+      "nome": "Sibillini",
+      "lat": 42.82,
+      "lon": 13.21,
+      "raggio_km": 10,
+      "testo": "I Monti Sibillini, tra Umbria e Marche, sono un parco nazionale di cime calcaree oltre i 2.000 m, legate alle leggende della Sibilla. Sul versante umbro si aprono gli altopiani di Castelluccio, che tra fine maggio e luglio si coprono di fioriture."
+    },
+    {
+      "nome": "Norcia",
+      "lat": 42.79,
+      "lon": 13.09,
+      "raggio_km": 5,
+      "luogo": "Norcia"
+    },
+    {
+      "nome": "Ferentillo",
+      "lat": 42.62,
+      "lon": 12.79,
+      "raggio_km": 5,
+      "luogo": "Ferentillo"
+    },
+    {
+      "nome": "Marmore",
+      "lat": 42.55,
+      "lon": 12.73,
+      "raggio_km": 4,
+      "luogo": "Cascata delle Marmore"
+    },
+    {
+      "nome": "Monti Martani",
+      "lat": 42.78,
+      "lon": 12.52,
+      "raggio_km": 13,
+      "testo": "I Monti Martani sono la dorsale boscosa che separa la media valle del Tevere dalla Valle Umbra e dalla conca di Terni; ai loro piedi correva il ramo occidentale della via Flaminia, e sui crinali si incontrano pascoli, antiche pievi e resti di santuari umbri."
+    },
+    {
+      "nome": "Stroncone",
+      "lat": 42.48,
+      "lon": 12.68,
+      "raggio_km": 8,
+      "luogo": "Stroncone"
+    },
+    {
+      "nome": "Narni",
+      "lat": 42.515,
+      "lon": 12.51,
+      "raggio_km": 4,
+      "luogo": "Narni"
+    },
+    {
+      "nome": "Monti Amerini",
+      "lat": 42.66,
+      "lon": 12.33,
+      "raggio_km": 11,
+      "testo": "I Monti Amerini sono una catena di rilievi boscosi tra la valle del Tevere e quella del Nera, attorno ad Amelia: lecci, castagni e querce, piccoli castelli medievali, eremi tra le rocce e la vista sul lago di Corbara."
+    },
+    {
+      "nome": "Monte Peglia",
+      "lat": 42.83,
+      "lon": 12.21,
+      "raggio_km": 7,
+      "testo": "Il Monte Peglia (837 m), tra Orvieto e Todi, è un massiccio boscoso di querce e castagni riconosciuto dall'UNESCO come riserva della biosfera: un'area poco abitata, con radure, casali isolati e vista sulla valle del Tevere."
+    },
+    {
+      "nome": "Selva di Meana",
+      "lat": 42.77,
+      "lon": 11.98,
+      "raggio_km": 6,
+      "luogo": "Selva di Meana"
+    },
+    {
+      "nome": "Orvieto",
+      "lat": 42.718,
+      "lon": 12.11,
+      "raggio_km": 4,
+      "luogo": "Orvieto"
+    },
+    {
+      "nome": "Monte Tezio",
+      "lat": 43.19,
+      "lon": 12.345,
+      "raggio_km": 3.5,
+      "luogo": "Monte Tezio"
+    },
+    {
+      "nome": "Monte Malbe",
+      "lat": 43.115,
+      "lon": 12.32,
+      "raggio_km": 3,
+      "luogo": "Monte Malbe"
+    },
+    {
+      "nome": "Trasimeno",
+      "lat": 43.13,
+      "lon": 12.1,
+      "raggio_km": 14,
+      "testo": "Il Trasimeno è il quarto lago d'Italia per superficie e il più grande della penisola: poco profondo, circondato da colline di oliveti, castelli e borghi fortificati, con tre isole. Sulle sue rive, nel 217 a.C., Annibale sconfisse l'esercito romano."
+    },
+    {
+      "nome": "Monte Acuto",
+      "lat": 43.3,
+      "lon": 12.31,
+      "raggio_km": 3,
+      "luogo": "Monte Acuto"
+    },
+    {
+      "nome": "Gubbio",
+      "lat": 43.36,
+      "lon": 12.59,
+      "raggio_km": 4,
+      "luogo": "Monte Ingino"
+    },
+    {
+      "nome": "Alpe della Luna",
+      "lat": 43.6,
+      "lon": 12.18,
+      "raggio_km": 8,
+      "testo": "Sopra Bocca Trabaria corre il crinale dell'Alpe della Luna, tra Toscana, Marche e Umbria: grandi faggete e abetine, sorgenti del Tevere e del Metauro poco lontane e ampie vedute sull'Alta Valle del Tevere."
+    }
+  ],
+  "settori": {
+    "Alto Tevere": "L'Alto Tevere è la parte più settentrionale dell'Umbria, attorno a Città di Castello e Umbertide: nella valle campi e filari lungo il fiume, sulle colline castelli, pievi e borghi murati, e verso il confine con Toscana e Marche le grandi faggete dell'Appennino.",
+    "Alto Chiascio": "L'Alto Chiascio comprende Gubbio, Gualdo Tadino e la dorsale appenninica del Monte Cucco: montagne calcaree con faggete, pascoli d'altura, grotte ed eremi, attraversate fin dall'antichità dalla via Flaminia.",
+    "Valle Umbra Nord": "La zona tra Assisi, Spello, Foligno, Nocera Umbra e l'altopiano di Colfiorito: dal Monte Subasio alle montagne della valle del Menotre, ricche di sorgenti, castelli e piccoli borghi.",
+    "Valle Spoletina": "Le montagne attorno a Spoleto e Trevi: il bosco sacro di Monteluco, la fascia degli oliveti e i rilievi che separano la Valle Umbra dalla Valnerina, con castelli e antiche strade di valico.",
+    "Valnerina": "La Valnerina è la valle del fiume Nera, tra pareti di roccia, boschi e borghi fortificati; più in alto si aprono i pascoli e gli altopiani verso Norcia, Cascia e i Monti Sibillini.",
+    "Valle del Nera": "La bassa valle del Nera, tra Terni, Narni e la Cascata delle Marmore: gole scavate dal fiume, borghi medievali e i resti della via Flaminia e delle città romane.",
+    "Amerino": "I Monti Amerini sono una catena di rilievi boscosi tra la valle del Tevere e quella del Nera, attorno ad Amelia: lecci, castagni e querce, piccoli castelli medievali e vista sul lago di Corbara.",
+    "Orvietano-Tuderte": "Il territorio tra Orvieto e Todi: rupi di tufo, colline di vigneti e oliveti, i boschi del Monte Peglia e della Selva di Meana e la valle del Tevere con il lago di Corbara.",
+    "Perugino-Trasimeno": "Le colline attorno a Perugia e al lago Trasimeno: il Monte Tezio e il Monte Malbe alle porte della città, oliveti, castelli e borghi affacciati sul lago."
+  },
+  "luoghi": {
+    "Abbazia di San Pietro in Valle": "L'abbazia di San Pietro in Valle fu fondata nell'VIII secolo dal duca longobardo di Spoleto Faroaldo II, che vi si fece monaco, dove vivevano gli eremiti Lazzaro e Giovanni. L'altare porta il nome del duca Ilderico e la firma dello scultore, «Ursus magester fecit», rara per l'epoca. Le pareti hanno affreschi romanici del XII secolo.",
+    "Abbazia di San Silvestro": "L'Abbazia di San Silvestro, sul versante sud del Subasio presso Collepino, secondo la tradizione fu fondata da san Romualdo nel 1025 ed è documentata dal 1083; nel XII secolo entrò nell'ordine camaldolese. Dell'antico complesso restano l'abside, la cripta e la base del campanile; dal 1972 vi vive una piccola comunità religiosa.",
+    "Abbazia di Sant'Eutizio": "L'abbazia di Sant'Eutizio nacque dalla comunità di eremiti siriani che nel V secolo vivevano in grotte scavate nella roccia della Valle Castoriana: Eutizio succedette al fondatore Spes, e di loro scrisse già papa Gregorio Magno. La chiesa romanica con il rosone è stata gravemente danneggiata dai terremoti dell'ottobre 2016.",
+    "Abbazia di Santa Maria di Sitria": "L'Abbazia di Santa Maria di Sitria fu fondata da san Romualdo, che vi visse alcuni anni all'inizio dell'XI secolo. La chiesa romanica a una navata ha una cripta con la volta su una colonna di granito romana; accanto si mostra la cella dove, secondo la tradizione, il santo fu rinchiuso per sei mesi dai suoi stessi monaci.",
+    "Abbazia di Sassovivo": "L'Abbazia di Sassovivo, sopra Foligno, sorge isolata su uno sperone di roccia circondato da una lecceta secolare, oggi protetta. Fondata dai benedettini nella seconda metà dell'XI secolo, conserva un chiostro romanico del 1229 firmato dal marmoraro romano Pietro de Maria, con 128 colonnine binate i cui pezzi furono lavorati a Roma.",
+    "Accumoli": "Accumoli, nell'alta valle del Tronto vicino al punto d'incontro tra Lazio, Umbria, Marche e Abruzzo, fu l'epicentro del terremoto del 24 agosto 2016. La torre civica, nata nel XII secolo come campanile e poi rialzata, resse alla scossa pur danneggiata, mentre gran parte del borgo andò distrutta.",
+    "Acquedotto della Formina": "L'Acquedotto della Formina portava a Narni l'acqua raccolta da diverse sorgenti presso Sant'Urbano, lungo circa 13 km con pendenza quasi costante, tra gallerie, ponti e pozzi di ispezione. Fu costruito in età di Tiberio, intorno al 27 d.C., e rifornì la città fino agli anni Venti del Novecento.",
+    "Allerona": "Allerona è il comune più occidentale dell'Umbria, al confine con Lazio e Toscana. Il castello, a cui si entra dalla Porta del Sole, era un presidio di Orvieto verso Chiusi. In maggio la festa di sant'Isidoro porta in paese i Pugnaloni, carri decorati con scene del lavoro nei campi.",
+    "Alpe della Luna": "L'Alpe della Luna è una catena di monti tra Toscana, Umbria e Marche, sullo spartiacque tra Tirreno e Adriatico; la cima più alta è il Monte dei Frati (1453 m). Dai suoi versanti nascono Marecchia, Metauro e Foglia; la riserva naturale è coperta quasi tutta da boschi dove vivono lupo e aquila reale.",
+    "Alviano": "Alviano è dominato dal castello ricostruito alla fine del Quattrocento dal condottiero Bartolomeo d'Alviano, poi passato ai Doria Pamphili e oggi sede del municipio e di musei. In basso, la diga sul Tevere del 1963 ha creato il lago di Alviano, le cui sponde paludose formano un'oasi del WWF di circa 900 ettari, rifugio di molti uccelli acquatici.",
+    "Amatrice": "Amatrice sorge in una conca a circa 955 m ai piedi dei Monti della Laga e fu a lungo città di confine del Regno di Napoli. Ha dato il nome alla pasta all'amatriciana. Il terremoto del 24 agosto 2016 ne ha distrutto il centro storico ed è stato il paese con più vittime di quella notte.",
+    "Amelia": "Amelia è tra le città più antiche dell'Umbria: Plinio, citando Catone, ne colloca le origini oltre mille anni prima di Cristo. Il centro è chiuso dalle mura poligonali, grandi blocchi incastrati senza malta. Nel 1963, durante dei lavori, vi fu trovata in frammenti una statua bronzea di Germanico alta oltre due metri, ora al museo archeologico.",
+    "Anghiari": "Anghiari, borgo murato su uno sperone sopra la Valtiberina, dà il nome alla battaglia del 1440 in cui Firenze sconfisse le truppe milanesi, scena del celebre affresco perduto di Leonardo in Palazzo Vecchio. Dal paese scende verso Sansepolcro una strada perfettamente rettilinea, lo Stradone.",
+    "Annifo": "Annifo è un borgo della montagna di Foligno, a circa 870 m, sul bordo di uno dei piani carsici dell'altopiano plestino. Il suo nome è legato al terremoto del 26 settembre 1997: la scossa più forte, di magnitudo 6.0, ebbe l'epicentro in questa zona e causò nuovi crolli in Umbria e nelle Marche.",
+    "Armenzano": "Armenzano è un piccolo borgo medievale sul versante orientale del Subasio, a circa 700 m: le case di pietra si dispongono in anelli concentrici attorno al castello, seguendo la forma della roccia. Il nome deriverebbe dal latino armentum, \"mandria\", ricordo di una lunga tradizione di pastorizia.",
+    "Arquata del Tronto": "Arquata del Tronto è uno dei rari comuni divisi tra due parchi nazionali: i Monti Sibillini a nord e il Gran Sasso e Monti della Laga a sud. La sua rocca del XIII secolo sorvegliava la via Salaria e la valle del Tronto. Il paese e le frazioni, come Pescara del Tronto, sono stati devastati dai terremoti del 2016.",
+    "Arrone": "Arrone prende il nome da un nobile romano che alla fine del IX secolo costruì un castello su uno sperone di roccia sopra il Nera. La parte alta, detta «la Terra», conserva mura e vicoli medievali; la chiesa trecentesca di San Giovanni Battista ha affreschi quattrocenteschi di scuola umbra. Fino al 1960 il paese era servito da un tram per Terni.",
+    "Assisi": "Assisi, città di san Francesco e di santa Chiara, è costruita con la pietra rosa e bianca del Subasio, che le dà il suo colore caratteristico. La Basilica di San Francesco, con gli affreschi di Giotto, Cimabue e Simone Martini, è patrimonio UNESCO dal 2000; nel terremoto del 1997 crollò parte della volta della basilica superiore.",
+    "Attigliano": "Attigliano è un borgo sulla valle del Tevere al confine con il Lazio. Del castello tardomedievale, passato nei secoli da Todi agli Alviano e ai Farnese, restano tratti di mura, alcune torri e una porta. In piazza della Rocca la torre ha un orologio con una sola lancetta, accanto alla fontana dei delfini del 1885.",
+    "Avigliano Umbro": "Avigliano Umbro è il comune più giovane dell'Umbria: si è staccato da Montecastrilli nel 1975. Il territorio, attraversato dall'antica via Amerina, fu conteso nel Medioevo tra Todi e Baschi; dell'epoca tuderte resta la Porta Vecchia con l'aquila di Todi. Nel comune si trova la foresta fossile di Dunarobba.",
+    "Badia Montecorona": "La Badia di Montecorona, vicino a Umbertide, sarebbe stata fondata da san Romualdo nel 1008; verso il 1050 la guidò san Pier Damiani. Ha un campanile poligonale e una cripta a cinque navate con colonne romane e medievali. Una strada lastricata dai monaci, la «mattonata», sale all'eremo cinquecentesco sul monte.",
+    "Bagnara": "Bagnara, frazione di Nocera Umbra alle pendici del Monte Pennino, è il luogo dove nasce il Topino, a circa 650 m: è il fiume che poi attraversa Foligno e la Valle Umbra. Le terre intorno alle sorgenti appartengono a una comunanza agraria, che ne rivendica la proprietà collettiva.",
+    "Baschi": "Baschi è un paese sulle colline della valle del Tevere. Secondo la tradizione il castello fu costruito da un funzionario carolingio soprannominato il Basco, da cui il nome. La parrocchiale di San Nicolò, del Cinquecento, custodisce un polittico di Giovanni di Paolo; nell'Antiquarium comunale sono esposti reperti del sito romano di Scoppieto.",
+    "Basilica di San Salvatore": "La Basilica di San Salvatore, presso il cimitero di Spoleto, è una delle chiese più antiche dell'Umbria, costruita riusando colonne, capitelli e fregi romani. Insieme al Tempietto del Clitunno fa parte dal 2011 del sito UNESCO dedicato ai Longobardi in Italia.",
+    "Belfiore": "Belfiore, frazione di Foligno, è il punto più basso del sentiero delle cascate del Menotre, che risale il fiume fino a Pale tra pioppi, felci e rocce bagnate. Come Pale, visse a lungo di mulini e cartiere: un documento del 1590 lodava la qualità della carta prodotta in questi due borghi.",
+    "Bettona": "Bettona, su un colle tra la Valle Umbra e il Tevere, è di origine etrusca: l'unico centro etrusco sulla sponda orientale del fiume. Le mura medievali del XII secolo inglobano ancora tratti di quelle antiche, e dai bastioni si vedono Perugia, Assisi e Spello; la pinacoteca conserva opere del Perugino.",
+    "Bevagna": "Bevagna, la romana Mevania sul ramo occidentale della Flaminia, conserva il mosaico con animali marini delle sue terme e i resti del teatro, inglobati nelle case. Piazza Silvestri, con le chiese romaniche di San Silvestro e San Michele, è un raro insieme medievale; d'estate il Mercato delle Gaite rievoca i mestieri del Medioevo.",
+    "Bocca Serriola": "Bocca Serriola (730 m), che a Città di Castello chiamano «la Cima», mette in comunicazione la valle del Tevere con quella del Biscubio, verso le Marche. Secondo alcuni geografi è qui, o alla vicina Bocca Trabaria, che l'Appennino settentrionale lascia il posto a quello umbro-marchigiano.",
+    "Bocca Trabaria": "Bocca Trabaria (1049 m) separa la valle del Tevere da quella del Metauro e l'Umbria dalle Marche. Il nome viene dal latino trabs, trave: i Romani tagliavano qui il legname e lo facevano scendere lungo il Tevere. Nella notte del 27 luglio 1849 vi passò Garibaldi con Anita, diretto a Venezia.",
+    "Bolsena": "Bolsena si affaccia sul più grande lago vulcanico d'Europa, nato dal collasso dei vulcani Vulsini. Qui i Romani trasferirono gli abitanti della Velzna etrusca dopo il 264 a.C. Nel 1263, secondo la tradizione, un'ostia sanguinò durante la messa nella chiesa di Santa Cristina: è il miracolo da cui nacque la festa del Corpus Domini.",
+    "Borgo Cerreto": "Borgo Cerreto, frazione di Cerreto di Spoleto, sorge dove il torrente Vigi confluisce nel Nera. Il borgo crebbe nel Quattrocento attorno a edifici religiosi benedettini; la chiesa romanica di San Paterniano usa come campanile un'antica torre di avvistamento. Fino al 1968 qui si fermava il treno Spoleto–Norcia.",
+    "Bosco di San Francesco": "Il Bosco di San Francesco scende dalla Basilica di Assisi verso la valle del Tescio ed è curato dal FAI, che lo ha aperto al pubblico nel 2011. Il percorso attraversa l'antico complesso benedettino di Santa Croce, con mulino e chiesa, e termina in una radura con il \"Terzo Paradiso\", opera di land art di Michelangelo Pistoletto.",
+    "Calvi dell'Umbria": "Calvi dell'Umbria, ai piedi del Monte San Pancrazio vicino al confine con il Lazio, è il paese di san Berardo, uno dei cinque frati francescani uccisi in Marocco nel 1220. Nella chiesa di Sant'Antonio è esposto un grande presepe in terracotta del 1545. L'ex monastero delle Orsoline, con la chiesa barocca di Ferdinando Fuga, ospita un museo.",
+    "Camerino": "Camerino è una città d'altura dell'Appennino marchigiano, per secoli capitale della signoria dei Da Varano, che vi lasciarono il palazzo ducale. La sua università risale al Trecento. Il centro storico è stato gravemente danneggiato dal terremoto del 2016.",
+    "Cammoro": "Cammoro, frazione di Sellano a circa 970 m, è il medievale Castrum Cammori, arroccato sul monte omonimo tra Foligno, Spoleto e Norcia. Conserva la chiesa romanica di San Paterniano e quella di Santa Maria Novella, ricavata dal castello; dopo il terremoto del 1997 quasi tutti gli abitanti lo hanno lasciato.",
+    "Campello Alto": "Campello Alto è il castello da cui nacque Campello sul Clitunno, su un colle a circa 514 m. Secondo la tradizione fu costruito nel 921 da Rovero di Champeaux, barone borgognone al seguito del duca di Spoleto; da lui discendono i conti Campello, che diedero il nome al paese.",
+    "=Campi": "Campi è una frazione di Norcia con il nucleo antico di Campi Vecchio sul pendio. Il terremoto del 2016 ha distrutto la chiesa di San Salvatore, antica pieve ricca di affreschi, e le logge della chiesa di Sant'Andrea. Si è salvata la chiesa di Santa Maria di Piazza, datata 1351.",
+    "Campi Vecchio": "Campi è una frazione di Norcia con il nucleo antico di Campi Vecchio sul pendio. Il terremoto del 2016 ha distrutto la chiesa di San Salvatore, antica pieve ricca di affreschi, e le logge della chiesa di Sant'Andrea. Si è salvata la chiesa di Santa Maria di Piazza, datata 1351.",
+    "Campo del Sole": "Il Campo del Sole, sul lungolago di Tuoro, è un museo all'aperto di 27 sculture-colonne in pietra serena, scolpite da artisti contemporanei tra il 1985 e il 1989.",
+    "=Cancelli": "Cancelli, piccolo borgo della montagna di Foligno, custodisce un'antica tradizione: i santi Pietro e Paolo, ospitati da una famiglia povera del luogo, avrebbero donato ai suoi discendenti maschi il potere di guarire con l'imposizione delle mani. Da qui il detto \"andare a prendere il segno a Cancelli\" e il santuario sorto per i molti fedeli.",
+    "Cannara": "Cannara sorge sulla riva del Topino, al centro della Valle Umbra. Secondo la tradizione qui san Francesco fondò nel 1221 il Terzo Ordine, rivolto ai laici; il paese è noto anche per la sua cipolla, festeggiata ogni anno a settembre.",
+    "Canoscio": "Canoscio, sulle colline sopra Trestina, è noto per il santuario della Madonna del Transito: nacque da un'immagine votiva voluta nel 1348 da un sopravvissuto alla peste, e la grande chiesa attuale fu progettata da Emilio De Fabris, l'architetto della facciata del duomo di Firenze. Dal 1998 è basilica minore.",
+    "Caprareccia": "Caprareccia è il valico tra la valle di Spoleto e la Valnerina, superato dalla ex ferrovia Spoleto–Norcia con una galleria di 1936 m. Per arrivarci il treno saliva con tornanti e anelli elicoidali e viadotti alti, opera dell'ingegnere svizzero Erwin Thomann. La linea funzionò dal 1926 al 1968 ed è oggi un percorso ciclopedonale.",
+    "Carsulae": "Carsulae fu una città romana nata lungo la via Flaminia, che la attraversava entrando dall'arco di San Damiano, la porta nord. Restano il foro con i templi gemelli, la basilica, il teatro e l'anfiteatro. Fu abbandonata nella tarda antichità, forse dopo un terremoto; la chiesetta di San Damiano venne costruita secoli dopo su un edificio romano.",
+    "Cascata delle Marmore": "La Cascata delle Marmore, 165 m in tre salti, è una cascata artificiale: nel 271 a.C. il console Manio Curio Dentato fece scavare un canale per scaricare nel Nera le acque stagnanti del Velino. Il suo aspetto attuale risale ai lavori del 1787. Oggi l'acqua serve anche per l'energia elettrica e la cascata è a pieno regime solo in certi momenti.",
+    "Cascate del Menotre": "Le Cascate del Menotre scendono tra Pale e Belfiore lungo la gola sotto il Sasso di Pale, con due salti principali e molte cascatelle. Un sentiero di circa 2 km le costeggia da vicino; la forza di queste acque muoveva un tempo i mulini e le cartiere della valle.",
+    "Cascia": "Cascia è la città di santa Rita, vissuta tra Tre e Quattrocento e nata nella vicina Roccaporena: il suo corpo è venerato nella basilica a lei dedicata, costruita nel Novecento. In paese c'è anche la chiesa gotica di Sant'Agostino, con affreschi di scuola umbra. La zona è molto sismica: il terremoto del 1703 fece qui più di 700 vittime.",
+    "Castel dell'Aquila": "Castel dell'Aquila, oggi frazione di Montecastrilli, nacque nel 1294 come avamposto di Todi sul colle Nobile, per sbarrare la valle all'espansione di Amelia. Nel 1366 fu distrutto da una compagnia di ventura al servizio del cardinale Albornoz e poi ricostruito più volte; restano la torre e le torri della porta.",
+    "Castel Procoio": "Castel Procoio, sulle pendici del Tezio, fu iniziato nel 1455 dagli abitanti del posto, che tra il 1473 e il 1481 ottennero anche aiuti dal Comune di Perugia. L'opera non fu mai del tutto completata e il castello rimase poi abbandonato per decenni, fino ai restauri iniziati negli anni Ottanta del Novecento.",
+    "Castel Rigone": "Castel Rigone è un borgo sulle colline sopra Passignano, con una vista ampia sul Trasimeno. Appena fuori dalle mura sorge il santuario della Madonna dei Miracoli, iniziato nel 1494 con l'aiuto del Comune di Perugia come voto contro la peste e attribuito a Rocco di Tommaso da Vicenza.",
+    "Castel San Felice": "Castel San Felice è un piccolo borgo fortificato sul Nera, accanto all'abbazia romanica dei Santi Felice e Mauro, consacrata nel 1194. Sulla facciata, sotto il rosone con i simboli degli evangelisti, è scolpita la leggenda dei due santi che uccisero un drago: lo si legge come simbolo della bonifica delle paludi della valle compiuta dai monaci.",
+    "Castel Viscardo": "Castel Viscardo è cresciuto attorno al Castello di Madonna, del Trecento, appartenuto ai Monaldeschi della Cervara e poi agli Spada. Le argille della zona alimentano da sempre la produzione di mattoni e cotto; nei dintorni, in località Caldane, c'è una necropoli etrusca.",
+    "Casteldilago": "Casteldilago, frazione di Arrone, ha un nome che ricorda il bacino lacustre che un tempo occupava il fondovalle del Nera. Il castello, nato nell'XI secolo su un incrocio di strade tra la Flaminia e la Salaria, fu conteso a lungo tra Spoleto, Terni e lo Stato della Chiesa. Nella chiesa di San Nicola ci sono affreschi dello Spagna o della sua scuola.",
+    "Castelluccio di Norcia": "Castelluccio di Norcia, a 1452 m, è uno dei paesi più alti dell'Appennino e guarda dall'alto il Pian Grande. Tra fine maggio e inizio luglio i campi di lenticchia, papaveri e fiordalisi colorano i Piani nella celebre fioritura. Il borgo è stato quasi raso al suolo dal terremoto del 30 ottobre 2016.",
+    "Castiglione del Lago": "Castiglione del Lago sorge su un promontorio calcareo che in origine era forse un'isola del Trasimeno. La rocca medievale, detta del Leone, ha pianta pentagonale ed è unita da un camminamento coperto al palazzo dei Della Corgna, signori del luogo dal Cinquecento, le cui sale sono affrescate.",
+    "Castiglione Ugolino": "Castiglione Ugolino è un poggio a nord di Perugia su cui resta una torre, parte delle antiche difese del castello. Il documento più antico che lo riguarda è del 1189 e registra la sua sottomissione alla città di Perugia.",
+    "Cerreto di Spoleto": "Cerreto di Spoleto, castello medievale su un colle sopra la Valnerina, prende il nome dai cerri, le querce dei suoi boschi. Nel Quattro e Cinquecento molti cerretani giravano l'Italia come questuanti, guaritori e venditori di rimedi: da «cerretano» deriva, secondo la spiegazione più diffusa, la parola «ciarlatano».",
+    "Cesi": "Cesi è un borgo arroccato sulle pendici dei Monti Martani, affacciato sulla conca ternana. Dal paese prese il nome la famiglia Cesi, a cui apparteneva Federico, fondatore a Roma dell'Accademia dei Lincei nel 1603. Dal monte escono correnti d'aria fresca d'estate, da cui nacque la leggenda di Eolo, dio dei venti, nascosto nella montagna.",
+    "Chiaserna": "Chiaserna, frazione marchigiana di Cantiano, è l'ultimo paese sulla strada che sale al Monte Catria. Il nome viene ricondotto ai Claverni, una tribù degli Umbri di Gubbio; nell'alto Medioevo vi sorgeva un'abbazia legata a Fonte Avellana. Qui si tiene la mostra del cavallo del Catria, razza locale.",
+    "Chiusi": "Chiusi era l'etrusca Clevsin, una delle città più potenti dell'Etruria, patria del re Porsenna. I dintorni sono pieni di tombe a camera, alcune dipinte, e sotto il centro corrono gallerie scavate nel tufo che la leggenda lega al labirinto di Porsenna.",
+    "Cima del Redentore": "La Cima del Redentore, 2448 m, è l'anticima del Vettore che domina con la sua parete i Piani di Castelluccio ed è la vetta più alta del territorio umbro. Una versione della leggenda del lago di Pilato racconta che da qui si gettarono i bufali che trascinavano il corpo del governatore romano.",
+    "Citerna": "Citerna è un borgo sul crinale tra valle del Tevere e Toscana, a 480 m, conteso nel Medioevo tra Arezzo e Città di Castello e poi fiorito sotto i Vitelli. Nella chiesa di San Francesco si conserva una Madonna col Bambino in terracotta attribuita a Donatello, riscoperta nei primi anni Duemila. Nel 1849 vi trovò rifugio Garibaldi.",
+    "Città della Pieve": "Città della Pieve, chiamata nel Medioevo Castel della Pieve, è il paese natale del Perugino ed è costruita quasi tutta in mattoni, prodotti qui fin dal Duecento. Nell'oratorio di Santa Maria dei Bianchi si conserva la sua Adorazione dei Magi del 1504. Il vicolo Baciadonne, tra i più stretti d'Italia, si apre sulla Val di Chiana.",
+    "Città di Castello": "Città di Castello, l'antica Tifernum Tiberinum, è il centro dell'alta valle del Tevere. Il giovane Raffaello vi dipinse diverse opere, tra cui lo Sposalizio della Vergine oggi a Brera; la pinacoteca è in Palazzo Vitelli alla Cannoniera e il duomo ha un raro campanile cilindrico. Qui nacque Alberto Burri, a cui sono dedicati due musei.",
+    "Civita di Bagnoregio": "Civita di Bagnoregio sta su uno sperone di tufo che si sbriciola sopra uno strato di argilla, in mezzo alla valle dei calanchi; lo scrittore Bonaventura Tecchi la chiamò 'la città che muore'. Ci si arriva solo a piedi, da un lungo ponte pedonale del 1965. Qui nacque san Bonaventura.",
+    "Civitella del Lago": "Civitella del Lago, frazione di Baschi a circa 480 m, si chiamava Civitella de' Pazzi: prese il nome attuale nel 1962, con la nascita del lago di Corbara. Dal belvedere lo sguardo va dal lago e dalla valle del Tevere fino ai Monti Cimini e all'Amiata. Il borgo è sede del Parco fluviale del Tevere e ospita il museo delle uova dipinte.",
+    "Colfiorito": "L'altopiano di Colfiorito, sull'Appennino tra Umbria e Marche, è formato da sette piani carsici, antichi fondi di lago oggi asciutti, circondati da dorsali calcaree. Era la terra degli Umbri Plestini; nei campi dei piani si coltiva la patata rossa di Colfiorito, riconosciuta come IGP.",
+    "Colle le Cese": "Colle le Cese è il pianoro appena sotto Forca Canapine, sul versante marchigiano di Arquata del Tronto, al confine con l'Umbria. Qui sorgeva il rifugio Città di Ascoli del CAI, reso inagibile dal terremoto del 2016. Siamo lungo il sentiero europeo E1, tra i Piani di Castelluccio e la valle del Tronto.",
+    "Collemancio": "Collemancio, borgo collinare di Cannara, sorge accanto ai resti di Urvinum Hortense, città fondata nel III secolo a.C. e divenuta municipio romano in età augustea. Si possono vedere tratti delle mura in blocchi di arenaria, le terme e una basilica paleocristiana.",
+    "Collepino": "Collepino è un piccolo borgo fortificato di Spello, a circa 600 m sul fianco del Subasio, lungo la strada panoramica verso Assisi. Nacque intorno al XIII secolo come villaggio di boscaioli e pastori al servizio della vicina abbazia di San Silvestro, di cui divenne poi il baluardo difensivo.",
+    "Collicello": "Collicello, borgo di Amelia tra i boschi, nacque verso il 1295 per accogliere gli abitanti di castelli vicini passati sotto Amelia. Nel Quattrocento fu il caposaldo amerino contro i Chiaravalle, signori del vicino castello di Canale: dal torrione una bombarda tirava sulle mura nemiche. Canale fu espugnato nel 1462 e oggi ne restano le rovine.",
+    "Corciano": "Corciano è un borgo murato su un colle tra Perugia e il Trasimeno, con vicoli che salgono a spirale fino alla torre comunale duecentesca. Nella chiesa di Santa Maria si conservano l'Assunta dipinta dal Perugino nel 1513 e un gonfalone contro la peste di Benedetto Bonfigli del 1472, che mostra il castello com'era nel Quattrocento.",
+    "Cortona": "Cortona è un'antica città etrusca, cinta ancora da tratti delle mura originarie, affacciata sulla Val di Chiana e sul Trasimeno. Vi nacque Luca Signorelli e nel Museo Diocesano si conserva l'Annunciazione del Beato Angelico. Sulle pendici del monte, l'eremo delle Celle ricorda il passaggio di san Francesco.",
+    "Cospaia": "Cospaia fu una minuscola repubblica indipendente dal 1440 al 1826: nel trattato che cedeva Sansepolcro a Firenze il confine seguiva un torrente chiamato Rio, ma i torrenti con quel nome erano due e la striscia in mezzo restò fuori. Vi si coltivò il tabacco quando altrove era vietato; sulla chiesa si legge il motto «Perpetua et firma libertas».",
+    "Costa di Trex": "Costa di Trex è un borgo del Subasio a circa 570 m, affacciato sulla valle del Tescio. Il nome sarebbe la contrazione di \"Costa delle Tre Chiese\"; il paese nacque da un antico insediamento fortificato con funzione di torre di avvistamento e sale ancora lungo il pendio verso la torre medievale.",
+    "Costacciaro": "Costacciaro fu un castello di confine di Gubbio sulla via Flaminia: restano la torre civica duecentesca e il Rivellino a prua di nave progettato da Francesco di Giorgio Martini. La vicina sorgente Scirca, dove riaffiorano le acque della grotta del Cucco, alimenta anche l'acquedotto di Perugia.",
+    "Croce della Pieve": "La Croce della Pieve si alza sul crinale sommitale del Monte Tezio, e oggi ne resta quasi solo l'intelaiatura in ferro. Durante la Seconda guerra mondiale, in momenti diversi, un aereo tedesco e uno americano precipitarono proprio in questa zona. Nelle giornate limpide lo sguardo va dal Trasimeno alla valle del Tevere.",
+    "Dunarobba": "Dunarobba è un borgo di Avigliano Umbro con una rocca dai quattro torrioni angolari semicircolari. Poco fuori, a fine anni Settanta, una cava di argilla per mattoni riportò alla luce la foresta fossile: decine di tronchi di conifere parenti delle sequoie, vecchi due o tre milioni di anni, ancora in piedi e conservati come legno, non pietrificati.",
+    "Eggi": "Eggi, borgo collinare a pochi chilometri a nord di Spoleto, ha un castello trecentesco a pianta triangolare, con una porta difesa da due torri. Nella chiesa di San Giovanni Battista l'abside è affrescata dallo Spagna, pittore della cerchia del Perugino.",
+    "Eremo della Madonna della Stella": "L'eremo della Madonna della Stella, nel comune di Cerreto di Spoleto vicino a Roccatamburo, fu fondato all'inizio del Trecento da due frati agostiniani in una parete di roccia della Valle Noce. Ha una chiesa scavata nella pietra e una decina di celle unite da scale e sentieri. Il nome viene dal velo stellato della Madonna dipinto sulla roccia.",
+    "Eremo della Pasquarella": "L'Eremo della Pasquarella, detto anche Santa Maria dello Scoglio, è un santuario nel territorio di Morre, nel comune di Baschi, con origini che risalgono all'XI secolo.",
+    "Eremo delle Carceri": "L'Eremo delle Carceri, a circa 800 m in una gola boscosa del Subasio, prende nome dalle \"carceri\", i ripari isolati dove si ritiravano gli eremiti e poi Francesco con i primi compagni. Tra lecci secolari si scende alla grotta del santo; chiesa e conventino furono ampliati nel Quattrocento per volere di san Bernardino da Siena.",
+    "Eremo di San Girolamo": "L'Eremo di San Girolamo, vicino a Pascelupo, sorge sul ripido versante del fosso del Rio Freddo, ai piedi di un anfiteatro di alte pareti calcaree. Le sue origini sono medievali e appartiene agli eremiti camaldolesi di Monte Corona.",
+    "Eremo di Serrasanta": "L'Eremo di Serrasanta sta sulla vetta del monte omonimo, dove la tradizione colloca la vita eremitica di san Facondino alla fine del VI secolo. L'edificio attuale è l'oratorio costruito nel 1547 da una confraternita di Gualdo; restaurato nel 2011 come rifugio, durante i lavori ha restituito resti di una costruzione di epoca romana.",
+    "Eremo Francescano": "L'Eremo Francescano di Campello sorge nel bosco sopra Pissignano: la chiesa romanica risale all'XI secolo, mentre la grotta sarebbe stata abitata già nel V secolo. Il complesso, con un piccolo chiostro e i resti di una torre romana, fu restaurato nel 1930.",
+    "Fabriano": "Fabriano è famosa per la carta: le sue cartiere sono attive dal Medioevo e qui si diffuse l'uso della filigrana, il marchio impresso nel foglio controluce. È anche la città natale del pittore Gentile da Fabriano.",
+    "Ferentillo": "Ferentillo è diviso dal Nera in due paesi, Matterella e Precetto, ciascuno dominato da una rocca costruita a difesa dell'abbazia di San Pietro in Valle. Nella cripta della chiesa di Santo Stefano si conservano corpi mummificati in modo naturale dal terreno e dall'aria fresca e asciutta. Le pareti di roccia intorno sono note agli arrampicatori.",
+    "Fighille": "Fighille, frazione di Citerna lungo il torrente Sovara, è nota fin dal Medioevo per la ceramica grazie a un'argilla di buona qualità; il nome forse viene dal latino figulinus, vasaio. Era terra di confine tra Stato Pontificio e Granducato di Toscana, e l'ex dogana pontificia è oggi uno spazio per l'arte.",
+    "=Foce": "Foce è un borgo di Amelia su un colle panoramico affacciato sulla Tuscia, sulla conca ternana e verso Todi. Il castello controllava la strada verso il Ponte di Augusto e fu a lungo conteso tra Amelia e Narni; mura e rocca, distrutte durante le guerre, furono ricostruite nel 1451. Restano tratti di mura con torri, la porta e il pozzo.",
+    "Foligno": "Foligno, la romana Fulginiae, crebbe lungo la via Flaminia nel cuore della Valle Umbra. Qui l'11 aprile 1472 fu completata la prima edizione a stampa della Divina Commedia, nella bottega di Johann Numeister e degli Orfini; la città è nota anche per la Giostra della Quintana, rievocazione di età barocca.",
+    "Fonte Avellana": "Il monastero di Fonte Avellana, ai piedi del Catria, nacque come eremo alla fine del X secolo. Vi visse san Pier Damiani, che ne fu priore dal 1043, e Dante lo cita nel canto XXI del Paradiso. Oggi è dei monaci camaldolesi; Giovanni Paolo II vi venne nel 1982 per il millenario.",
+    "Fonte Bregno": "Fonte Bregno, a circa 1000 m, è la sorgente più alta del Subasio e sta sul confine tra Assisi e Spello, che se la contesero fin dal Medioevo. Il nome viene dal dialettale \"bregno\", l'abbeveratoio per gli animali; accanto c'è un piccolo riparo in pietra con camino.",
+    "Fonti del Clitunno": "Le Fonti del Clitunno sono un laghetto limpido alimentato da sorgenti tra Trevi e Spoleto, sacre già in età romana al dio Clitunno. Ne celebrarono le acque Virgilio, Plinio il Giovane, Byron e Carducci, che nel 1876 scrisse l'ode \"Alle fonti del Clitumno\"; il parco con il laghetto fu sistemato nel 1852.",
+    "Fonti di Sassovivo": "Le Fonti di Sassovivo, dette anche Fontanelle, sono un gruppo di sorgenti a circa 565 m nella lecceta sotto l'abbazia. Abbandonate per anni, sono state recuperate con lavori avviati nel 2013 e sono una sosta fresca lungo i sentieri che salgono da Foligno.",
+    "Fontignano": "A Fontignano il Perugino visse e tenne bottega negli ultimi anni; qui morì di peste nel 1523 mentre dipingeva nella chiesa dell'Annunziata, dove oggi riposano i resti attribuiti a lui. Nella chiesa resta una sua Madonna col Bambino del 1522. Sul colle sopra il paese si vedono i ruderi del castello, saccheggiato e incendiato a fine Trecento.",
+    "Forca Canapine": "Forca Canapine, a 1541 m, è il valico tra Norcia e Arquata del Tronto, vicino al punto in cui si incontrano Umbria, Marche e Lazio. Il nome ricorda la canapa coltivata un tempo nei campi intorno. Dal passo lo sguardo va al Pian Grande e alla parete del Vettore; qui passa anche il sentiero europeo E1.",
+    "Forca di Presta": "Forca di Presta, a circa 1550 m ai piedi del Vettore, è il valico tra la provincia di Ascoli Piceno e quella di Perugia. È il punto di partenza più usato per salire al Vettore e al Pizzo del Diavolo; la via più breve per il lago di Pilato passa dalle Roccette, un tratto esposto adatto solo a escursionisti esperti.",
+    "Forca Viola": "Forca Viola è una sella erbosa a poco più di 1900 m, sotto le pareti del Vettore. Da qui passa l'itinerario che da Castelluccio porta al lago di Pilato: è la via più lunga per raggiungerlo, ma la salita regala un'ampia vista sui Piani di Castelluccio.",
+    "Foresta fossile di Dunarobba": "La Foresta fossile di Dunarobba è venuta alla luce a fine anni Settanta in una cava di argilla per mattoni. Conserva decine di tronchi di conifere parenti delle sequoie, cresciuti due o tre milioni di anni fa sulle rive dell'antico lago Tiberino: sono ancora in piedi e conservati come legno, non pietrificati, e oggi sono protetti da tettoie.",
+    "Fornole": "Fornole, frazione di Amelia, deve forse il nome alle fornaci romane per laterizi e ceramiche. Fu un caposaldo amerino contro Narni, più volte distrutto nel Quattrocento; restano mura, torri e due porte. Sul Monte San Silvestro una chiesetta del Trecento sovrasta la grotta del drago, legata alla leggenda di san Silvestro che incatena il mostro.",
+    "Forra di Rio Freddo": "La Forra di Rio Freddo, vicino a Pascelupo nel Parco del Monte Cucco, è un canyon lungo circa 3 km scavato nel calcare, percorso da un torrente dall'acqua molto fredda anche d'estate, intorno ai 9 gradi. È frequentata per il torrentismo; ai suoi margini sorge l'eremo di San Girolamo.",
+    "Fossato di Vico": "Fossato di Vico nasce vicino a Helvillum, stazione di posta romana sulla via Flaminia. Il borgo medievale, sul colle a circa 580 m, ha vicoli e passaggi coperti detti rughe e piccole chiese affrescate come la Piaggiola; un antiquarium raccoglie i reperti della città romana.",
+    "Gavelli": "Gavelli, piccolo borgo di Sant'Anatolia di Narco ai piedi del Monte Coscerno, conserva nella chiesa di San Michele Arcangelo un ciclo di affreschi di Giovanni di Pietro detto lo Spagna, datato 1518. Nell'abside si vedono San Michele che sconfigge il demonio e la sua apparizione sul Monte Gargano.",
+    "Giove": "Giove è un borgo affacciato sulla valle del Tevere, dominato dal Palazzo Ducale dei Mattei, che acquistarono il castello nel 1597 e ricevettero il titolo di duchi nel 1643. Secondo la tradizione le facciate contano 365 finestre, una per ogni giorno dell'anno, e una rampa a spirale permetteva alle carrozze di salire fino alla loggia.",
+    "Gola del Bottaccione": "La Gola del Bottaccione, scavata dal torrente Camignano tra Monte Ingino e Monte Foce, è famosa tra i geologi: qui Walter e Luis Alvarez trovarono lo strato di argilla ricco di iridio, tra Cretaceo e Terziario, che li portò all'ipotesi dell'asteroide che estinse i dinosauri. Nella gola restano anche una diga e un acquedotto medievali.",
+    "Gola della Rocchetta": "La Gola della Rocchetta sale da Gualdo Tadino verso il Monte Serrasanta, passando per le sorgenti dell'acqua minerale omonima. Negli anni Trenta un ragazzo trovò lungo il sentiero un ripostiglio di 59 oggetti dell'età del Bronzo, tra cui due dischi in lamina d'oro, oggi al museo archeologico di Perugia.",
+    "Gole del Forello": "Le Gole del Forello sono la stretta profonda con cui il Tevere attraversa la dorsale tra il Monte Peglia e i Monti Amerini, tra Todi e Orvieto. Sono il cuore, impervio e quasi disabitato, del Parco fluviale del Tevere. Nelle pareti calcaree si aprono grotte come quella della Piana, frequentata già nel Neolitico e nell'età del bronzo.",
+    "Gole del Nera": "Le Gole del Nera sono la stretta valle boscosa che il fiume ha inciso tra Narni e Stifone. Il percorso ciclopedonale lungo il fiume segue un vecchio tracciato ferroviario e passa accanto al Ponte di Augusto e a diverse sorgenti. L'acqua, ricca di sali minerali, prende riflessi turchesi; sulle pareti di roccia nidifica il passero solitario.",
+    "Gole dell'Infernaccio": "Le Gole dell'Infernaccio sono una stretta forra scavata dal fiume Tenna tra il Monte Priora e il Monte Sibilla, nel comune di Montefortino. Il sentiero passa tra alte pareti calcaree e faggete; sopra le gole sorge l'eremo di San Leonardo al Volubrio, ricostruito nel secolo scorso da padre Pietro Lavini e danneggiato dal terremoto del 2016.",
+    "Greccio": "Greccio è legato al primo presepe: nel Natale del 1223 san Francesco vi rievocò la nascita di Gesù, con l'aiuto del signore del luogo Giovanni Velita. Nel 1228 nella grotta fu costruita la Cappella del Presepio, nucleo del santuario aggrappato alla roccia a 635 m, uno dei quattro santuari francescani della valle reatina.",
+    "Grotta di Monte Cucco": "La Grotta di Monte Cucco supera i 30 km di gallerie e arriva a 923 m di profondità: per molto tempo è stata il sistema carsico più profondo d'Italia. Fu esplorata a fondo per la prima volta da Giovan Battista Miliani nel 1889-90; in una galleria sono state trovate ossa di rinoceronte, orso e stambecco dell'ultima glaciazione.",
+    "Grotta di Sant'Agnese": "La Grotta di Sant'Agnese si apre a circa 1050 m sul versante occidentale del Monte Cucco, in comune di Costacciaro. Secondo la tradizione fu rifugio di un'eremita; è un grande salone di una cinquantina di metri formato da crolli, con muri a secco che ne ricordano l'uso come riparo, e vi si celebra ancora qualche funzione.",
+    "Grotte dell'Abbadessa": "Le Grotte dell'Abbadessa, presso Pale, sono cavità carsiche formate soprattutto dalle acque del Menotre. Note già dal XII secolo, ebbero visitatori illustri come la regina Cristina di Svezia e il granduca Cosimo III de' Medici.",
+    "Gualdo Tadino": "Gualdo Tadino prende il nome dalla romana Tadinum, stazione sulla via Flaminia; nel 552 nei dintorni i Bizantini di Narsete sconfissero i Goti. La città attuale fu ricostruita nel 1237 sotto la Rocca Flea, rifatta da Federico II, che oggi ospita il museo civico con le ceramiche locali, compresa quella a lustro dai riflessi metallici.",
+    "Guardea": "Guardea si trova al confine con il Lazio, tra l'Amerino e l'Orvietano. Sul colle di Guardea Vecchia restano le rovine del primo borgo fortificato, con mura, torri e mastio; di fronte si alza il Castello del Poggio, di origine medievale e restaurato nel Cinquecento da Antonio da Sangallo il Giovane. Il paese attuale è nato più in basso, nella valle.",
+    "Gubbio": "Gubbio è l'antica Iguvium degli Umbri: nel Palazzo dei Consoli, costruito nel Trecento, sono conservate le Tavole Eugubine, sette lastre di bronzo che sono il testo più lungo in lingua umbra. Ogni 15 maggio la Corsa dei Ceri porta tre grandi macchine di legno di corsa per le vie fino alla basilica di Sant'Ubaldo sul Monte Ingino.",
+    "I Prati": "I Prati di Stroncone sono un altopiano erboso intorno ai 1000 m, ai piedi del Monte Macchialunga, dove pascolano cavalli e bestiame. Vicino alla chiesa di Santa Maria dei Prati, ancora meta di devoti ed escursionisti, partono numerosi sentieri. Poco a est della cima del Macchialunga si trova il punto più alto del comune, a 1160 m.",
+    "Isola Fossara": "Isola Fossara sorge alla confluenza tra Sentino e Artino, di fronte al Monte Catria. Ogni anno per sant'Antonio vi si innalza il Maggio, un palo di oltre 20 metri ottenuto da due faggi uniti; poco lontano il Sentino scava la Gola del Corno.",
+    "Isola Maggiore": "Isola Maggiore è l'unica isola abitata del Trasimeno. Secondo la tradizione san Francesco vi trascorse in solitudine la Quaresima del 1211, e un sentiero porta allo scoglio dove si sarebbe riparato. Nel 1904 la marchesa Elena Guglielmi fece venire una maestra dall'Irlanda per insegnare alle donne dell'isola il merletto a uncinetto.",
+    "Isola Polvese": "Isola Polvese è la più grande delle isole del Trasimeno ed è disabitata. Dal 1995 è un parco scientifico e didattico, con boschi, oliveti e una vasta zona umida dove sostano molti uccelli acquatici.",
+    "Lago del Vigi": "Il Lago del Vigi è un piccolo invaso artificiale creato negli anni Sessanta sul torrente Vigi, affluente del Nera, per produrre energia idroelettrica. Le sue acque verdi tra i boschi gli hanno valso il soprannome scherzoso di \"Loch Ness\" umbro; un breve sentiero porta alle vicine cascate delle Rote.",
+    "Lago di Chiusi": "Il lago di Chiusi è ciò che resta della grande palude che nel Medioevo occupava la Val di Chiana, bonificata a partire dal Cinquecento. È poco profondo e ospita una delle garzaie più importanti dell'Italia centrale, con garzette e aironi rossi; è anche tappa di uccelli migratori come il falco pescatore.",
+    "Lago di Corbara": "Il Lago di Corbara è un bacino artificiale formato dalla diga sul Tevere costruita tra il 1959 e il 1963 per produrre energia elettrica. Le sue sponde frastagliate si spingono a monte dentro la Gola del Forello. Fa parte del Parco fluviale del Tevere e prende il nome da Corbara, frazione di Orvieto.",
+    "Lago di Pilato": "Il lago di Pilato, a circa 1940 m in un circo glaciale sotto il Vettore, quando l'acqua cala si divide in due specchi e sembra un paio di occhiali. Solo qui vive il chirocefalo del Marchesoni, un piccolo crostaceo rosso: per questo è vietato fare il bagno. La leggenda vuole che vi sia finito il corpo di Ponzio Pilato, trascinato da due bufali.",
+    "Lago Trasimeno": "Il Trasimeno è il lago più esteso dell'Italia peninsulare ma è profondo appena pochi metri, e non ha un emissario naturale: già nel 1422 Braccio da Montone fece scavare un canale di scolo, rifatto a fine Ottocento verso il Nestore. Delle tre isole, solo la Maggiore è abitata.",
+    "Le Marmore": "Le Marmore è il paese posto sul ciglio della cascata, dove il Velino, uscito dal lago di Piediluco, precipita nella gola del Nera. Il nome viene, secondo la spiegazione più diffusa, dalle incrostazioni calcaree bianche simili al marmo che l'acqua deposita sulle rocce. Da qui si raggiunge il belvedere superiore della cascata.",
+    "Leonessa": "Leonessa, a quasi mille metri ai piedi del Terminillo, nacque nel 1278 per ordine di Carlo I d'Angiò, re di Napoli, riunendo gli abitanti di vari castelli e villaggi. Si chiamava Gonessa, dalla cittadina francese di Gonesse, ed è ancora divisa in sei «sesti» con i nomi dei castelli fondatori. È la patria di san Giuseppe da Leonessa.",
+    "Lippiano": "Lippiano, frazione di Monte Santa Maria Tiberina a circa 400 m vicino al confine toscano, è dominato da un castello citato nelle cronache dal 1195, che faceva parte del marchesato dei Bourbon del Monte.",
+    "Lugnano in Teverina": "Lugnano in Teverina è un borgo su un colle affacciato sulla valle del Tevere. Il monumento principale è la collegiata romanica di Santa Maria Assunta, con un portico ad archi decorato dai simboli degli Evangelisti e, all'interno, un trittico dell'Alunno. Fuori paese restano le rovine della villa romana di Poggio Gramignano, scoperta nel 1988.",
+    "=Macchie": "Macchie è un borgo dei Monti Amerini sorto forse tra X e XI secolo, poi baluardo settentrionale di Amelia a guardia di una strada usata dai pastori per portare le greggi a svernare in Maremma. Documentato dal 1237, fu più volte devastato dalle compagnie di ventura e quasi raso al suolo nel 1500 da Luigi d'Alviano e dagli Atti di Todi.",
+    "Macenano": "Macenano è la frazione di Ferentillo nel cui territorio, alle pendici boscose del Monte Solenne, sorge l'abbazia longobarda di San Pietro in Valle. Il monastero, fondato nell'VIII secolo dal duca di Spoleto Faroaldo II, è oggi in parte un albergo, mentre la chiesa con i suoi affreschi romanici appartiene alla diocesi.",
+    "Madonna del Ponte (Narni)": "Il santuario della Madonna del Ponte, presso Narni, prende il nome dal vicino Ponte di Augusto. Nacque dopo che nel 1714 un cacciatore, riparatosi in una grotta, vi scoprì un antico affresco della Madonna col Bambino. La chiesa barocca, ispirata al santuario di Loreto, fu completata nel 1722 e ha la cupola proprio sopra la grotta.",
+    "Madonna della Spella": "La Madonna della Spella è un'antica chiesa-santuario sul versante del Subasio sopra Spello, con affreschi votivi tardomedievali e graffiti lasciati dai pellegrini. Oggi è anche un rifugio escursionistico curato in parte dal CAI di Foligno e un incrocio di sentieri, con ampia vista sull'Appennino.",
+    "Magione": "Magione prende il nome dalla 'mansio', il luogo di sosta: qui gli Ospitalieri di San Giovanni, poi detti Cavalieri di Malta, avevano un ospizio per i pellegrini, poi diventato il castello che domina il paese. Nel 1502 vi si riunirono i condottieri che congiurarono contro Cesare Borgia.",
+    "Marcite di Norcia": "Le marcite di Norcia sono prati vicino alle mura della città irrigati in modo artificiale con l'acqua delle risorgive, che scorre a temperatura costante anche d'inverno. Questo sistema antico dà fieno abbondante e disegna nella piana di Santa Scolastica una trama di canali e prati sempre verdi.",
+    "Melezzole": "Melezzole, frazione di Montecchio a circa 600 m, conserva un castello del XII secolo a pianta circolare: tre anelli concentrici di case attorno a una piazza. Nel 1557 passò stabilmente a Todi, la cui aquila è scolpita sulla torre. È noto per i marroni dei suoi castagneti, in parte gestiti come proprietà collettiva.",
+    "Mevale": "Mevale è una piccola frazione di Visso nella valle del Nera. Conserva la minuscola Chiesa della Fonte, una ventina di metri quadrati, con tre nicchie affrescate nell'abside e una colomba dello Spirito Santo tra raggi dorati sulla volta. Il borgo è nel cratere del terremoto del 2016, che ha spinto molti abitanti ad andarsene.",
+    "Migiana di Monte Tezio": "Migiana di Monte Tezio è un minuscolo borgo ai piedi del monte, ricordato nei documenti già dal XII secolo. Fu la sua comunità a costruire nel Quattrocento il vicino Castel Procoio, chiedendo più volte denaro alle corporazioni di Perugia per portarlo a termine.",
+    "Miranda": "Miranda è un piccolo paese a circa 600 m sui monti che sovrastano Terni, con una terrazza panoramica sulla conca ternana. Nei dintorni si trovano i ruderi dell'abbazia di San Benedetto in Fundis. A Natale sul Monte Miranda si accende una grande stella luminosa, visibile da tutta la città.",
+    "Mongiovino": "Il santuario di Mongiovino, sotto il vecchio borgo omonimo presso Tavernelle, fu avviato negli anni Venti del Cinquecento su progetto attribuito a Rocco di Tommaso da Vicenza. È in arenaria, a croce greca, con una cupola ottagonale; vi si venera una Madonna con Bambino del Trecento ritenuta miracolosa.",
+    "Monte Acuto": "Il Monte Acuto (926 m), con la sua forma a cono riconoscibile da lontano, domina Umbertide e la valle del Tevere. Sulla cima sono stati trovati i resti di un santuario degli Umbri del VI-V secolo a.C., dedicato a una divinità dei pastori; dalla vetta si vede buona parte della regione.",
+    "Monte Bove": "Il Monte Bove, 2169 m, sovrasta Ussita con pareti di calcare dolomitico alte fino a 750 m, frequentate dagli alpinisti. Tra le sue due cime, Nord e Sud, si apre la Val di Bove, una valle glaciale costellata di doline. La faglia che lo attraversa ha generato le forti scosse della sera del 26 ottobre 2016.",
+    "Monte Catria": "Il Monte Catria (1701 m) è il più alto dei tre grandi massicci della zona, con Monte Nerone e Monte Cucco. Dante lo ricorda nel Paradiso come «un gibbo che si chiama Catria»; dal 1901 sulla vetta si alza una grande croce voluta da papa Leone XIII per il Giubileo del 1900. Sui pascoli si incontra il cavallo del Catria, razza autoctona.",
+    "Monte Coscerno": "Il Monte Coscerno, circa 1684 m, domina una vasta zona montuosa disabitata tra Vallo di Nera, Poggiodomo, Monteleone di Spoleto e Sant'Anatolia di Narco. La vetta è una dorsale erbosa di più cocuzzoli, con una parete calcarea verso sud-ovest e versanti coperti da faggete e querceti.",
+    "Monte Croce di Serra": "Il Monte Croce di Serra, poco sotto i mille metri, è la cima più alta dei Monti Amerini. Come molte vette della catena ha la sommità arrotondata e prativa, mentre i versanti sono coperti di boschi di roverella, cerro, carpino, castagno e leccio: su questi monti si trova la lecceta più estesa dell'Umbria.",
+    "Monte Cucco": "Il Monte Cucco (1566 m) è una delle cime più alte dell'Appennino umbro-marchigiano e dal 1995 è il cuore di un parco regionale di oltre diecimila ettari. È uno dei luoghi più noti d'Europa per il volo libero, mentre sotto la vetta si apre uno dei più vasti sistemi di grotte d'Italia.",
+    "Monte d'Ansciano": "Sul Monte d'Ansciano, una delle alture sopra Gubbio, gli scavi iniziati nel 1975 hanno messo in luce un villaggio fortificato dell'età del Bronzo, abbandonato verso il 950 a.C. Più tardi la cima ospitò un semplice santuario degli Umbri, dove sono stati trovati numerosi bronzetti votivi.",
+    "Monte del Lago": "Monte del Lago è un piccolo borgo fortificato nel Trecento su un promontorio della sponda orientale del Trasimeno. La chiesa di Sant'Andrea conserva affreschi del Quattrocento, tra cui una Crocifissione; nella vicina villa Palombaro il musicologo Riccardo Schnabl ospitò più volte Giacomo Puccini.",
+    "Monte Foce": "Il Monte Foce, detto anche Monte Calvo, chiude insieme al Monte Ingino la Gola del Bottaccione, alle spalle di Gubbio. All'inizio del sentiero che lo risale resta un tratto di mura ciclopiche, forse legate all'antica città umbra di Iguvium.",
+    "Monte Ingino": "Il Monte Ingino sovrasta Gubbio: in cima, vicino ai resti della rocca, la basilica di Sant'Ubaldo custodisce il corpo del patrono e i tre Ceri della corsa di maggio. Si sale a piedi o con la funivia a cestelli aperti; a dicembre il versante si illumina con il grande albero di Natale disegnato da luci.",
+    "Monte Malbe": "Il Monte Malbe è la collina boscosa tra Perugia e Corciano, coperta di lecci, querce e castagni, con belle vedute sul Tezio e sulla città. Nel Trecento vi nacque la piccola comunità religiosa dei Fraticelli di Monte Malbe, poi sciolta dopo i processi dell'Inquisizione; sul monte sorge anche l'eremo di San Salvatore, fondato tra XI e XII secolo.",
+    "Monte Orve": "Il Monte Orve (circa 926 m), al centro dei piani di Colfiorito, ospita il più importante castelliere degli Umbri Plestini: un abitato d'altura su terrazze artificiali, chiuso da una cinta in pietre poligonali lunga circa 1300 m. Gli scavi mostrano che fu frequentato almeno fino al III secolo a.C.",
+    "Monte Patino": "Il Monte Patino, 1883 m, si alza tra la conca di Norcia e i Piani di Castelluccio. Dalla sua cresta erbosa si vede Norcia in basso e, dall'altra parte, la mole del Vettore. Da Norcia la salita è lunga e costante, con circa 1200 m di dislivello.",
+    "Monte Peglia": "Il Monte Peglia (837 m) separa l'Orvietano dalla valle del Tevere; nel 2018 l'UNESCO lo ha riconosciuto riserva della biosfera. Conta oltre mille specie vegetali e animali come gatto selvatico, martora e gufo reale. Presso San Venanzo restano tre piccoli vulcani spenti: da uno viene la venanzite, roccia rarissima.",
+    "Monte Pennino": "Il Monte Pennino (1571 m) sta sul crinale dell'Appennino umbro-marchigiano, al confine tra le province di Perugia e Macerata. Sulle sue pendici umbre, presso Bagnara, nasce il Topino, mentre il versante marchigiano scende verso la valle del Potenza.",
+    "Monte San Pancrazio": "Il Monte San Pancrazio, circa 1020 m, sovrasta Calvi dell'Umbria. Sulla cima restano i ruderi dell'eremo di San Pancrazio, sorto dove già nel VI secolo a.C. si trovava un luogo di culto umbro-sabino. Dalla vetta lo sguardo scende su boschi e colline fino alla valle del Tevere.",
+    "Monte Santa Maria Tiberina": "Monte Santa Maria Tiberina fu per secoli un piccolo stato indipendente, il marchesato dei Bourbon del Monte, feudo imperiale tra Toscana e Stato della Chiesa con il diritto di battere moneta. Fino al 1927 apparteneva alla provincia di Arezzo; dal borgo in cima al colle si vede gran parte dell'alta valle del Tevere.",
+    "Monte Sibilla": "Il Monte Sibilla, 2175 m, ha la vetta cinta da una fascia di roccia che le dà la forma di una corona. Vicino alla cima si apre la Grotta della Sibilla, legata alla leggenda di una regina-maga che viveva sotto la montagna: nel 1420 la visitò il francese Antoine de La Sale, che ne lasciò una descrizione e una pianta.",
+    "Monte Subasio": "Il Monte Subasio (1290 m) è la montagna di Assisi e Spello, protetta da un parco regionale: la cima è un ampio pascolo da cui si abbraccia la Valle Umbra. Vicino alla vetta si aprono due grandi doline carsiche, il Mortaro Grande e il Mortaro Piccolo, dove un tempo si pressava la neve per conservarla come ghiaccio fino all'estate.",
+    "Monte Tezio": "Il Monte Tezio (961 m) separa la valle del Tevere dalle colline del Trasimeno: dalla vetta, con il cielo terso, si vedono l'Appennino fino al Gran Sasso e, a ovest, il Cetona e l'Amiata. Vicino alla cima restano le neviere, documentate dal 1608: d'inverno vi si pressava la neve sotto la paglia per vendere il ghiaccio in estate.",
+    "Monte Torre Maggiore": "Il Monte Torre Maggiore, circa 1120 m, è la cima più alta dei Monti Martani. In vetta gli scavi hanno riportato alla luce un santuario degli antichi Umbri, frequentato dal VI secolo a.C. e trasformato con templi in epoca romana. Tra le offerte votive sono emerse statuette di bronzo di guerrieri e di animali.",
+    "Monte Vettore": "Il Monte Vettore, 2476 m, è la cima più alta dei Sibillini, sul confine tra Umbria e Marche. Sul versante occidentale si vede la lunga cicatrice della faglia che si è mossa nel terremoto del 2016, chiamata «Cordone del Vettore» o «Sentiero delle Fate». In una conca sotto la vetta si nasconde il lago di Pilato.",
+    "Montecampano": "Montecampano è un borgo di Amelia su un colle affacciato sulla bassa valle del Nera. Amelia lo acquistò nel 1354 per la posizione vicina alla via Amerina; nel Quattrocento fu devastato da Braccio da Montone, distrutto da Paolo Orsini e incendiato da Niccolò Piccinino nel 1434. Restano tratti delle mura e alcune torri.",
+    "Montecastelli": "Montecastelli, frazione di Umbertide lungo il Tevere, è dominata da un castello dell'XI secolo costruito per controllare la valle e spesso conteso; nel 1407 vi passarono le truppe di Braccio da Montone. Restano parti del castello e il borgo diviso in vecchi quartieri.",
+    "Montecastrilli": "Montecastrilli è un paese collinare tra Todi e Amelia, documentato dal 1059; una leggenda, senza fondamento, ne lega il nome ad Annibale. Fu terra degli Arnolfi e poi della Chiesa, e divenne comune autonomo nel 1810. Nel borgo si trova il monastero delle Clarisse con l'annessa chiesa seicentesca di Santa Chiara.",
+    "Montecchio": "Montecchio è un paese della valle del Tevere cresciuto attorno a un castello del XII secolo, comune autonomo dal 1948. Nel vicino Vallone di San Lorenzo si trova una necropoli etrusca del VI-IV secolo a.C., con tombe a camera scavate nel terreno, panche per i defunti e corredi che indicano stretti legami con Orvieto.",
+    "Montefalco": "Montefalco, sul colle al centro della Valle Umbra, è detta la \"ringhiera dell'Umbria\" per la vista che si apre in ogni direzione. Nella chiesa-museo di San Francesco Benozzo Gozzoli dipinse nel 1452 le storie di san Francesco; le colline intorno sono la terra del Sagrantino.",
+    "Montefranco": "Montefranco nacque nel 1228, quando alcuni abitanti di Arrone, per sfuggire al dominio del signore locale, si stabilirono su un colle e si sottomisero a Spoleto. Il nome ricorda la libertà, cioè la «franchigia», che ottennero. Restano parti delle mura con la Porta Franca e la Porta Spoletina; nel 1444 vi soggiornò san Bernardino da Siena.",
+    "Montelabate": "L'Abbazia di Montelabate, il cui nome antico è Santa Maria di Valdiponte, fu un importante monastero benedettino sulle colline a nord di Perugia, documentato con certezza dal 995. La chiesa più antica sopravvive come cripta; il chiostro fu rifatto all'inizio del Duecento e la sala capitolare conserva affreschi della fine dello stesso secolo.",
+    "Monteleone di Spoleto": "A Monteleone di Spoleto nel 1902 un contadino trovò per caso in una tomba a tumulo una biga da parata del VI secolo a.C., rivestita di bronzo con scene della vita di Achille. Venduta all'estero poco dopo, oggi è al Metropolitan Museum di New York. Il paese è noto anche per il suo farro, prodotto tipico dell'altopiano.",
+    "Monteluco": "Monteluco, a circa 780 m sopra Spoleto, deve il nome al lucus, il bosco sacro a Giove: due cippi con la Lex Spoletina vietavano di tagliarne gli alberi, pena il sacrificio di un bue. Nella lecceta vissero eremiti dall'alto Medioevo; la tradizione vuole che Francesco vi fondasse un piccolo convento, e nel 1556 vi soggiornò Michelangelo.",
+    "Montepulciano": "Montepulciano è un borgo rinascimentale su un crinale tra la Val di Chiana e la Val d'Orcia, noto per il Vino Nobile. Ai piedi del paese sorge il tempio di San Biagio, opera di Antonio da Sangallo il Vecchio; qui nacque l'umanista Angelo Poliziano.",
+    "Monti Martani": "I Monti Martani sono una dorsale calcarea lunga circa 45 km al centro dell'Umbria, tra Terni, Todi, Spoleto e Foligno; la cima più alta è il Monte Torre Maggiore. I versanti sono coperti di querce, lecci e, più in alto, faggi, e il sottosuolo è ricco di grotte e doline. Dalle loro rocce nascono acque minerali come quella di San Gemini.",
+    "Montone": "Montone è un borgo murato su una collina dell'alta valle del Tevere, patria del condottiero Braccio da Montone, per il quale nel 1414 fu eretto in contea. La festa principale è quella della Santa Spina, il lunedì di Pasqua; poco fuori dal paese, su un'altura, sorge la Rocca d'Aries.",
+    "Montoro": "Montoro è un borgo fortificato di Narni su un colle sopra l'ultimo tratto della valle del Nera, citato già nell'857 tra i beni dell'abbazia di Farfa. Il paese sale a gradoni fino al palazzo baronale con la torre. Sul sentiero verso Stifone si incontrano i ruderi di Montoro Vecchio, abbandonato dopo il passaggio dei lanzichenecchi nel 1527.",
+    "Morre": "Morre è un piccolo borgo di Baschi a oltre 500 m, circondato da castagneti gestiti da una comunanza agraria. Il nome deriverebbe dal gelso, detto localmente moro, coltivato un tempo per i bachi da seta. Nel suo territorio si trova il santuario della Pasquarella, o di Santa Maria dello Scoglio, di origine medievale.",
+    "Narni": "Narni domina dall'alto la stretta del Nera: i Romani la chiamarono Narnia e da un atlante dell'antichità C.S. Lewis prese il nome del suo regno fantastico. In alto c'è la Rocca Albornoz; sotto l'ex convento di San Domenico, nel 1979, alcuni giovani speleologi scoprirono ambienti sotterranei, tra cui una cella dell'Inquisizione.",
+    "Necropoli del Crocifisso del Tufo": "La necropoli del Crocifisso del Tufo, ai piedi della rupe di Orvieto, risale soprattutto al VI secolo a.C. Le tombe a camera, in blocchi di tufo, sono allineate lungo vere e proprie vie come case di una città; sugli architravi si leggono ancora i nomi etruschi delle famiglie.",
+    "Nera Montoro": "Montoro è un borgo fortificato di Narni su un colle sopra l'ultimo tratto della valle del Nera, citato già nell'857 tra i beni dell'abbazia di Farfa. Il paese sale a gradoni fino al palazzo baronale con la torre. Sul sentiero verso Stifone si incontrano i ruderi di Montoro Vecchio, abbandonato dopo il passaggio dei lanzichenecchi nel 1527.",
+    "Nocera Umbra": "Nocera Umbra, la romana Nuceria Camellaria sulla via Flaminia, è detta \"città delle acque\" per le sue sorgenti minerali: la più nota è l'Angelica, che sgorga ai Bagni di Nocera. Sul colle domina la torre civica detta il Campanaccio, unico resto della rocca medievale; dopo il terremoto del 1997 il centro storico restò chiuso per oltre due anni.",
+    "Norcia": "Norcia è la patria di san Benedetto, padre del monachesimo occidentale. Le mura rinascimentali cingono ancora il centro, e dalla sua antica arte di lavorare il maiale viene la parola «norcineria». Il terremoto del 30 ottobre 2016 fece crollare la basilica di San Benedetto, di cui rimase in piedi la facciata; è stata riaperta nel 2025.",
+    "Oasi di Alviano": "L'Oasi di Alviano occupa le sponde del lago nato nel 1963 con la diga sul Tevere sotto Alviano. Gestita dal WWF, copre circa 900 ettari di canneti, prati allagati e boschi ripariali, una delle zone umide più importanti dell'Italia centrale per gli uccelli acquatici, osservabili da capanni e torrette lungo il sentiero natura.",
+    "Oasi di San Liberato": "L'Oasi di San Liberato, presso Narni, è un lago artificiale nato sbarrando il Nera poco prima della confluenza con il Tevere. Le sue rive paludose ospitano molti uccelli acquatici e sono una tappa per i migratori lungo la valle; l'acqua del bacino alimenta una centrale idroelettrica a Orte.",
+    "Ocriculum (Otricoli)": "Ocriculum era una città romana sorta lungo la via Flaminia vicino al Tevere, sotto l'attuale Otricoli. Nel parco archeologico si vedono teatro, terme, anfiteatro, ninfeo, tombe monumentali e un tratto della Flaminia. Gli scavi del Settecento portarono in Vaticano molti reperti, tra cui la colossale testa di marmo detta Giove di Otricoli.",
+    "Orvieto": "Orvieto sta su una rupe di tufo nata dall'attività dei vulcani Vulsini; era l'etrusca Velzna, distrutta dai Romani nel 264 a.C. Il Duomo, iniziato nel 1290, ha la facciata a bassorilievi di Lorenzo Maitani e, nella cappella di San Brizio, il Giudizio universale di Luca Signorelli. Sotto la città si apre un dedalo di grotte e pozzi scavati nel tufo.",
+    "Orvieto Scalo": "Orvieto Scalo è il centro moderno cresciuto nella valle del Paglia attorno alla stazione ferroviaria, ai piedi della rupe. Da qui una funicolare sale fino alla città vecchia, risparmiando la ripida salita.",
+    "Paciano": "Paciano è un borgo di origine trecentesca sulle pendici del monte Petrarvella, sopra il Trasimeno, ancora chiuso dalle mura con tre porte. Nelle sue chiese restano dipinti del Quattrocento, tra cui una Madonna della Misericordia di Fiorenzo di Lorenzo.",
+    "=Pale": "Pale è una frazione di Foligno presso il Sasso di Pale, dove il Menotre si getta in una gola con una serie di salti. Fin dal Medioevo la forza dell'acqua mosse mulini e cartiere, e tra Cinquecento e Seicento la carta di Pale era rinomata in tutta la regione; queste attività finirono con l'arrivo dell'elettricità.",
+    "Palude di Colfiorito": "La Palude di Colfiorito è una zona umida alimentata da sorgenti, protetta dal 1976 dalla Convenzione di Ramsar e cuore del Parco di Colfiorito. Il livello dell'acqua cambia molto con le stagioni ed è una tappa importante per molti uccelli acquatici migratori; a metà Novecento, nei mesi piovosi, si allagava quasi del tutto.",
+    "Panicale": "Panicale è un borgo murato su un colle che guarda il Trasimeno e la valle del Nestore. Nella chiesa di San Sebastiano un'intera parete è occupata dal Martirio di san Sebastiano dipinto dal Perugino nel 1505; nella piazza principale c'è una fontana in travertino del 1473.",
+    "Pascelupo": "Pascelupo, piccolo borgo nel Parco del Monte Cucco, era il Castrum Pascelupi con cui Gubbio difendeva il confine verso il Ducato di Urbino; nel 1396 passò ai Montefeltro. Dai suoi dintorni si raggiungono l'eremo di San Girolamo, la Valle delle Prigioni e la forra del Rio Freddo.",
+    "Passignano sul Trasimeno": "Passignano sul Trasimeno occupa un promontorio della sponda nord del lago: il borgo medievale, chiuso dalle mura, sale fino alla rocca. Poco fuori c'è la pieve di San Cristoforo, sorta prima del Mille. D'estate il Palio delle Barche vede i rioni correre per le vie portando le barche in spalla.",
+    "Passo di Viamaggio": "Il Passo di Viamaggio (983 m), in Toscana, collega la Valtiberina con la Valmarecchia sulla strada tra Sansepolcro e Rimini. Il valico è usato fin dall'antichità: in epoca romana una strada univa Arezzo alla colonia di Rimini passando per questa zona.",
+    "Penna in Teverina": "Penna in Teverina è un borgo fortificato sopra il Tevere, nato per controllare il fiume e la via Amerina. Dal 1502 fu degli Orsini, poi passò a Vicino Orsini, il creatore del Sacro Bosco di Bomarzo. Del loro palazzo restano il giardino all'italiana e gli stemmi; le grandi figure in travertino dette Mammalocchi sono attribuite a Pirro Ligorio.",
+    "Perugia": "Perugia fu una delle grandi città etrusche e ne conserva le mura e l'Arco Etrusco. Nel cuore medievale, attorno a piazza IV Novembre, stanno la Fontana Maggiore dei Pisano e il Palazzo dei Priori; sotto la Rocca Paolina, voluta da papa Paolo III nel Cinquecento, restano intere vie del vecchio quartiere dei Baglioni.",
+    "Pian d'Arca": "Pian d'Arca, nella campagna tra Cannara e Bevagna, è il luogo dove la tradizione colloca la predica di san Francesco agli uccelli, raccontata nei Fioretti e dipinta nella Basilica superiore di Assisi. Una pietra lungo la vecchia strada e una piccola edicola del 1926 ne segnano il punto, tra campi rimasti quasi intatti.",
+    "Pian delle Macinare": "Pian delle Macinare è un ampio piano carsico a circa 1100 m sul versante nord-orientale del Monte Cucco, con il rifugio Mainardi. Poco sopra, a quasi 1400 m, si trova uno degli ingressi del grande sistema di grotte della montagna.",
+    "Piediluco": "Piediluco si specchia nell'omonimo lago, ciò che resta dell'antico Lacus Velinus. Sopra il paese ci sono i resti della rocca, rifatta nel 1364, e la chiesa di San Francesco, terminata nel 1338. Il lago è il centro nazionale di preparazione olimpica del canottaggio; dalla riva, verso il Monte Caperno, si sente un'eco famosa.",
+    "Piedipaterno": "Piedipaterno, sul Nera, è la frazione dove ha sede il comune di Vallo di Nera; fino al 1881 fu un piccolo comune autonomo. Sulla rupe di Paterno resta una torre medievale e poco fuori dal paese c'è la chiesa dell'Eremita. La stazione della ferrovia Spoleto–Norcia, che ospitava la sottostazione elettrica, è oggi lungo la pista ciclabile.",
+    "Pietralunga": "Pietralunga, a 566 m nella parte nord-orientale dell'alta valle del Tevere, conserva in piazza una rocca longobarda a pianta pentagonale. Il suo territorio è in gran parte boscoso: la foresta demaniale di Pietralunga copre circa 3900 ettari. Per il ruolo nella Resistenza il paese ha ricevuto la medaglia di bronzo al valor militare.",
+    "Pieve de' Saddi": "La Pieve de' Saddi, nei boschi di Pietralunga, sorge secondo la tradizione dove nel 303 fu martirizzato san Crescentino, sopra un tempio romano. La chiesa ha una cripta; poco lontano la Fonte del Drago, una sorgente sulfurea, è legata alla leggenda del santo che uccise un drago.",
+    "Pischiello": "Al Pischiello, sulle colline di Passignano, i marchesi Bourbon del Monte di Sorbello costruirono nel primo Settecento una villa di campagna per i mesi caldi, al centro di un piccolo borgo agricolo. Nel 1904 Romeyne Robert Ranieri di Sorbello vi aprì una scuola di ricamo che diede lavoro a molte donne della zona.",
+    "Pissignano": "Pissignano, frazione di Campello sul Clitunno, ha un castello del XII secolo a pianta triangolare che scende lungo il pendio sopra la Flaminia. Il nome deriverebbe dal latino Pissinianum; ai piedi del borgo, lungo la strada, sorge il Tempietto del Clitunno.",
+    "Plestia": "Plestia fu il centro degli Umbri Plestini e poi municipio romano nella piana di Colfiorito. Ne resta il ricordo nella chiesa di Santa Maria di Pistia, costruita sopra un edificio pubblico romano con colonnato, probabilmente la basilica del foro; i reperti sono esposti al museo archeologico di Colfiorito.",
+    "Poggio Bustone": "Poggio Bustone, sulle pendici del Monte Rosato sopra la piana reatina, accolse san Francesco nel 1208: la tradizione dice che salutò gli abitanti con «Buongiorno, buona gente», e la porta medievale del paese si chiama Porta del Buongiorno. Il convento di San Giacomo è uno dei santuari della Valle Santa. Qui è nato Lucio Battisti.",
+    "Poggiodomo": "Poggiodomo, a quasi mille metri sul versante orientale del Monte Coscerno, è il comune meno abitato dell'Umbria. Nato attorno a un castello su uno sperone di roccia, fu per secoli rifugio di monaci, eremiti e, nella Seconda guerra mondiale, di partigiani. Intorno ai suoi villaggi crescono fitti boschi di faggio e orniello.",
+    "Polino": "Polino, uno dei comuni meno abitati dell'Umbria, controllava la strada per Leonessa sul confine tra Stato della Chiesa e Regno di Napoli. La rocca, nata nel XII secolo e rifatta nel Cinquecento con quattro torri cilindriche, ospita un museo dedicato all'Appennino umbro. All'ingresso del paese c'è una fontana barocca del 1625.",
+    "Ponte delle Torri": "Il Ponte delle Torri scavalca la valle del Tessino tra Spoleto e Monteluco: lungo circa 230 m e alto circa 80, con nove arcate, era anche un acquedotto che portava l'acqua alla Rocca e alla città. Nella forma attuale risale al Trecento; Goethe lo ammirò come un'opera diventata \"una seconda natura\".",
+    "Ponte di Augusto": "Il Ponte di Augusto, costruito intorno al 27 a.C., portava la via Flaminia oltre il Nera appena sotto Narni. Era lungo circa 160 m su quattro arcate; oggi resta in piedi solo il primo grande arco. Le sue rovine furono un soggetto amato dai pittori dell'Ottocento, tra cui Corot.",
+    "Ponte Pattoli": "Ponte Pattoli sta sul Tevere, ai piedi del Monte Tezio, all'estremo nord del comune di Perugia. Il borgo antico fu quasi distrutto nel 1319 nelle guerre tra Assisi ghibellina e Perugia guelfa e saccheggiato da Astorre Baglioni nel 1496; il paese di oggi è cresciuto attorno al ponte costruito a fine Ottocento.",
+    "Porano": "Porano è un paese chiuso da mura medievali sull'altopiano a sud di Orvieto; nei dintorni si trova la tomba etrusca degli Hescanas, dipinta all'interno. Villa Paolina, nata da un antico monastero, fu nel Settecento residenza estiva dei Gualterio e nel 1723 ospitò Giacomo Stuart, pretendente al trono inglese.",
+    "Porchiano del Monte": "Porchiano del Monte è un borgo collinare di Amelia, il medievale Castrum Fortiani, conteso tra Amelia, Todi e Alviano e passato ad Amelia nel 1317. Del castello restano tratti di mura e la porta. Nella chiesa di San Simeone, dal campanile romanico, si conserva una delle lastre di marmo macchiate di sangue del miracolo di Bolsena del 1263.",
+    "Poreta": "Poreta, sopra la Flaminia a nord di Spoleto, nacque come villa di campagna e fu fortificata alla fine del Duecento; nel Quattrocento fu cinta di mura contro le scorrerie delle compagnie di ventura. Dopo un forte terremoto del Settecento il castello fu abbandonato e gli abitanti costruirono nuove case fuori dalle mura, riusandone le pietre.",
+    "Pozzo di San Patrizio": "Il Pozzo di San Patrizio fu scavato nella rupe di Orvieto per volere di papa Clemente VII, rifugiatosi in città dopo il Sacco di Roma del 1527, su progetto di Antonio da Sangallo il Giovane. Due rampe elicoidali separate permettevano ai muli di scendere e risalire senza incrociarsi.",
+    "Prati di Stroncone": "I Prati di Stroncone sono un altopiano erboso intorno ai 1000 m, ai piedi del Monte Macchialunga, dove pascolano cavalli e bestiame. Vicino alla chiesa di Santa Maria dei Prati, ancora meta di devoti ed escursionisti, partono numerosi sentieri. Poco a est della cima del Macchialunga si trova il punto più alto del comune, a 1160 m.",
+    "Preci": "Preci, borgo medievale della Valle Castoriana, fu sede di una famosa scuola di chirurghi empirici, nata dai saperi dei monaci di Sant'Eutizio e fiorita soprattutto nel Cinquecento. I preciani operavano cataratte, calcoli ed ernie e lavorarono in molte corti europee: Cesare Scacchi curò la regina Elisabetta I d'Inghilterra.",
+    "Preggio": "Preggio è un borgo a circa 600 m sulle colline tra Umbertide e il lago Trasimeno, con i resti di una rocca medievale. Nei dintorni sorgono il castello di Polgeto e quello di Romeggio, il cui nome ricorda i pellegrini diretti a Roma.",
+    "Rasiglia": "Rasiglia, frazione di Foligno nella valle del Menotre, è attraversata da canali e piccole cascate alimentati dalla sorgente Capovena, che sgorga sopra il paese. Per secoli l'acqua mosse mulini, gualchiere e lanifici, facendone un centro di tessitura e tintura fino al Novecento; dopo il terremoto del 1997 rischiò lo spopolamento.",
+    "Rieti": "Rieti, antica città sabina, è indicata dalla tradizione come centro geografico d'Italia, l'«Umbilicus Italiae». La sua piana, un tempo occupata dal Lacus Velinus, fu prosciugata dai Romani aprendo la Cascata delle Marmore. Intorno sorgono i quattro santuari francescani della Valle Santa: Greccio, Fonte Colombo, La Foresta e Poggio Bustone.",
+    "Rifugio Capanna Ghezzi": "Capanna Ghezzi è un piccolo rifugio non custodito del CAI, a circa 1570 m sopra i Piani di Castelluccio. Danneggiato dal terremoto del 2016, resta un punto di riferimento per chi cammina tra Castelluccio, la Strada Imperiale e i sentieri che salgono verso la Cima del Redentore e il Vettore.",
+    "Rigali": "Rigali, frazione collinare di Gualdo Tadino affacciata sulla valle del Chiascio, dà il nome alla Nostrale di Rigali, una varietà di olivo tipica dell'Umbria.",
+    "Rocca d'Aries": "La Rocca d'Aries, nel comune di Montone, fu costruita dai Fortebracci su una fortificazione più antica e poi ampliata da Perugia. Passata a diverse famiglie, negli anni Ottanta è stata acquistata dalla Regione Umbria.",
+    "Rocca Maggiore": "La Rocca Maggiore domina Assisi dalla cima del colle: documentata dal 1173, ospitò da bambino il futuro imperatore Federico II. Nel 1198 gli assisani la smantellarono cacciando il presidio imperiale; fu ricostruita dal cardinale Albornoz a metà Trecento e dalle sue mura si vedono la Valle Umbra e il Subasio.",
+    "Roccaporena": "Roccaporena, borgo di Cascia chiuso in una piccola gola, è il paese natale di santa Rita. Sopra le case si alza per circa 120 m lo Scoglio, lo sperone di roccia dove la santa andava a pregare: oggi in cima c'è una cappella e vi sale una scalinata di oltre 300 gradini con la Via Crucis. La strada per Cascia arrivò solo nel 1950.",
+    "Sambucetole": "Sambucetole è un piccolo borgo di Amelia, uno dei castelli costruiti dal comune tra Due e Trecento per controllare la zona detta delle Valli. Già abitato nel 1326, subì le scorrerie delle compagnie di ventura. Nella chiesa di San Matteo un'urna di legno custodisce il corpo di san Clemente martire, patrono del paese, giunto da Roma.",
+    "=San Benedetto": "L'Abbazia di San Benedetto, sul fianco del Subasio sopra Assisi, è documentata almeno dall'XI secolo; nei restauri del dopoguerra sotto la chiesa riemerse la cripta di un edificio ancora più antico. Furono i benedettini del Subasio a concedere a Francesco la Porziuncola. Danneggiata dal terremoto del 1997, è stata restaurata.",
+    "San Damiano": "San Damiano, poco sotto Assisi tra gli ulivi, è la chiesetta dove secondo la tradizione il crocifisso parlò a Francesco chiedendogli di riparare la sua casa. Qui santa Chiara visse con le sue sorelle fino alla morte, e qui Francesco avrebbe composto il Cantico delle Creature.",
+    "San Facondino": "La chiesa romanica di San Facondino, appena a nord di Gualdo Tadino, è dedicata al vescovo di Tadinum morto secondo la tradizione nel 607. Sorge vicino a una necropoli umbra e a un cimitero longobardo; l'edificio attuale risale all'XI secolo e un'iscrizione del 1250 ne ricorda un restauro. A metà Duecento fu per qualche anno sede vescovile.",
+    "San Gemini": "San Gemini è un borgo murato sui colli tra Terni e Carsulae, noto per le sorgenti di acqua minerale, il cui parco aprì nel 1889. Accanto al paese sorge l'abbazia romanica di San Nicolò, documentata dal 1036 e legata all'abbazia di Farfa: il suo portale scolpito fu venduto a un acquirente americano e sul posto ne resta una copia.",
+    "San Giovanni del Pantano": "Presso San Giovanni del Pantano, in un bosco di faggi, un taglialegna scoprì nel 1919 la Tomba del Faggeto, piccola tomba etrusca del II secolo a.C. con volta a botte. L'ingresso è chiuso da una lastra di arenaria che ruotava su perni; dentro c'era l'urna di un certo Arnth Cairnina, nome che forse sopravvive in quello del vicino torrente Caina.",
+    "San Leo Bastia": "San Leo Bastia, frazione di Città di Castello vicino al confine toscano, fu possedimento dei marchesi di Collevecchio, il cui castello fu raso al suolo da Braccio da Montone nel 1416. Lungo la valle restano torri di avvistamento medievali come quella della Bastia; l'antico nome, San Leone di Carbognano, ricorderebbe i carbonai dei boschi.",
+    "San Savino": "Il castello di San Savino domina dall'alto la sponda orientale del Trasimeno. Le prime notizie risalgono al 1006, quando il conte Pietro Attone vi fondò un monastero dedicato a san Savino; nel 1310 Perugia ne rafforzò le difese contro le truppe dell'imperatore Enrico VII.",
+    "Sanguineto": "Sanguineto è una località presso Tuoro, nel teatro della battaglia del Trasimeno del 217 a.C. Secondo la tradizione il nome, come quello della vicina Ossaia, ricorda la strage dei Romani: si diceva che il torrente qui si fosse tinto di sangue.",
+    "Sansepolcro": "Sansepolcro, secondo la leggenda fondata da due pellegrini di ritorno con reliquie del Santo Sepolcro, è la città natale di Piero della Francesca. Nel museo civico si conserva la sua Resurrezione, dipinta per il palazzo comunale. Il centro, ancora cinto dalle mura, è il capoluogo della Valtiberina toscana.",
+    "Sant'Anatolia di Narco": "Sant'Anatolia di Narco, sul Nera, ospita nel vecchio palazzo comunale il Museo della Canapa, dedicato alla lavorazione della fibra che per secoli in Valnerina diede tessuti e corde. Nel museo si tesse ancora su telai a mano. Nel territorio del comune c'è anche l'abbazia dei Santi Felice e Mauro, a Castel San Felice.",
+    "Sant'Erasmo": "Sant'Erasmo è un pianoro sopra Cesi dove restano lunghi tratti di mura poligonali preromane, fatte di grandi massi incastrati senza malta: non si sa ancora se fossero una fortezza o un santuario. Sul punto più alto c'è la chiesetta romanica di Sant'Erasmo, del XII secolo. La vista spazia sulla conca ternana fino ai Monti Sabini e al Terminillo.",
+    "Sant'Urbano (Narni)": "Sant'Urbano è un piccolo borgo collinare di Narni, circondato da boschi che dal Medioevo sono proprietà collettiva. Qui inizia l'acquedotto romano della Formina e poco lontano si trova lo Speco di San Francesco. A maggio si svolge la processione delle intusse, lunghe pertiche con in cima fiaccole di legno di pino.",
+    "Scheggia": "Scheggia era una tappa della via Flaminia, segnata come ad Ensem sulle carte romane, vicino al santuario oracolare di Giove Appennino. Il suo comune, Scheggia e Pascelupo, è l'unico dell'Umbria interamente sul versante adriatico; nel borgo restano la torre civica e un antico ospedale per pellegrini documentato dal 1317.",
+    "Scheggino": "Scheggino fu fondato da Spoleto tra XI e XII secolo per controllare la valle del Nera; il castello ha pianta triangolare e nel 1522 resistette a un lungo assedio. Tra le case di pietra scorre un canale alimentato dal fiume. Il paese è legato al tartufo nero: qui è nata una delle aziende più note per la sua conservazione e il suo commercio.",
+    "Scoppieto": "Scoppieto è un borgo di Baschi con vista sul lago di Corbara. Sul pianoro vicino gli scavi dell'Università di Perugia hanno trovato una manifattura romana di vasellame fine da mensa e lucerne, attiva dall'età di Augusto al II secolo d.C.: i prodotti, firmati con bolli, scendevano il Tevere fino a Roma e da lì nel Mediterraneo.",
+    "Sellano": "Sellano si trova nella valle del torrente Vigi, e nel suo territorio nascono il fiume Menotre e sorgenti che riforniscono Spoleto. Il terremoto del 1997 lo colpì duramente e il borgo è stato ricostruito con cura. Al margine del paese c'è la chiesa ottagonale di San Francesco, o Madonna della Croce, del 1538.",
+    "Selva di Meana": "La Selva di Meana è un vasto bosco della valle del Paglia, presso Allerona, un tempo parte della tenuta della famiglia Cahen. Oggi fa parte del parco del Monte Peglia e della Selva di Meana.",
+    "Siena": "Siena è una delle tappe principali della via Francigena. Il suo centro medievale ruota attorno a piazza del Campo, a forma di conchiglia, dominata dal Palazzo Pubblico e dalla Torre del Mangia; due volte l'anno vi si corre il Palio tra le contrade.",
+    "Sigillo": "Sigillo corrisponde al municipio romano di Suillum sulla via Flaminia, di cui resta fuori dal paese il Ponte Spiano. Distrutto da Federico II nel 1230, il borgo fu ricostruito da Perugia come fortezza di confine; la chiesa di Santa Maria di Scirca conserva affreschi del Quattrocento. Dal suo territorio si sale a Val di Ranco e al Monte Cucco.",
+    "Speco di San Francesco": "Lo Speco di San Francesco, nei boschi di Sant'Urbano, nacque come eremo benedettino; secondo la tradizione Francesco vi giunse nel 1213 e pregava in una fenditura della roccia. Nel Quattrocento san Bernardino da Siena vi fece sorgere il convento con il chiostro, abitato dai frati minori. Si mostra il pozzo del miracolo dell'acqua mutata in vino.",
+    "Spello": "Spello, l'antica Hispellum romana, conserva lunghi tratti di mura e porte di età augustea, tra cui Porta Venere con le due torri dodecagonali. In Santa Maria Maggiore la Cappella Baglioni è affrescata dal Pinturicchio; per il Corpus Domini le vie si coprono di infiorate, disegni di petali preparati durante la notte.",
+    "Spoleto": "Spoleto fu capitale di un potente ducato longobardo, e il suo Duomo conserva gli affreschi di Filippo Lippi. Sopra la città la Rocca Albornoziana, voluta dal cardinale Albornoz dal 1359, fu per lungo tempo un carcere; il Ponte delle Torri la collega a Monteluco. Dal 1958 ospita il Festival dei Due Mondi, fondato da Gian Carlo Menotti.",
+    "Stifone": "Stifone, piccolo borgo di Narni sul Nera, era il porto fluviale dell'antica Narnia: da qui le merci scendevano verso il Tevere e Roma. Poco a valle, in località Le Mole, restano nel fiume le strutture di un cantiere navale romano scoperto nel 1969. Le sorgenti tingono l'acqua di verde smeraldo, ma il livello può salire d'improvviso.",
+    "Strada Imperiale (Sibillini)": "La Strada Imperiale era una delle tre strade «doganali» di Castelluccio: per percorrerla si pagava un pedaggio. La usavano i pastori per raggiungere le vie della transumanza verso la campagna romana. Vi si arriva dal Passo di Sasso Borghese, la sella tra Palazzo Borghese e il Monte Argentella.",
+    "Stroncone": "Stroncone è un borgo medievale su un colle di ulivi a sud di Terni, documentato dal 1012, a lungo terra di confine. Fuori dalle mura c'è il convento di San Francesco, che la tradizione vuole fondato dal santo nel 1213; la chiesa conserva un affresco di Tiberio d'Assisi del 1509. Nel 1799 il paese resistette sette giorni all'assedio francese.",
+    "Sugano": "Sugano è un borgo su un pendio roccioso dell'altopiano dell'Alfina, con vista su Orvieto e sulla valle del Paglia. Esisteva già nel 1115; dalle sue cave usciva la pietra vulcanica usata negli edifici di Orvieto, e il suo vino rosso fu lodato nel Cinquecento dal bottigliere di papa Paolo III.",
+    "Taizzano": "Taizzano è un borgo di Narni su un colle sopra le gole del Nera, citato nel XII secolo tra i castelli della diocesi narnese; del castello non resta traccia. Nei dintorni sorge l'abbazia di Sant'Angelo in Massa, costruita su una villa romana e documentata dal 996, che conserva un'Adorazione dei pastori di Michelangelo Braidi.",
+    "Tempietto del Clitunno": "Il Tempietto del Clitunno, a Pissignano, è una piccola chiesa a forma di tempio antico, costruita nell'alto Medioevo riusando anche materiali romani. All'interno restano affreschi del VII secolo con il Salvatore tra i santi Pietro e Paolo; dal 2011 fa parte del sito UNESCO \"I Longobardi in Italia. I luoghi del potere\".",
+    "Tenaglie": "Tenaglie, frazione di Montecchio, è un borgo medievale sorto sui resti di una villa romana. Fu dei Baschi e poi degli Ancajani, il cui palazzo del primo Seicento domina il paese e ospita negli edifici annessi un museo della civiltà contadina. Nei dintorni restano i ruderi del castello di Carnano, antica roccaforte dei Baschi.",
+    "Terni": "Terni, l'antica Interamna Nahars, deve il nome alla posizione fra due corsi d'acqua nella valle del Nera. Il patrono è san Valentino, vescovo martire del III secolo, la cui basilica sorge su un antico cimitero cristiano. Le acciaierie, aperte nel 1884, ne fecero una città industriale, bombardata oltre cento volte nella seconda guerra mondiale.",
+    "Todi": "Todi fu fondata dagli Umbri su un colle sopra il Tevere: il suo nome antico, Tutere, significherebbe 'città di confine'. Piazza del Popolo, con il Duomo e i palazzi del Duecento, è il cuore medievale della città; fuori le mura sorge Santa Maria della Consolazione, chiesa rinascimentale forse su disegno del Bramante. Qui nacque Jacopone.",
+    "Tomba del Faggeto": "La Tomba del Faggeto è una piccola tomba etrusca del II secolo a.C., scoperta per caso da un taglialegna nel 1919. Ha volta a botte di ispirazione greca, rara in questa zona, e una porta in lastra di arenaria che ruotava su due perni. L'iscrizione sull'urna nomina il defunto, Arnth Cairnina.",
+    "Trestina": "Trestina, frazione di Città di Castello verso Umbertide, si trova alla confluenza di alcuni torrenti nel Nestore. Nell'Ottocento a Tarragoni, nei dintorni, fu trovato un grande tripode etrusco in bronzo, oggi al museo di Cortona; una copia è all'ingresso del paese. Sul colle del Castellaccio restano i ruderi di una torre medievale.",
+    "Trevi": "Trevi è considerata la capitale dell'olio umbro: dall'alto del suo colle domina la Fascia olivata Assisi-Spoleto, una distesa di uliveti su terrazzamenti in pietra a secco riconosciuta dalla FAO come patrimonio agricolo di importanza mondiale. Nella frazione di Bovara cresce l'Ulivo di Sant'Emiliano, ritenuto il più antico dell'Umbria.",
+    "Triponzo": "Triponzo sorge dove il fiume Corno si getta nel Nera; il nome viene dal latino Tripontium, «tre ponti». Poco a ovest del paese, sulla roccia accanto a una galleria della statale, un'iscrizione romana ricorda la costruzione della strada da Spoleto a Norcia per ordine del Senato. Vicino sgorgano acque sulfuree tiepide.",
+    "Tuoro sul Trasimeno": "Nella piana fra Tuoro sul Trasimeno e il lago, nel 217 a.C., Annibale tese un'imboscata all'esercito romano del console Flaminio, che vi perse la vita insieme a migliaia di soldati. Vicino al lido c'è il Campo del Sole, un cerchio di 27 sculture in pietra serena realizzate da artisti contemporanei tra il 1985 e il 1989.",
+    "Ulivo di Sant'Emiliano": "L'Ulivo di Sant'Emiliano, a Bovara di Trevi, è considerato l'olivo più antico dell'Umbria, con un'età stimata di circa 1700 anni. Secondo la tradizione nel 304 il vescovo Emiliano fu legato a questo albero, allora giovane, prima di essere decapitato; oggi è protetto da una recinzione.",
+    "Umbertide": "Umbertide si chiamò Fratta fino al 1863, quando prese il nome dal principe Umberto di Savoia. Sorge dove la Reggia confluisce nel Tevere; della città medievale resta la Rocca trecentesca, e nella chiesa-museo di Santa Croce si conserva una Deposizione di Luca Signorelli. Nel 1944 un bombardamento alleato distrusse un intero quartiere.",
+    "Ussita": "Ussita è un comune di frazioni sparse nella valle sotto il Monte Bove, nel cuore dei Sibillini. Nel Medioevo era la più importante delle «guaite» unite a Visso; del castello costruito nel 1380 per Rodolfo da Varano resta una torre a Fantellino. Le scosse del 26 ottobre 2016 sono nate dalla faglia sotto il Bove.",
+    "Val di Ranco": "Val di Ranco, in comune di Sigillo, è una località sotto il Monte Cucco da cui partono molti sentieri verso la vetta, attraverso la vecchia faggeta detta Madre dei Faggi. È uno dei luoghi storici del volo libero in Europa e ha ospitato anche campionati mondiali di deltaplano.",
+    "Valfabbrica": "Valfabbrica, nella valle del Chiascio, è cresciuta attorno all'abbazia benedettina di Santa Maria in Vado Fabricae, documentata già nell'820 e tra le più antiche dell'Umbria. Nel Medioevo il territorio fu conteso tra Perugia, Assisi e Gubbio; del monastero, soppresso nel 1359, resta la chiesa di Santa Maria Assunta presso il cimitero.",
+    "Valiano": "Valiano, frazione di Montepulciano, era un castello di confine tra Toscana e terre perugine, conteso a lungo da Firenze e Perugia. Con Montalera e Montegualandro formava una rete di torri di segnalazione. Il suo ponte era l'unico passaggio comodo nella palude della Chiana verso Castiglione e Cortona.",
+    "Valle Castoriana": "La Valle Castoriana, la valle di Preci, fu dal V secolo rifugio di eremiti venuti dalla Siria, che vivevano a coppie in grotte scavate nella roccia. Da quelle comunità nacque l'abbazia di Sant'Eutizio, e dalle conoscenze mediche dei monaci la scuola dei chirurghi preciani.",
+    "Valle delle Prigioni": "La Valle delle Prigioni è una stretta gola calcarea sotto il borgo di Pascelupo, nel Parco del Monte Cucco. Il sentiero che la percorre, in parte sul Sentiero Italia, passa accanto a un grande masso isolato e a un breve tunnel buio nella roccia.",
+    "Vallo di Nera": "Vallo di Nera è un borgo-castello costruito dopo il 1217 sulla cima di un colle, con il permesso di Spoleto. Nella chiesa di Santa Maria l'abside fu affrescata nel 1383 da Cola di Pietro da Camerino e Francesco di Antonio; un altro affresco racconta il passaggio della processione dei Bianchi, i penitenti che attraversarono l'Italia nel 1399.",
+    "Valsorda": "La Valsorda è una conca prativa a circa mille metri sul Monte Serrasanta, con due piccoli laghetti carsici e il rifugio Monte Maggio del CAI di Gualdo Tadino. Presso il valico che porta all'eremo di Serrasanta sono stati trovati resti preistorici.",
+    "Valtopina": "Valtopina è un piccolo comune nella valle del Topino, tra Foligno e Nocera Umbra, ai margini del Parco del Monte Subasio. Il tartufo è il simbolo del paese: molti abitanti delle campagne lo cercano o lo coltivano, e in autunno gli è dedicata una mostra mercato.",
+    "Verchiano": "Verchiano, a circa 780 m nell'alta valle del Menotre, è dominato dalla sua rocca medievale. Il paese sta lungo il tracciato dell'antica Via della Spina, la strada che collegava Spoleto alle Marche passando per l'altopiano di Colfiorito.",
+    "Villa Cahen": "Villa Cahen fu fatta costruire intorno al 1880 dal finanziere di Anversa Edouard Cahen, che aveva comprato la tenuta dai Bourbon del Monte. La sua proprietà si estendeva tra due crinali della valle del Paglia, nei boschi che oggi formano la Selva di Meana.",
+    "Villa Paolina": "Villa Paolina, a Porano, nacque da un monastero medievale e dal 1706 divenne la residenza estiva dei Gualterio, detta 'villa dei sette cardinali'. Nel 1723 vi soggiornò Giacomo Stuart, pretendente al trono d'Inghilterra. È circondata da uno dei parchi storici più importanti dell'Umbria.",
+    "Visso": "Visso, alla confluenza tra il Nera e il torrente Ussita, ha una piazza medievale chiusa da palazzi e dalla Collegiata di Santa Maria, con affreschi di Paolo da Visso. Il comune possiede 27 manoscritti di Giacomo Leopardi, tra cui una stesura dell'Infinito, acquistati nel 1868. Il centro è stato duramente colpito dal terremoto del 2016."
+  }
+}
