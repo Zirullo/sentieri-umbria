@@ -8,7 +8,7 @@ const SEEN_MAX = 2500;
 
 const SHELL = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css',
-  'js/app.js', 'js/geo.js', 'js/nav.js', 'js/compass.js', 'js/offline.js', 'js/plan.js', 'js/profile.js', 'js/custom.js', 'js/filters.js',
+  'js/app.js', 'js/geo.js', 'js/nav.js', 'js/compass.js', 'js/offline.js', 'js/plan.js', 'js/profile.js', 'js/custom.js', 'js/filters.js', 'js/basemap.js',
   'vendor/leaflet/leaflet.js', 'vendor/leaflet/leaflet.css',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
   'data/index.json',

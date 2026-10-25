@@ -34,6 +34,9 @@
       <button id="list-note" class="list-note" hidden></button>
       <div id="list-body"></div>
     </section>
+    <button id="btn-layers" class="map-btn" aria-label="Tipo di mappa e legenda">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5Z"/><path d="m2 13 10 5 10-5"/></svg>
+    </button>
     <button id="btn-locate" class="fab" aria-label="La mia posizione">◎</button>
     <!-- Anteprima del sentiero toccato: dati principali, senza aprire la scheda -->
     <div id="peek" class="peek" hidden></div>
@@ -55,6 +58,9 @@
   <section id="nav" class="nav" hidden>
     <div id="nav-map"></div>
     <div id="nav-banner" class="banner"></div>
+    <button id="nav-layers" class="map-btn" aria-label="Tipo di mappa e legenda">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5Z"/><path d="m2 13 10 5 10-5"/></svg>
+    </button>
     <div class="nav-panel">
       <div class="compass-row">
         <div class="compass" id="compass">
@@ -85,6 +91,9 @@
       </div>
     </div>
   </section>
+
+  <!-- Tipo di mappa e legenda -->
+  <div id="map-panel" class="map-panel" hidden></div>
 
   <div id="toast" class="toast" hidden></div>
 

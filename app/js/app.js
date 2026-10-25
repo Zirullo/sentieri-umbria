@@ -6,10 +6,13 @@ import { MAX_NATIVE_ZOOM, TILE_URL, deleteTrail, downloadTrail, isDownloaded, re
 import { SCALE_LABEL, directionsUrl, fmtHours, fmtTime, parseDuration, sunset, walkHours } from './plan.js';
 import { CUSTOM_SECTOR, importFromHash, loadCustom, removeCustom } from './custom.js';
 import { CLIMBS, DURATIONS, NO_FILTERS, SCALES, activeCount, isLoop, loadFilters, matches, saveFilters } from './filters.js';
+import { BASEMAPS, addBaseMap, currentBase, setBase } from './basemap.js';
 
 const $ = (s) => document.querySelector(s);
 const SIM = new URLSearchParams(location.search).has('sim');
 const SCALE_COLOR = { T: '#2e7d32', E: '#c62828', EE: '#6a1b9a', EEA: '#111111' };
+const NO_SCALE_COLOR = '#757575'; // grigio: non si confonde con l'arancione del sentiero selezionato
+const trailColor = (t) => SCALE_COLOR[t.scale] || NO_SCALE_COLOR;
 const ACTIVE_KEY = 'active-nav';
 const ATTRIB = 'Mappa © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA) · Dati © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 
@@ -61,12 +64,14 @@ const shown = (t) => matches(t, filters, hoursOf(t).h);
 function initMap() {
   map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([42.95, 12.55], 9);
   tileLayer().addTo(map);
+  addBaseMap(map);
   const renderer = L.canvas({ padding: 0.3 });
   for (const t of trails) {
-    t.layer = L.polyline(t.geom, { color: SCALE_COLOR[t.scale] || '#e65100', weight: 3, opacity: 0.85, renderer, interactive: false });
+    t.layer = L.polyline(t.geom, { color: trailColor(t), weight: 3, opacity: 0.85, renderer, interactive: false });
   }
   labels = L.layerGroup().addTo(map);
-  map.on('click', (e) => pickTrail(e.containerPoint, e.latlng));
+  // il tocco che chiude il riquadro della mappa non seleziona anche un sentiero
+  map.on('click', (e) => { if (Date.now() - mapPanelClosedAt > 600) pickTrail(e.containerPoint, e.latlng); });
   map.on('moveend', renderLabels);
   applyFilters();
   if (SIM) window.appMap = map;
@@ -159,7 +164,7 @@ function renderLabels() {
     placed.push(spot[1]);
     const icon = L.divIcon({
       className: 'trail-label',
-      html: `<span style="border-color:${SCALE_COLOR[t.scale] || '#e65100'}">${esc(t.ref)}</span>`,
+      html: `<span style="border-color:${trailColor(t)}">${esc(t.ref)}</span>`,
       iconSize: null,
     });
     L.marker(spot[0], { icon, keyboard: false }).on('click', (ev) => {
@@ -260,7 +265,7 @@ function renderPeek(t) {
   const route = genericName(t.name) ? '' : [t.from, t.to].filter(Boolean).join(' → ');
   const sub = [route, t.sector].filter(Boolean).join(' · ');
   const chips = [
-    t.scale ? `<span class="chip scale" style="background:${SCALE_COLOR[t.scale] || '#e65100'}">${esc(t.scale)} · ${esc(SCALE_LABEL[t.scale] || '')}</span>` : '',
+    t.scale ? `<span class="chip scale" style="background:${trailColor(t)}">${esc(t.scale)} · ${esc(SCALE_LABEL[t.scale] || '')}</span>` : '',
     `<span class="chip">${fmtDist(t.len)}</span>`,
     t.up != null ? `<span class="chip">↑ ${t.up} m</span>` : '',
     `<span class="chip">⏱ ${fmtHours(hoursOf(t).h)}</span>`,
@@ -285,6 +290,59 @@ function closePeek() {
   $('#peek').hidden = true;
   $('#btn-locate').style.bottom = '';
   clearSelection();
+}
+
+/* ---------- Sfondo della mappa e legenda ---------- */
+
+const swatch = (color, w = 4, dash = '') => `<svg class="lg-sw" viewBox="0 0 28 10" aria-hidden="true">
+  <line x1="2" y1="5" x2="26" y2="5" stroke="${color}" stroke-width="${w}" stroke-dasharray="${dash}"/></svg>`;
+const dot = (color) => `<i class="lg-dot" style="background:${color}"></i>`;
+let mapPanelClosedAt = 0;
+
+// Simboli della mappa generale o di quella di navigazione.
+function legendRows(inNav) {
+  if (inNav) {
+    return [
+      [swatch('#d50000', 5), 'sentiero da seguire'],
+      [swatch('#9e9e9e', 5), 'tratto già percorso'],
+      [swatch('#d50000', 3, '2 5'), 'dati mancanti: segui i segnavia'],
+      [swatch('#d50000', 2, '5 4'), 'variante'],
+      [swatch('#1565c0', 2, '3 4'), 'direzione per tornare sul sentiero'],
+      ['<span class="dir-arrow"><span><svg viewBox="0 0 12 12"><path d="M6 1 L11 10.5 L6 8 L1 10.5 Z"/></svg></span></span>', 'verso di percorrenza'],
+      [dot('#2e7d32'), 'partenza'],
+      [dot('#111'), 'arrivo'],
+      [dot('#1565c0'), 'tu (il cono indica dove guardi)'],
+    ];
+  }
+  return [
+    ...Object.entries(SCALES).map(([s, label]) => [swatch(SCALE_COLOR[s]), `<b>${s}</b> ${label}`]),
+    [swatch(NO_SCALE_COLOR), 'difficoltà non indicata'],
+    [swatch('#ff6f00', 6), 'sentiero selezionato'],
+    ['<span class="lg-num">210</span>', 'numero del sentiero (da vicino)'],
+    [dot('#1565c0'), 'la tua posizione'],
+  ];
+}
+
+function toggleMapPanel(btn) {
+  const panel = $('#map-panel');
+  if (!panel.hidden && panel.dataset.for === btn.id) { panel.hidden = true; return; }
+  panel.dataset.for = btn.id;
+  const render = () => {
+    const cur = currentBase();
+    panel.innerHTML = `
+      <div class="mp-title">Mappa</div>
+      <div class="mp-bases">${Object.entries(BASEMAPS).map(([k, b]) => `<button data-base="${k}" class="${k === cur ? 'on' : ''}">${b.label}</button>`).join('')}</div>
+      ${cur !== 'topo' ? '<div class="mp-note">Senza rete si vede solo la topografica.</div>' : ''}
+      <div class="mp-title">Legenda</div>
+      ${legendRows(btn.id === 'nav-layers').map(([sym, text]) => `<div class="lg-row"><span class="lg-sym">${sym}</span><span>${text}</span></div>`).join('')}`;
+  };
+  render();
+  panel.onclick = (e) => {
+    const b = e.target.closest('[data-base]');
+    if (b) { setBase(b.dataset.base); render(); }
+  };
+  panel.style.top = `${btn.getBoundingClientRect().bottom + 8}px`;
+  panel.hidden = false;
 }
 
 /* ---------- Elenco e ricerca ---------- */
@@ -566,6 +624,7 @@ async function startNav(d, reversed) {
     nav.map = L.map('nav-map', { zoomControl: false, preferCanvas: true, attributionControl: false });
     L.control.attribution({ prefix: false }).addAttribution('© OpenTopoMap · © OpenStreetMap').addTo(nav.map);
     L.tileLayer(TILE_URL, { subdomains: 'abc', maxNativeZoom: MAX_NATIVE_ZOOM, maxZoom: 18, crossOrigin: true }).addTo(nav.map);
+    addBaseMap(nav.map);
     nav.map.on('dragstart', () => { nav.follow = false; });
     if (SIM) {
       nav.map.on('click', (e) => onFix({ coords: { latitude: e.latlng.lat, longitude: e.latlng.lng, accuracy: 5 } }));
@@ -762,6 +821,14 @@ function bind() {
   $('#filters').addEventListener('click', onFilterClick);
   $('#filters .sheet-close').onclick = () => { $('#filters').hidden = true; };
   $('#list-note').onclick = showFilters;
+  for (const b of document.querySelectorAll('.map-btn')) b.onclick = () => toggleMapPanel(b);
+  // un tocco fuori dal riquadro della mappa lo chiude
+  document.addEventListener('pointerdown', (e) => {
+    const panel = $('#map-panel');
+    if (panel.hidden || panel.contains(e.target) || e.target.closest('.map-btn')) return;
+    panel.hidden = true;
+    mapPanelClosedAt = Date.now();
+  });
   $('#list-body').addEventListener('click', (e) => {
     const it = e.target.closest('.item');
     if (it) previewTrail(Number(it.dataset.id), { zoom: true });
