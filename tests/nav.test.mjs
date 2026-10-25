@@ -170,14 +170,14 @@ function gauss(rand) {
 }
 
 test('rumore GPS nel bosco: nessun falso allarme su 20 sentieri reali', () => {
-  const idx = JSON.parse(readFileSync(new URL('../app/data/index.json', import.meta.url)));
+  const idx = JSON.parse(readFileSync(new URL('../app/piedi/data/index.json', import.meta.url)));
   const sample = idx.trails.filter((t) => t.cai && t.gaps === 0 && t.len > 3000).slice(0, 20);
   const rand = rng(42);
   let fixes = 0;
   let falseAlarms = 0;
   let maxErr = 0;
   for (const t of sample) {
-    const d = JSON.parse(readFileSync(new URL(`../app/data/trails/${t.id}.json`, import.meta.url)));
+    const d = JSON.parse(readFileSync(new URL(`../app/piedi/data/trails/${t.id}.json`, import.meta.url)));
     const tr = new Track(d.segments.flat());
     const g = new Guide(tr);
     for (let s = 0; s <= tr.length; s += 4) { // ~1 fix al secondo camminando
@@ -233,9 +233,9 @@ test('in bici: fix radi a 30 km/h, la progressiva segue e nessun falso allarme',
 });
 
 test('sentiero reale: camminata simulata con deviazione', () => {
-  const idx = JSON.parse(readFileSync(new URL('../app/data/index.json', import.meta.url)));
+  const idx = JSON.parse(readFileSync(new URL('../app/piedi/data/index.json', import.meta.url)));
   const t = idx.trails.find((x) => x.ref === '501' && x.cai) || idx.trails.find((x) => x.cai && x.gaps === 0 && x.len > 5000);
-  const d = JSON.parse(readFileSync(new URL(`../app/data/trails/${t.id}.json`, import.meta.url)));
+  const d = JSON.parse(readFileSync(new URL(`../app/piedi/data/trails/${t.id}.json`, import.meta.url)));
   const tr = new Track(d.segments.flat());
   const g = new Guide(tr);
   let offSeen = false;

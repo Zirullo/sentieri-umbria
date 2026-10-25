@@ -6,7 +6,9 @@ appena esci di più di 30 m. Funziona anche senza rete.
 
 ## Uso sul telefono (Android, Chrome)
 
-1. Apri il sito pubblicato su GitHub Pages e scegli **Aggiungi a schermata Home**.
+1. Apri https://zirullo.github.io/sentieri-umbria/, scegli **A piedi** (o **In bici**) e poi,
+   dal menu ⋮ di Chrome, **Installa app**. Le due app stanno in cartelle sorelle (`piedi/`, `bici/`)
+   e si installano ognuna per conto suo.
 2. A casa, con la rete: apri un sentiero e premi **Scarica offline**
    (mappa topografica intorno al sentiero, di solito 3–10 MB).
 3. Al punto di partenza premi **Inizia**. Lo schermo resta acceso.
@@ -48,7 +50,7 @@ Dati, preferenze e mappe scaricate sono separati da quelli della versione a pied
 ```sh
 python -I tools/fetch_osm.py data/raw/osm_umbria.json      # sentieri da Overpass
 python -I tools/fetch_dem.py data/raw/dem                   # solo la prima volta (~230 MB)
-python -P -E tools/build_data.py data/raw/osm_umbria.json data/raw/dem app/data
+python -P -E tools/build_data.py data/raw/osm_umbria.json data/raw/dem app/piedi/data
 
 # versione in bici: relazioni route=bicycle e route=mtb
 python -I tools/fetch_osm.py --bici data/raw/osm_umbria_bici.json
@@ -70,7 +72,7 @@ se c'è ed è unico, altrimenti C1, C2… (ciclovie) e M1, M2… (MTB), in ordin
 
 ```sh
 npm test          # test della logica di guida
-npm run serve     # http://127.0.0.1:8765/?sim  (?sim: clic sulla mappa = posizione GPS finta)
+npm run serve     # http://127.0.0.1:8765/piedi/?sim  (?sim: clic sulla mappa = posizione GPS finta)
 ```
 
 Ogni push su `main` esegue i test e pubblica la cartella `app/` su GitHub Pages.
@@ -83,4 +85,5 @@ Ogni push su `main` esegue i test e pubblica la cartella `app/` su GitHub Pages.
 | `app/js/offline.js` | scaricamento della mappa lungo un corridoio attorno al sentiero |
 | `app/js/plan.js` | tempo di percorrenza (DIN 33466 a piedi, stima in bici) e tramonto |
 | `app/js/config.js` | differenze tra versione a piedi e in bici (`<html data-mode="bici">`) |
-| `app/sw.js` | service worker per l'uso offline (`bici/sw.js` lo importa con cache proprie) |
+| `app/sw-core.js` | service worker per l'uso offline, importato da `piedi/sw.js` e `bici/sw.js` con cache proprie |
+| `app/index.html`, `app/sw.js` | pagina di scelta tra le due app; disattivazione del vecchio service worker |

@@ -1,103 +1,60 @@
 <!doctype html>
+<!-- Pagina di scelta. Le due app stanno in cartelle sorelle (piedi/, bici/): se una contenesse l'altra,
+     Chrome su Android le confonderebbe all'installazione. Qui arrivano anche i vecchi link dell'app a piedi. -->
 <html lang="it">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#b71c1c">
-  <meta name="description" content="Sentieri CAI dell'Umbria con bussola di guida e avviso fuori sentiero, anche offline.">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Sentieri CAI, ciclovie e percorsi MTB dell'Umbria, con guida e avviso fuori percorso.">
   <title>Sentieri Umbria</title>
-  <link rel="manifest" href="manifest.webmanifest">
-  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
-  <link rel="stylesheet" href="css/app.css">
+  <link rel="icon" href="piedi/icons/icon.svg" type="image/svg+xml">
+  <script>
+    // vecchi link: sentieri personali e ?reset/?sim vanno all'app a piedi, #percorso= a quella in bici
+    (() => {
+      const { hash, search } = location;
+      if (hash.startsWith('#percorso=')) location.replace(`bici/${search}${hash}`);
+      else if (hash.startsWith('#sentiero=') || search) location.replace(`piedi/${search}${hash}`);
+    })();
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; padding: 24px 16px; display: flex; flex-direction: column; justify-content: center;
+      font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #1a1a1a; background: #f5f5f5;
+    }
+    main { width: 100%; max-width: 420px; margin: 0 auto; }
+    h1 { margin: 0 0 4px; font-size: 26px; }
+    p { margin: 0 0 20px; color: #5f6368; }
+    a.app {
+      display: flex; gap: 16px; align-items: center; margin-bottom: 12px; padding: 16px; border-radius: 16px;
+      background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.15); color: inherit; text-decoration: none;
+    }
+    a.app img { width: 64px; height: 64px; border-radius: 14px; flex: none; }
+    a.app b { display: block; font-size: 19px; }
+    a.app span { color: #5f6368; font-size: 14px; }
+    small { display: block; margin-top: 8px; color: #5f6368; }
+  </style>
 </head>
 <body>
-  <!-- Ricerca e selezione -->
-  <header class="topbar">
-    <input id="search" type="search" placeholder="Cerca numero o nome" autocomplete="off" enterkeyhint="search">
-    <button id="btn-filter" class="icon-btn" aria-label="Filtri">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5h18l-7 8.5V19l-4 2v-7.5Z"/></svg>
-      <span id="filter-badge" class="badge" hidden></span>
-    </button>
-    <button id="btn-view" class="icon-btn" aria-label="Mostra elenco">☰</button>
-  </header>
-
   <main>
-    <div id="map"></div>
-    <section id="list" class="list" hidden>
-      <div class="seg" role="tablist">
-        <button data-sort="zone" class="on">Per zona</button>
-        <button data-sort="near">Vicino a me</button>
-        <button data-sort="saved">Scaricati</button>
-      </div>
-      <button id="list-note" class="list-note" hidden></button>
-      <div id="list-body"></div>
-    </section>
-    <button id="btn-layers" class="map-btn" aria-label="Tipo di mappa e legenda">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5Z"/><path d="m2 13 10 5 10-5"/></svg>
-    </button>
-    <button id="btn-locate" class="fab" aria-label="La mia posizione">◎</button>
-    <!-- Anteprima del sentiero toccato: dati principali, senza aprire la scheda -->
-    <div id="peek" class="peek" hidden></div>
+    <h1>Sentieri Umbria</h1>
+    <p>Scegli l'app: ognuna si installa sul telefono per conto suo.</p>
+    <a class="app" href="piedi/">
+      <img src="piedi/icons/icon-192.png" alt="">
+      <div><b>A piedi</b><span>Sentieri CAI con bussola di guida e avviso fuori sentiero</span></div>
+    </a>
+    <a class="app" href="bici/">
+      <img src="bici/icons/icon-192.png" alt="">
+      <div><b>In bici</b><span>Ciclovie e percorsi MTB, con vibrazione e suono fuori percorso</span></div>
+    </a>
+    <small>Per installarla: apri l'app, poi menu ⋮ di Chrome → «Installa app».</small>
   </main>
-
-  <!-- Filtri -->
-  <section id="filters" class="sheet filters" hidden>
-    <button class="sheet-close icon-btn" aria-label="Chiudi">✕</button>
-    <div id="filters-body"></div>
-  </section>
-
-  <!-- Scheda del sentiero -->
-  <section id="sheet" class="sheet" hidden>
-    <button class="sheet-close icon-btn" aria-label="Chiudi">✕</button>
-    <div id="sheet-body"></div>
-  </section>
-
-  <!-- Navigazione -->
-  <section id="nav" class="nav" hidden>
-    <div id="nav-map"></div>
-    <div id="nav-banner" class="banner"></div>
-    <button id="nav-layers" class="map-btn" aria-label="Tipo di mappa e legenda">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5Z"/><path d="m2 13 10 5 10-5"/></svg>
-    </button>
-    <div class="nav-panel">
-      <div class="compass-row">
-        <div class="compass" id="compass">
-          <svg viewBox="0 0 100 100" aria-hidden="true">
-            <circle cx="50" cy="50" r="47" class="ring"/>
-            <g id="arrow"><path d="M50 8 L72 70 L50 58 L28 70 Z" class="arrow"/></g>
-          </svg>
-        </div>
-        <div class="nav-stats">
-          <div class="big" id="nav-target">–</div>
-          <div class="small" id="nav-hint">In attesa del GPS…</div>
-          <div class="stats">
-            <div><span id="nav-done">–</span><small>fatti</small></div>
-            <div><span id="nav-left">–</span><small>mancanti</small></div>
-            <div><span id="nav-ele">–</span><small>quota</small></div>
-          </div>
-          <div class="dest" id="nav-dest">
-            <svg viewBox="0 0 20 20" aria-hidden="true"><path id="dest-arrow" d="M10 2 L15 17 L10 13 L5 17 Z"/></svg>
-            <span id="nav-dest-text">Arrivo –</span>
-          </div>
-        </div>
-      </div>
-      <canvas id="profile" class="profile"></canvas>
-      <div class="nav-buttons">
-        <button id="nav-exit">✕ Esci</button>
-        <button id="nav-reverse">⇄ Inverti</button>
-        <button id="nav-center">◎ Centra</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Tipo di mappa e legenda -->
-  <div id="map-panel" class="map-panel" hidden></div>
-
-  <div id="toast" class="toast" hidden></div>
-
-  <script src="vendor/leaflet/leaflet.js"></script>
-  <script type="module" src="js/app.js"></script>
+  <script>
+    // il vecchio service worker della cartella principale non serve più (vedi sw.js)
+    navigator.serviceWorker?.getRegistrations().then((rs) => {
+      for (const r of rs) if (r.scope === new URL('./', location.href).href) r.unregister();
+    }).catch(() => {});
+  </script>
 </body>
 </html>

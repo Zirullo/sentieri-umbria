@@ -10,7 +10,7 @@ e avviso fuori sentiero. Tenerla semplice.
 ```sh
 npm test                                   # test Node (tests/*.test.mjs)
 node tools/noise_report.mjs 120            # falsi allarmi e precisione con rumore GPS simulato
-python -m http.server 8765 --directory app --bind 127.0.0.1   # poi http://127.0.0.1:8765/?sim
+python -m http.server 8765 --directory app --bind 127.0.0.1   # poi http://127.0.0.1:8765/piedi/?sim
 ```
 
 Rigenerare i dati: vedi README. `build_data.py` va lanciato con `python -P -E` (non `-I`):
@@ -34,15 +34,19 @@ Rigenerare i dati: vedi README. `build_data.py` va lanciato con `python -P -E` (
 
 ## Due versioni: a piedi e in bici
 
-- `app/` è la versione a piedi, `app/bici/` quella in bici: pagina, manifest, icone, dati e `sw.js` propri,
-  codice e CSS comuni (`../js`, `../css`). Le differenze stanno in `app/js/config.js`, scelte da
-  `<html data-mode="bici">`. Ogni modifica a `index.html` va ripetuta in `bici/index.html` (un test confronta gli id).
-- Stesso sito: chiavi di `localStorage` e nomi delle cache della bici hanno il prefisso `bici-` (`KEY_PREFIX`).
-- Test nel browser della bici: `http://127.0.0.1:8765/bici/?sim`.
+- `app/piedi/` e `app/bici/` sono due app in cartelle sorelle: pagina, manifest, icone, dati e `sw.js` propri,
+  codice e CSS comuni (`../js`, `../css`, `../sw-core.js`). Le differenze stanno in `app/js/config.js`, scelte da
+  `<html data-mode="bici">`. Ogni modifica a `piedi/index.html` va ripetuta in `bici/index.html` (un test confronta gli id).
+- Mai un'app nella cartella principale: il suo ambito conterrebbe l'altra e Chrome su Android le confonde
+  all'installazione ("già installata"). `app/index.html` è solo una pagina di scelta che inoltra i vecchi link
+  (`#sentiero=`, `?reset`, `?sim`) a `piedi/`; `app/sw.js` serve solo a disattivare il vecchio service worker.
+- Stesso sito: chiavi di `localStorage` e nomi delle cache della bici hanno il prefisso `bici-` (`KEY_PREFIX`);
+  a piedi niente prefisso (dati di prima del trasloco), salvo il guscio `piedi-shell-*`.
+- Test nel browser: `http://127.0.0.1:8765/piedi/?sim` e `http://127.0.0.1:8765/bici/?sim`.
 
 ## Vincoli
 
-- Il service worker precarica gli elenchi `OWN` e `SHARED` in `app/sw.js`: ogni nuovo modulo JS va aggiunto
+- Il service worker precarica gli elenchi `OWN` e `SHARED` in `app/sw-core.js`: ogni nuovo modulo JS va aggiunto
   a `SHARED` (`tests/shell.test.mjs` lo controlla).
 - Logica di guida in `app/js/nav.js`, coperta dai test: ogni modifica va verificata anche con `noise_report`.
 - Mai mettere coordinate personali nel repository (è pubblico): i sentieri personali passano dal link

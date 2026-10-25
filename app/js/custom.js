@@ -1,5 +1,5 @@
 // Sentieri personali: salvati solo su questo telefono, aggiunti da un link
-//   https://…/sentieri-umbria/#sentiero=Nome|lat,lon;lat,lon;…
+//   https://…/sentieri-umbria/piedi/#sentiero=Nome|lat,lon;lat,lon;…
 //   https://…/sentieri-umbria/bici/#percorso=Nome|lat,lon;…   (versione in bici)
 // La parte dopo # non viene mai inviata al server, quindi le coordinate restano private.
 import { haversine } from './geo.js';

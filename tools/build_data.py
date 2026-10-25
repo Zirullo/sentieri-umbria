@@ -1,11 +1,11 @@
 """Converte i dati OSM + DEM nei file usati dalla PWA.
 
-Uso: python -P -E tools/build_data.py data/raw/osm_umbria.json data/raw/dem app/data
+Uso: python -P -E tools/build_data.py data/raw/osm_umbria.json data/raw/dem app/piedi/data
      python -P -E tools/build_data.py --bici data/raw/osm_umbria_bici.json data/raw/dem app/bici/data
 
 Produce:
-  app/data/index.json      elenco sentieri + geometria semplificata per la mappa generale
-  app/data/trails/<id>.json traccia dettagliata ordinata con quote, per la navigazione
+  app/piedi/data/index.json      elenco sentieri + geometria semplificata per la mappa generale
+  app/piedi/data/trails/<id>.json traccia dettagliata ordinata con quote, per la navigazione
 """
 import json
 import math

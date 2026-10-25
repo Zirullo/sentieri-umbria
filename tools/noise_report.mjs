@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { Track } from '../app/js/geo.js';
 import { Guide } from '../app/js/nav.js';
 
-const data = new URL('../app/data/', import.meta.url);
+const data = new URL('../app/piedi/data/', import.meta.url);
 const move = ([lat, lon], n, e) => [lat + n / 110540, lon + e / (111320 * Math.cos((lat * Math.PI) / 180))];
 let seed = 7;
 const rand = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32);
