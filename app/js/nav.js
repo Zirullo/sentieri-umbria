@@ -12,9 +12,12 @@ const JUMP_CONFIRM = 3;     // fix coerenti necessari per un salto più grande
 const WALK_MPS = 2.5;       // velocità massima plausibile a piedi, per fix distanziati nel tempo
 
 export class Guide {
-  constructor(track, offTrackM = OFF_TRACK_M) {
+  // maxSpeed e lookahead cambiano in bici (vedi config.js); i valori predefiniti sono quelli a piedi.
+  constructor(track, { offTrackM = OFF_TRACK_M, maxSpeed = WALK_MPS, lookahead = LOOKAHEAD_M } = {}) {
     this.track = track;
     this.offTrackM = offTrackM;
+    this.maxSpeed = maxSpeed;
+    this.lookahead = lookahead;
     this.reset();
   }
 
@@ -40,7 +43,7 @@ export class Guide {
     };
     if (!this.joined) return accept();
     // se il GPS manda fix radi (risparmio energetico) in mezzo si cammina di più
-    const maxFwd = MAX_FWD_M + WALK_MPS * Math.max(0, (now - (this.lastT ?? now)) / 1000);
+    const maxFwd = MAX_FWD_M + this.maxSpeed * Math.max(0, (now - (this.lastT ?? now)) / 1000);
     const jump = s - this.s;
     if (jump >= -MAX_BACK_M && jump <= maxFwd) return accept();
     if (this.pending && Math.abs(s - this.pending.s) < maxFwd) this.pending = { s, n: this.pending.n + 1 };
@@ -83,7 +86,7 @@ export class Guide {
       target = [near.lat, near.lon];
     } else {
       mode = 'on';
-      target = tr.pointAt(this.s + LOOKAHEAD_M);
+      target = tr.pointAt(this.s + this.lookahead);
     }
 
     const s = this.s ?? near.s;

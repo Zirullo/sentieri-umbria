@@ -1,10 +1,12 @@
 // Sentieri personali: salvati solo su questo telefono, aggiunti da un link
 //   https://…/sentieri-umbria/#sentiero=Nome|lat,lon;lat,lon;…
+//   https://…/sentieri-umbria/bici/#percorso=Nome|lat,lon;…   (versione in bici)
 // La parte dopo # non viene mai inviata al server, quindi le coordinate restano private.
 import { haversine } from './geo.js';
+import { BIKE, KEY_PREFIX, W } from './config.js';
 
-const KEY = 'custom-trails';
-export const CUSTOM_SECTOR = 'Sentieri personali';
+const KEY = `${KEY_PREFIX}custom-trails`;
+export const CUSTOM_SECTOR = `${W.Many} personali`;
 
 function idFor(name) {
   let h = 0;
@@ -25,7 +27,8 @@ export function makeTrail(name, pts) {
     from: '',
     to: '',
     sector: CUSTOM_SECTOR,
-    scale: 'T',
+    scale: BIKE ? '' : 'T',
+    kind: BIKE ? 'road' : undefined,
     cai: false,
     len: Math.round(len),
     up: null,
@@ -56,7 +59,7 @@ export function removeCustom(name) {
 
 // Legge un sentiero dall'indirizzo, lo salva e ripulisce l'indirizzo. Restituisce il nome o null.
 export function importFromHash() {
-  const m = /^#sentiero=([^|]+)\|(.+)$/.exec(decodeURIComponent(location.hash));
+  const m = /^#(?:sentiero|percorso)=([^|]+)\|(.+)$/.exec(decodeURIComponent(location.hash));
   if (!m) return null;
   const name = m[1].trim().slice(0, 60);
   const pts = m[2].split(';').map((p) => p.split(',').map(Number)).filter((p) => p.length === 2

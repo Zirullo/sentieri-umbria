@@ -196,6 +196,42 @@ test('rumore GPS nel bosco: nessun falso allarme su 20 sentieri reali', () => {
   assert.ok(falseAlarms / fixes < 0.002, `falsi allarmi ${falseAlarms} su ${fixes}`);
 });
 
+test('in bici: fix radi a 30 km/h, la progressiva segue e nessun falso allarme', () => {
+  // a piedi un salto oltre 60 m + 2,5 m/s va confermato da più fix: in bici sarebbe la norma
+  const idx = JSON.parse(readFileSync(new URL('../app/bici/data/index.json', import.meta.url)));
+  const sample = idx.trails.filter((t) => t.gaps === 0 && t.len > 15000 && t.len < 80000).slice(0, 8);
+  assert.ok(sample.length >= 5);
+  const BIKE = { maxSpeed: 14, lookahead: 60 }; // come in config.js
+  const rand = rng(7);
+  let fixes = 0;
+  let falseAlarms = 0;
+  let maxErr = 0;
+  let walkStuck = 0;
+  for (const t of sample) {
+    const d = JSON.parse(readFileSync(new URL(`../app/bici/data/trails/${t.id}.json`, import.meta.url)));
+    const tr = new Track(d.segments.flat());
+    const g = new Guide(tr, BIKE);
+    const walk = new Guide(tr); // impostazioni a piedi, per confronto
+    let now = 0;
+    let r;
+    for (let s = 0; s <= tr.length; s += 125) { // un fix ogni 15 s a 30 km/h (risparmio energetico)
+      now += 15000;
+      const p = move(tr.pointAt(s), gauss(rand) * 6, gauss(rand) * 6);
+      r = g.update(...p, 10, now);
+      const w = walk.update(...p, 10, now);
+      fixes++;
+      if (r.mode === 'off') falseAlarms++;
+      if (r.mode === 'on') maxErr = Math.max(maxErr, Math.abs(r.done - s));
+      if (w.mode === 'on' && s - w.done > 500) walkStuck++;
+    }
+    r = g.update(...tr.pointAt(tr.length).slice(0, 2), 10, now + 10000); // fermo all'arrivo
+    assert.equal(r.mode, 'arrived', `${t.name}: arrivo non riconosciuto`);
+  }
+  assert.ok(maxErr < 150, `errore progressiva ${Math.round(maxErr)} m`);
+  assert.ok(falseAlarms / fixes < 0.005, `falsi allarmi ${falseAlarms} su ${fixes}`);
+  assert.ok(walkStuck > 0, 'con le impostazioni a piedi la progressiva resterebbe indietro');
+});
+
 test('sentiero reale: camminata simulata con deviazione', () => {
   const idx = JSON.parse(readFileSync(new URL('../app/data/index.json', import.meta.url)));
   const t = idx.trails.find((x) => x.ref === '501' && x.cai) || idx.trails.find((x) => x.cai && x.gaps === 0 && x.len > 5000);

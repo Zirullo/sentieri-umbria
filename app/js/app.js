@@ -3,17 +3,17 @@ import { Guide } from './nav.js';
 import { Compass } from './compass.js';
 import { drawProfile } from './profile.js';
 import { MAX_NATIVE_ZOOM, TILE_URL, deleteTrail, downloadTrail, isDownloaded, registry, syncDataVersion } from './offline.js';
-import { SCALE_LABEL, directionsUrl, fmtHours, fmtTime, parseDuration, sunset, walkHours } from './plan.js';
+import { directionsUrl, fmtHours, fmtTime, parseDuration, rideHours, sunset, walkHours } from './plan.js';
 import { CUSTOM_SECTOR, importFromHash, loadCustom, removeCustom } from './custom.js';
-import { CLIMBS, DURATIONS, NO_FILTERS, SCALES, activeCount, isLoop, loadFilters, matches, saveFilters } from './filters.js';
+import { FILTERS, activeCount, isLoop, loadFilters, matches, noFilters, saveFilters } from './filters.js';
 import { BASEMAPS, addBaseMap, currentBase, setBase } from './basemap.js';
+import { ALERTS, BIKE, CLASSES, GUIDE, KEY_PREFIX, KIND_LABEL, NO_CLASS_COLOR, SCALE_LABEL, SECTOR_ORDER, W, isOwnKey } from './config.js';
+import { alertBack, alertOff, unlockSound } from './alert.js';
 
 const $ = (s) => document.querySelector(s);
 const SIM = new URLSearchParams(location.search).has('sim');
-const SCALE_COLOR = { T: '#2e7d32', E: '#c62828', EE: '#6a1b9a', EEA: '#111111' };
-const NO_SCALE_COLOR = '#757575'; // grigio: non si confonde con l'arancione del sentiero selezionato
-const trailColor = (t) => SCALE_COLOR[t.scale] || NO_SCALE_COLOR;
-const ACTIVE_KEY = 'active-nav';
+const trailColor = (t) => CLASSES.find((c) => c.test(t))?.color || NO_CLASS_COLOR;
+const ACTIVE_KEY = `${KEY_PREFIX}active-nav`;
 const ATTRIB = 'Mappa © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA) · Dati © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 
 let trails = [];
@@ -30,7 +30,7 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 const normalize = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 // Nomi OSM generici come "Sentiero 501" o "CAI 501" non dicono nulla: meglio "partenza – arrivo".
 const genericName = (n) => !n || /^(sentiero|cai|percorso)[\s\w.°-]*\d+[a-z]?$/i.test(n.trim());
-const title = (t) => (!genericName(t.name) && t.name) || [t.from, t.to].filter(Boolean).join(' – ') || t.name || `Sentiero ${t.ref}`;
+const title = (t) => (!genericName(t.name) && t.name) || [t.from, t.to].filter(Boolean).join(' – ') || t.name || `${W.One} ${t.ref}`;
 
 function toast(msg, ms = 2500) {
   const el = $('#toast');
@@ -50,7 +50,7 @@ function hoursOf(t, reversed = false) {
   if (h) return { h, src: 'CAI' };
   const up = reversed ? t.down : t.up;
   const down = reversed ? t.up : t.down;
-  return { h: walkHours(t.len, up, down), src: 'stima' };
+  return { h: BIKE ? rideHours(t.len, up, t.kind === 'mtb') : walkHours(t.len, up, down), src: 'stima' };
 }
 
 /* ---------- Mappa generale ---------- */
@@ -93,20 +93,20 @@ function applyFilters() {
 
 function renderFilters() {
   const count = trails.filter(shown).length;
-  const opt = (group, value, label, on) => `<button data-g="${group}" data-v="${value}" class="${on ? 'on' : ''}">${label}</button>`;
+  const group = (g) => {
+    if (g.type === 'check') {
+      return `<label class="f-check"><input type="checkbox" data-g="${g.key}" ${filters[g.key] ? 'checked' : ''}> ${g.label}</label>`;
+    }
+    const on = (i) => (g.type === 'multi' ? filters[g.key].includes(i) : filters[g.key] === i);
+    return `<div class="f-title">${g.title}</div>
+      <div class="f-opts">${g.options.map((o, i) => `<button data-g="${g.key}" data-v="${i}" class="${on(i) ? 'on' : ''}">${o.label}</button>`).join('')}</div>`;
+  };
   $('#filters-body').innerHTML = `
     <h2>Filtri</h2>
-    <div class="f-title">Difficoltà</div>
-    <div class="f-opts">${Object.entries(SCALES).map(([s, label]) => opt('scale', s, `<b>${s}</b> ${label}`, filters.scales.includes(s))).join('')}</div>
-    <div class="f-title">Durata stimata</div>
-    <div class="f-opts">${DURATIONS.map(([, , label], i) => opt('dur', i, label, filters.dur === i)).join('')}</div>
-    <div class="f-title">Salita totale</div>
-    <div class="f-opts">${CLIMBS.map(([, label], i) => opt('climb', i, label, filters.climb === i)).join('')}</div>
-    <label class="f-check"><input type="checkbox" data-g="loop" ${filters.loop ? 'checked' : ''}> Solo anelli (torni alla partenza)</label>
-    <label class="f-check"><input type="checkbox" data-g="cai" ${filters.cai ? 'checked' : ''}> Solo sentieri CAI</label>
+    ${FILTERS.map(group).join('')}
     <div class="actions">
       <button id="f-reset" ${activeCount(filters) ? '' : 'disabled'}>Azzera</button>
-      <button id="f-done" class="primary">${count ? `Mostra ${count}` : 'Nessun sentiero'}</button>
+      <button id="f-done" class="primary">${count ? `Mostra ${count}` : `Nessun ${W.one}`}</button>
     </div>`;
 }
 
@@ -120,16 +120,15 @@ function setFilters(f) {
 
 function onFilterClick(e) {
   if (e.target.id === 'f-done') { $('#filters').hidden = true; return; }
-  if (e.target.id === 'f-reset') { setFilters({ ...NO_FILTERS }); return; }
+  if (e.target.id === 'f-reset') { setFilters(noFilters()); return; }
   const b = e.target.closest('[data-g]');
   if (!b) return;
   const f = { ...filters };
-  const g = b.dataset.g;
-  if (g === 'scale') {
-    const s = b.dataset.v;
-    f.scales = f.scales.includes(s) ? f.scales.filter((x) => x !== s) : [...f.scales, s];
-  } else if (g === 'dur' || g === 'climb') f[g] = Number(b.dataset.v);
-  else f[g] = b.checked;
+  const g = FILTERS.find((x) => x.key === b.dataset.g);
+  const i = Number(b.dataset.v);
+  if (g.type === 'multi') f[g.key] = f[g.key].includes(i) ? f[g.key].filter((x) => x !== i) : [...f[g.key], i];
+  else if (g.type === 'one') f[g.key] = i;
+  else f[g.key] = b.checked;
   setFilters(f);
 }
 
@@ -204,7 +203,7 @@ function pickTrail(pt, latlng) {
   near.sort((a, b) => a[0] - b[0]);
   if (!near.length) return closePeek();
   if (near.length === 1) return previewTrail(near[0][1].id);
-  const html = `<div class="pick"><b>Quale sentiero?</b>${near.slice(0, 6).map(([, t]) =>
+  const html = `<div class="pick"><b>Quale ${W.one}?</b>${near.slice(0, 6).map(([, t]) =>
     `<button data-id="${t.id}"><span class="ref"><span>${esc(t.ref || '–')}</span></span> ${esc(title(t))}</button>`).join('')}</div>`;
   const popup = L.popup({ closeButton: false, maxWidth: 280, className: 'pick-popup' }).setLatLng(latlng).setContent(html).openOn(map);
   popup.getElement().addEventListener('click', (ev) => {
@@ -264,8 +263,12 @@ function renderPeek(t) {
   const loop = isLoop(t);
   const route = genericName(t.name) ? '' : [t.from, t.to].filter(Boolean).join(' → ');
   const sub = [route, t.sector].filter(Boolean).join(' · ');
+  const scale = t.scale ? `${esc(t.scale)} · ${esc(SCALE_LABEL[t.scale] || '')}` : '';
   const chips = [
-    t.scale ? `<span class="chip scale" style="background:${trailColor(t)}">${esc(t.scale)} · ${esc(SCALE_LABEL[t.scale] || '')}</span>` : '',
+    // a piedi il colore è quello della difficoltà, in bici quello del tipo di percorso
+    BIKE ? `<span class="chip scale" style="background:${trailColor(t)}">${KIND_LABEL[t.kind] || ''}</span>` : '',
+    BIKE && scale ? `<span class="chip">${scale}</span>` : '',
+    !BIKE && scale ? `<span class="chip scale" style="background:${trailColor(t)}">${scale}</span>` : '',
     `<span class="chip">${fmtDist(t.len)}</span>`,
     t.up != null ? `<span class="chip">↑ ${t.up} m</span>` : '',
     `<span class="chip">⏱ ${fmtHours(hoursOf(t).h)}</span>`,
@@ -303,11 +306,11 @@ let mapPanelClosedAt = 0;
 function legendRows(inNav) {
   if (inNav) {
     return [
-      [swatch('#d50000', 5), 'sentiero da seguire'],
+      [swatch('#d50000', 5), `${W.one} da seguire`],
       [swatch('#9e9e9e', 5), 'tratto già percorso'],
       [swatch('#d50000', 3, '2 5'), 'dati mancanti: segui i segnavia'],
       [swatch('#d50000', 2, '5 4'), 'variante'],
-      [swatch('#1565c0', 2, '3 4'), 'direzione per tornare sul sentiero'],
+      [swatch('#1565c0', 2, '3 4'), `direzione per tornare sul ${W.one}`],
       ['<span class="dir-arrow"><span><svg viewBox="0 0 12 12"><path d="M6 1 L11 10.5 L6 8 L1 10.5 Z"/></svg></span></span>', 'verso di percorrenza'],
       [dot('#2e7d32'), 'partenza'],
       [dot('#111'), 'arrivo'],
@@ -315,10 +318,10 @@ function legendRows(inNav) {
     ];
   }
   return [
-    ...Object.entries(SCALES).map(([s, label]) => [swatch(SCALE_COLOR[s]), `<b>${s}</b> ${label}`]),
-    [swatch(NO_SCALE_COLOR), 'difficoltà non indicata'],
-    [swatch('#ff6f00', 6), 'sentiero selezionato'],
-    ['<span class="lg-num">210</span>', 'numero del sentiero (da vicino)'],
+    ...CLASSES.map((c) => [swatch(c.color), c.label]),
+    ...(BIKE ? [] : [[swatch(NO_CLASS_COLOR), 'difficoltà non indicata']]),
+    [swatch('#ff6f00', 6), `${W.one} selezionato`],
+    [`<span class="lg-num">${BIKE ? 'SI-C' : '210'}</span>`, `numero del ${W.one} (da vicino)`],
     [dot('#1565c0'), 'la tua posizione'],
   ];
 }
@@ -357,7 +360,7 @@ function distToTrail(t, p) {
 
 function itemHtml(t, extra = '') {
   const h = hoursOf(t).h;
-  const sub = [t.scale, fmtDist(t.len), t.up != null ? `↑${t.up} m` : null, fmtHours(h), extra].filter(Boolean).join(' · ');
+  const sub = [BIKE && KIND_LABEL[t.kind], t.scale, fmtDist(t.len), t.up != null ? `↑${t.up} m` : null, fmtHours(h), extra].filter(Boolean).join(' · ');
   const saved = isDownloaded(t.id) ? ' ✓' : '';
   return `<button class="item" data-id="${t.id}">
     <span class="ref"><span>${esc(t.ref || '–')}</span></span>
@@ -375,7 +378,7 @@ function renderList() {
   if (q) {
     pool = trails.filter((t) => (t.search ??= normalize(`${t.ref} ${t.name} ${t.from} ${t.to} ${t.sector}`)).includes(q));
     pool.sort((a, b) => (normalize(b.ref) === q) - (normalize(a.ref) === q) || (normalize(b.ref).startsWith(q)) - (normalize(a.ref).startsWith(q)));
-    body.innerHTML = pool.length ? pool.slice(0, 100).map((t) => itemHtml(t)).join('') : '<div class="empty">Nessun sentiero trovato</div>';
+    body.innerHTML = pool.length ? pool.slice(0, 100).map((t) => itemHtml(t)).join('') : `<div class="empty">Nessun ${W.one} trovato</div>`;
     return;
   }
   if (listSort === 'near') {
@@ -392,7 +395,7 @@ function renderList() {
     const ids = Object.keys(registry()).map(Number);
     const saved = ids.map((id) => byId.get(id)).filter(Boolean);
     body.innerHTML = saved.length ? saved.map((t) => itemHtml(t)).join('')
-      : '<div class="empty">Nessun sentiero scaricato.<br>Apri un sentiero e premi «Scarica offline».</div>';
+      : `<div class="empty">Nessun ${W.one} scaricato.<br>Apri un ${W.one} e premi «Scarica offline».</div>`;
     return;
   }
   const groups = new Map();
@@ -400,8 +403,7 @@ function renderList() {
     if (!groups.has(t.sector)) groups.set(t.sector, []);
     groups.get(t.sector).push(t);
   }
-  const order = [CUSTOM_SECTOR, 'Alto Tevere', 'Alto Chiascio', 'Valle Umbra Nord', 'Valle Spoletina', 'Valnerina', 'Valle del Nera',
-    'Amerino', 'Orvietano-Tuderte', 'Perugino-Trasimeno', 'Lunga percorrenza', 'Altri sentieri', 'Regioni confinanti'];
+  const order = [CUSTOM_SECTOR, ...SECTOR_ORDER];
   body.innerHTML = order.filter((g) => groups.has(g))
     .map((g) => `<div class="group-title">${esc(g)} (${groups.get(g).length})</div>${groups.get(g).map((t) => itemHtml(t)).join('')}`)
     .join('');
@@ -508,14 +510,15 @@ function renderSheet(d) {
       <h2>${esc(d.ref)} · ${esc(title(d))}</h2>
       <div class="sub">${esc(reversed ? toLabel : fromLabel)} → ${esc(reversed ? fromLabel : toLabel)}${loop ? ' (anello)' : ''} · ${esc(d.sector)}</div>
       <div class="chips">
-        ${d.scale ? `<span class="chip scale" title="${esc(SCALE_LABEL[d.scale] || '')}">${esc(d.scale)}</span>` : ''}
+        ${BIKE ? `<span class="chip scale" style="background:${trailColor(d)}">${KIND_LABEL[d.kind] || ''}</span>` : ''}
+        ${d.scale ? `<span class="chip ${BIKE ? '' : 'scale'}" title="${esc(SCALE_LABEL[d.scale] || '')}">${esc(d.scale)}</span>` : ''}
         <span class="chip">${fmtDist(d.len)}</span>
         ${d.up != null ? `<span class="chip">↑ ${reversed ? d.down : d.up} m · ↓ ${reversed ? d.up : d.down} m</span>` : ''}
         <span class="chip">⏱ ${fmtHours(h)} <small>(${src})</small></span>
       </div>
       <div class="plan" id="plan"></div>
       ${d.gaps ? `<div class="warn">La traccia ha ${d.gaps} ${d.gaps === 1 ? 'interruzione' : 'interruzioni'} nei dati: lì segui la segnaletica.</div>` : ''}
-      ${!saved && !navigator.onLine ? '<div class="warn">Sei offline e questo sentiero non è scaricato: la mappa potrebbe mancare.</div>' : ''}
+      ${!saved && !navigator.onLine ? `<div class="warn">Sei offline e questo ${W.one} non è scaricato: la mappa potrebbe mancare.</div>` : ''}
       ${desc ? `<div class="desc">${esc(desc.length > 280 ? `${desc.slice(0, 280)}…` : desc)}</div>` : ''}
       <div class="dir-title">Verso di percorrenza${loop ? ' (anello)' : ''}</div>
       <div class="dir-choice">
@@ -528,14 +531,14 @@ function renderSheet(d) {
       </div>
       <div class="progress" id="dl-progress" hidden><div></div></div>
       <div class="actions"><button id="btn-go" class="primary">▶ Inizia</button></div>
-      ${d.custom ? `<div class="src">Sentiero personale, salvato solo su questo telefono ·
+      ${d.custom ? `<div class="src">${W.One} personale, salvato solo su questo telefono ·
         <a href="#" id="btn-del-custom">elimina</a></div>`
     : `<div class="src">Dati © OpenStreetMap contributors (ODbL) ·
         <a href="https://www.openstreetmap.org/relation/${d.id}" target="_blank" rel="noopener">relazione ${d.id}</a>
         ${tags['survey:date'] ? ` · rilievo ${esc(tags['survey:date'])}` : ''}</div>`}`;
     $('#btn-del-custom')?.addEventListener('click', (e) => {
       e.preventDefault();
-      if (!confirm(`Eliminare il sentiero «${d.name}»?`)) return;
+      if (!confirm(`Eliminare il ${W.one} «${d.name}»?`)) return;
       removeCustom(d.name);
       location.reload();
     });
@@ -587,7 +590,7 @@ async function download(d, rerender) {
 }
 
 async function removeDownload(d, rerender) {
-  if (!confirm('Eliminare la mappa offline di questo sentiero?')) return;
+  if (!confirm(`Eliminare la mappa offline di questo ${W.one}?`)) return;
   await deleteTrail(d.id, d.custom ? null : trailUrl(d.id));
   toast('Mappa offline eliminata');
   rerender();
@@ -616,10 +619,12 @@ async function startNav(d, reversed) {
   nav.detail = d;
   nav.reversed = reversed;
   nav.track = buildTrack(d, reversed);
-  nav.guide = new Guide(nav.track);
+  nav.guide = new Guide(nav.track, GUIDE);
   nav.endName = endName(d, reversed);
   nav.follow = true;
   nav.last = null;
+  nav.prevMode = null;
+  if (ALERTS) unlockSound(); // il tocco su «Inizia» permette alla pagina di suonare
 
   if (!nav.map) {
     // in navigazione i crediti stanno su una riga sola, per lasciare spazio alla mappa
@@ -723,20 +728,32 @@ function onFix(p) {
 
   const dir = cardinal(r.targetBearing);
   if (r.weak) setBanner('weak', `Segnale GPS debole (±${Math.round(accuracy)} m)`);
-  else if (r.mode === 'off') setBanner('off', `⚠ FUORI SENTIERO · ${fmtDist(r.distToTrack)}`);
-  else if (r.mode === 'approach') setBanner('approach', `Raggiungi il sentiero · ${fmtDist(r.distToTrack)} verso ${dir}`);
+  else if (r.mode === 'off') setBanner('off', `⚠ FUORI ${W.one.toUpperCase()} · ${fmtDist(r.distToTrack)}`);
+  else if (r.mode === 'approach') setBanner('approach', `Raggiungi il ${W.one} · ${fmtDist(r.distToTrack)} verso ${dir}`);
   else if (r.mode === 'arrived') setBanner('arrived', '🏁 Arrivato!');
-  else setBanner('on', '✓ Sul sentiero');
+  else setBanner('on', `✓ Sul ${W.one}`);
+  if (ALERTS) soundAlert(r.mode);
 
   $('#nav-target').textContent = r.mode === 'on' ? `${fmtDist(r.remaining)}` : r.mode === 'arrived' ? 'Arrivo' : fmtDist(r.targetDist);
   nav.hint = r.mode === 'on' ? `all'arrivo · ↑${r.climb[0]} m ↓${r.climb[1]} m`
     : r.mode === 'arrived' ? 'Percorso completato'
-    : `Torna sul sentiero verso ${dir}`;
+    : `Torna sul ${W.one} verso ${dir}`;
   $('#nav-done').textContent = r.mode === 'approach' ? '–' : fmtDist(r.done);
   $('#nav-left').textContent = fmtDist(r.remaining);
   $('#nav-ele').textContent = r.ele != null ? `${Math.round(r.ele)} m` : '–';
   drawProfile($('#profile'), nav.track, r.done);
   renderArrow();
+}
+
+// Vibrazione e suono uscendo dal percorso, ripetuti ogni 30 s finché si resta fuori, e al rientro.
+const ALERT_REPEAT_MS = 30000;
+function soundAlert(mode) {
+  const now = Date.now();
+  if (mode === 'off' && (nav.prevMode !== 'off' || now - nav.alertAt > ALERT_REPEAT_MS)) {
+    alertOff();
+    nav.alertAt = now;
+  } else if (mode === 'on' && nav.prevMode === 'off') alertBack();
+  nav.prevMode = mode;
 }
 
 function onGeoError(e) {
@@ -846,8 +863,9 @@ function bind() {
   $('#nav-reverse').onclick = () => {
     nav.reversed = !nav.reversed;
     nav.track = buildTrack(nav.detail, nav.reversed);
-    nav.guide = new Guide(nav.track);
+    nav.guide = new Guide(nav.track, GUIDE);
     nav.endName = endName(nav.detail, nav.reversed);
+    nav.prevMode = null;
     drawNavTrack();
     try { localStorage.setItem(ACTIVE_KEY, JSON.stringify({ id: nav.detail.id, reversed: nav.reversed, at: Date.now() })); } catch { /* ignorato */ }
     drawProfile($('#profile'), nav.track, null);
@@ -856,6 +874,8 @@ function bind() {
   };
   $('#nav-center').onclick = () => { nav.follow = true; if (myPos) nav.map.setView(myPos, Math.max(nav.map.getZoom(), 16)); };
   window.addEventListener('resize', () => { if (!$('#nav').hidden && nav.track) drawProfile($('#profile'), nav.track, nav.last?.done ?? null); });
+  // dopo una navigazione ripresa all'avvio il suono si sblocca al primo tocco
+  if (ALERTS) document.addEventListener('pointerdown', unlockSound);
 }
 
 async function resumeIfActive() {
@@ -873,19 +893,22 @@ async function resumeIfActive() {
   } catch { /* traccia non disponibile */ }
 }
 
-// Riporta l'app come appena aperta: cancella preferenze, navigazione in corso, sentieri personali,
-// mappe scaricate, cache e service worker di questo sito. Serve quando Chrome non lascia
-// disinstallare e reinstallare l'app. Si può chiamare anche aprendo l'indirizzo con ?reset.
+// Riporta l'app come appena aperta: cancella preferenze, navigazione in corso, percorsi personali,
+// mappe scaricate, cache e service worker. Serve quando Chrome non lascia disinstallare e
+// reinstallare l'app. Si può chiamare anche aprendo l'indirizzo con ?reset.
+// Tocca solo questa versione: l'altra (a piedi o in bici) sullo stesso sito resta com'è.
 async function resetApp() {
   if (!confirm('Cancellare tutti i dati dell\'app su questo telefono?\n\n'
-    + 'Si perdono le mappe scaricate, i sentieri personali (si riaggiungono dal loro link) e le preferenze.')) return false;
-  try { localStorage.clear(); } catch { /* ignorato */ }
-  try { sessionStorage.clear(); } catch { /* ignorato */ }
+    + `Si perdono le mappe scaricate, i ${W.many} personali (si riaggiungono dal loro link) e le preferenze.`)) return false;
   try {
-    for (const k of await caches.keys()) await caches.delete(k);
+    for (const k of Object.keys(localStorage)) if (isOwnKey(k)) localStorage.removeItem(k);
+  } catch { /* ignorato */ }
+  try {
+    for (const k of await caches.keys()) if (isOwnKey(k)) await caches.delete(k);
   } catch { /* cache non disponibile */ }
   try {
-    for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
+    const scope = new URL('./', location.href).href;
+    for (const r of await navigator.serviceWorker.getRegistrations()) if (r.scope === scope) await r.unregister();
   } catch { /* service worker non disponibile */ }
   location.replace(location.pathname); // ricarica senza ?reset né #…
   return true;
@@ -903,17 +926,18 @@ async function main() {
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (hadController && $('#nav').hidden) location.reload();
     });
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    // updateViaCache 'none': anche i file importati dal service worker (bici/sw.js importa ../sw.js) si aggiornano subito
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {});
   }
   try {
     const r = await fetch('data/index.json');
     const idx = await r.json();
     const added = importFromHash();
-    if (added) setTimeout(() => toast(`Sentiero «${added}» aggiunto`), 500);
+    if (added) setTimeout(() => toast(`${W.One} «${added}» aggiunto`), 500);
     trails = [...loadCustom(), ...idx.trails];
     syncDataVersion(idx.generated).catch(() => {});
   } catch {
-    toast('Impossibile caricare l\'elenco dei sentieri', 6000);
+    toast(`Impossibile caricare l'elenco dei ${W.many}`, 6000);
     return;
   }
   byId = new Map(trails.map((t) => [t.id, t]));

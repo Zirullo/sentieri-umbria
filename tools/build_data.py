@@ -1,6 +1,7 @@
 """Converte i dati OSM + DEM nei file usati dalla PWA.
 
 Uso: python -P -E tools/build_data.py data/raw/osm_umbria.json data/raw/dem app/data
+     python -P -E tools/build_data.py --bici data/raw/osm_umbria_bici.json data/raw/dem app/bici/data
 
 Produce:
   app/data/index.json      elenco sentieri + geometria semplificata per la mappa generale
@@ -39,7 +40,14 @@ KEEP_TAGS = [
     "distance", "ascent", "descent", "roundtrip", "operator", "network", "osmc:symbol", "symbol:it",
     "description:it", "description", "note:it", "note", "website", "survey:date", "check_date", "ref:REI",
     "source", "ele:max", "ele:min",
+    "cai_scale:mtb", "cai_scale:mtb:uphill", "mtb:scale", "mtb:scale:uphill", "mtb:description", "mtb:type", "surface",
 ]
+
+MIN_ROUTE_M = 200  # relazioni quasi vuote (solo un cartello o pochi metri) non sono percorsi
+
+# mtb:scale (0–6) → scala CAI del cicloescursionismo, usata dal Sentiero Italia in bici
+MTB_SCALE = {"0": "TC", "1": "MC", "2": "BC", "3": "OC", "4": "EC", "5": "EC", "6": "EC"}
+LONG_BIKE_NETWORKS = ("icn", "ncn")
 
 R_EARTH = 6371008.8
 
@@ -186,6 +194,43 @@ def ascent_descent(eles, threshold=5.0):
     return round(up), round(down)
 
 
+STRUCT_M = 6  # un punto della traccia entro questa distanza da una galleria o da un ponte ne fa parte
+
+
+def load_structures(osm, lat0=43.0):
+    """Gallerie e ponti scaricati insieme ai percorsi, come indice spaziale in metri."""
+    lines = [LineString(to_xy([(p["lat"], p["lon"]) for p in e["geometry"]], lat0))
+             for e in osm["elements"] if e["type"] == "way" and len(e.get("geometry", [])) >= 2]
+    print(f"{len(lines)} gallerie e ponti")
+    return shapely.STRtree(lines) if lines else None
+
+
+def fix_structures(pts, tree, lat0=43.0):
+    """Nelle gallerie e sui ponti la quota del DEM è sbagliata: si interpola tra i punti all'aperto."""
+    if tree is None or len(pts) < 3:
+        return
+    xy = shapely.points(to_xy([(p[0], p[1]) for p in pts], lat0))
+    inside = set(tree.query(xy, predicate="dwithin", distance=STRUCT_M)[0].tolist())
+    n = len(pts)
+    i = 0
+    while i < n:
+        if i not in inside:
+            i += 1
+            continue
+        j = i
+        while j < n and j in inside:
+            j += 1
+        # tratto [i, j) in galleria o su un ponte, tra i punti all'aperto i-1 e j
+        ea = pts[i - 1][2] if i > 0 else None
+        eb = pts[j][2] if j < n else None
+        for k in range(i, j):
+            if ea is not None and eb is not None:
+                pts[k][2] = round(ea + (eb - ea) * (k - i + 1) / (j - i + 1))
+            elif ea is not None or eb is not None:
+                pts[k][2] = ea if ea is not None else eb
+        i = j
+
+
 def load_boundary(path: Path):
     """Poligono dell'Umbria (lon, lat) dalle way 'outer' della relazione amministrativa."""
     if not path.exists():
@@ -221,6 +266,19 @@ def sector_of(tags, inside):
     return "Altri sentieri"
 
 
+def bike_sector(tags, inside):
+    name = tags.get("name", "")
+    if (tags.get("network") in LONG_BIKE_NETWORKS or "Tappa" in name) and inside >= 0.2:
+        return "Itinerari a tappe"
+    if inside < 0.5:
+        return "Regioni confinanti"
+    return "Ciclovie" if tags.get("route") == "bicycle" else "Mountain bike"
+
+
+def bike_scale(tags):
+    return tags.get("cai_scale:mtb") or MTB_SCALE.get(tags.get("mtb:scale", "").strip()[:1], "")
+
+
 def is_cai(tags):
     """Sentiero del catasto CAI: operatore CAI, codice REI o rilievo CAI dichiarato."""
     op = tags.get("operator", "").lower()
@@ -232,19 +290,24 @@ def r5(v):
     return round(v, 5)
 
 
-def main(osm_path, dem_dir, out_dir):
+def main(osm_path, dem_dir, out_dir, bike=False):
     osm = json.load(open(osm_path, encoding="utf-8"))
     dem = Dem(Path(dem_dir))
     umbria = load_boundary(Path(osm_path).with_name("umbria_confine.json"))
+    structures = load_structures(osm)
     out = Path(out_dir)
     (out / "trails").mkdir(parents=True, exist_ok=True)
 
     rels = {e["id"]: e for e in osm["elements"] if e["type"] == "relation"}
+    # nomi ripetuti (es. le tappe "SICAI Ciclo"): si distinguono con partenza e arrivo
+    names = [t.get("name") for t in (r.get("tags", {}) for r in rels.values()) if t.get("from") and t.get("to")]
     index = []
     total_pts = 0
 
     for rid, rel in rels.items():
-        tags = rel.get("tags", {})
+        tags = dict(rel.get("tags", {}))
+        if tags.get("name") and names.count(tags["name"]) > 1 and tags.get("from") and tags.get("to"):
+            tags["name"] = f"{tags['name']}: {tags['from']} – {tags['to']}"
         members = rel.get("members", [])
         main_ways = [way_coords(m) for m in members if m["type"] == "way" and m.get("role", "") in MAIN_ROLES]
         extra_ways = [(m.get("role"), way_coords(m)) for m in members
@@ -270,12 +333,15 @@ def main(osm_path, dem_dir, out_dir):
             for lat, lon in s:
                 e = dem.ele(lat, lon)
                 pts.append([r5(lat), r5(lon), None if e is None else round(e)])
+            fix_structures(pts, structures)
             for a, b in zip(s, s[1:]):
                 length += haversine(*a, *b)
             all_eles += [p[2] for p in pts if p[2] is not None]
             detail_segs.append(pts)
             ov_segs.append([[round(lat, 4), round(lon, 4)] for lat, lon in simplify(seg, SIMPLIFY_OVERVIEW_M, lat0)])
             total_pts += len(pts)
+        if length < MIN_ROUTE_M:
+            continue
 
         extras = []
         for role, w in extra_ways:
@@ -287,14 +353,15 @@ def main(osm_path, dem_dir, out_dir):
         lats = [p[0] for p in flat]
         lons = [p[1] for p in flat]
         info = {k: tags[k] for k in KEEP_TAGS if k in tags}
+        inside = share_inside(umbria, flat)
         entry = {
             "id": rid,
             "ref": tags.get("ref", ""),
             "name": tags.get("name") or tags.get("name:it") or "",
             "from": tags.get("from", ""),
             "to": tags.get("to", ""),
-            "sector": sector_of(tags, share_inside(umbria, flat)),
-            "scale": tags.get("cai_scale", ""),
+            "sector": bike_sector(tags, inside) if bike else sector_of(tags, inside),
+            "scale": bike_scale(tags) if bike else tags.get("cai_scale", ""),
             "cai": is_cai(tags),
             "len": round(length),
             "up": up,
@@ -305,6 +372,8 @@ def main(osm_path, dem_dir, out_dir):
             "gaps": len(detail_segs) - 1,
             "geom": ov_segs,
         }
+        if bike:
+            entry["kind"] = "road" if tags.get("route") == "bicycle" else "mtb"
         index.append(entry)
         detail = {k: v for k, v in entry.items() if k != "geom"}
         detail.update({"tags": info, "segments": detail_segs, "extras": extras})
@@ -315,8 +384,9 @@ def main(osm_path, dem_dir, out_dir):
                                                 "trails": index}, ensure_ascii=False, separators=(",", ":")),
                                     encoding="utf-8")
     size = (out / "index.json").stat().st_size / 1e6
-    print(f"{len(index)} sentieri, {total_pts} punti di dettaglio, index.json {size:.2f} MB")
+    print(f"{len(index)} percorsi, {total_pts} punti di dettaglio, index.json {size:.2f} MB")
 
 
 if __name__ == "__main__":
-    main(*sys.argv[1:4])
+    args = [a for a in sys.argv[1:] if a != "--bici"]
+    main(*args[:3], bike="--bici" in sys.argv)

@@ -25,6 +25,16 @@ La riga 🏁 indica sempre distanza e direzione in linea d'aria della meta.
 Limiti: a schermo spento il browser non riceve il GPS, quindi niente avvisi;
 la bussola del telefono va ricalibrata ogni tanto (movimento a "8").
 
+Se l'app si blocca o Chrome non lascia reinstallarla: pulsante della mappa (fogli sovrapposti) →
+**Cancella tutti i dati dell'app**, oppure apri l'indirizzo con `?reset`.
+
+## Versione in bici
+
+`…/sentieri-umbria/bici/` è un'app a parte (**Bici Umbria**, icona blu) con ciclovie e percorsi MTB.
+Stessa guida, tarata sulla velocità della bici, e in più vibrazione e suono quando esci dal percorso
+o ci rientri. Filtri per tipo (ciclovia/MTB), difficoltà MTB (scala CAI TC–EC), lunghezza e salita.
+Dati, preferenze e mappe scaricate sono separati da quelli della versione a piedi.
+
 ## Dati
 
 - **Sentieri**: relazioni `route=hiking` di [OpenStreetMap](https://www.openstreetmap.org/copyright)
@@ -39,7 +49,14 @@ la bussola del telefono va ricalibrata ogni tanto (movimento a "8").
 python -I tools/fetch_osm.py data/raw/osm_umbria.json      # sentieri da Overpass
 python -I tools/fetch_dem.py data/raw/dem                   # solo la prima volta (~230 MB)
 python -P -E tools/build_data.py data/raw/osm_umbria.json data/raw/dem app/data
+
+# versione in bici: relazioni route=bicycle e route=mtb
+python -I tools/fetch_osm.py --bici data/raw/osm_umbria_bici.json
+python -P -E tools/build_data.py --bici data/raw/osm_umbria_bici.json data/raw/dem app/bici/data
 ```
+
+Insieme ai percorsi si scaricano gallerie e ponti: lì la quota si interpola tra gli estremi,
+perché il DEM darebbe quella della montagna sopra la galleria o del fondovalle sotto il ponte.
 
 `build_data.py` richiede `numpy`, `shapely`, `tifffile`, `imagecodecs`.
 
@@ -58,5 +75,6 @@ Ogni push su `main` esegue i test e pubblica la cartella `app/` su GitHub Pages.
 | `app/js/geo.js` | distanze, rotte, proiezione sulla traccia |
 | `app/js/compass.js` | bussola del telefono con ripiego sulla rotta GPS |
 | `app/js/offline.js` | scaricamento della mappa lungo un corridoio attorno al sentiero |
-| `app/js/plan.js` | tempo di percorrenza (DIN 33466) e tramonto |
-| `app/sw.js` | service worker per l'uso offline |
+| `app/js/plan.js` | tempo di percorrenza (DIN 33466 a piedi, stima in bici) e tramonto |
+| `app/js/config.js` | differenze tra versione a piedi e in bici (`<html data-mode="bici">`) |
+| `app/sw.js` | service worker per l'uso offline (`bici/sw.js` lo importa con cache proprie) |

@@ -1,18 +1,23 @@
 // Service worker: app e dati disponibili senza rete.
+// Serve anche la versione in bici: bici/sw.js imposta self.APP e importa questo file.
+// Le due app stanno sullo stesso sito, quindi le cache hanno nomi distinti (prefisso).
+const APP = self.APP || { prefix: '', shared: '' };
 const VERSION = 'v1';
-const SHELL_CACHE = `shell-${VERSION}`;
-const TRAIL_CACHE = 'trails-v1';
-const TILE_CACHE = 'tiles-v1';        // riquadri scaricati esplicitamente
-const SEEN_CACHE = 'tiles-seen-v1';   // riquadri visti navigando online (limitati)
+const SHELL_CACHE = `${APP.prefix}shell-${VERSION}`;
+const TRAIL_CACHE = `${APP.prefix}trails-v1`;      // nomi uguali a quelli di js/offline.js
+const TILE_CACHE = `${APP.prefix}tiles-v1`;        // riquadri scaricati esplicitamente
+const SEEN_CACHE = `${APP.prefix}tiles-seen-v1`;   // riquadri visti navigando online (limitati)
 const SEEN_MAX = 2500;
 
-const SHELL = [
-  './', 'index.html', 'manifest.webmanifest', 'css/app.css',
-  'js/app.js', 'js/geo.js', 'js/nav.js', 'js/compass.js', 'js/offline.js', 'js/plan.js', 'js/profile.js', 'js/custom.js', 'js/filters.js', 'js/basemap.js',
+// file propri di ciascuna app (nella sua cartella) e file comuni (nella cartella principale)
+const OWN = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'data/index.json'];
+const SHARED = [
+  'css/app.css',
+  'js/app.js', 'js/geo.js', 'js/nav.js', 'js/compass.js', 'js/offline.js', 'js/plan.js', 'js/profile.js', 'js/custom.js',
+  'js/filters.js', 'js/basemap.js', 'js/config.js', 'js/alert.js',
   'vendor/leaflet/leaflet.js', 'vendor/leaflet/leaflet.css',
-  'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png',
-  'data/index.json',
 ];
+const SHELL = [...OWN, ...SHARED.map((f) => APP.shared + f)];
 
 self.addEventListener('install', (e) => {
   // cache: 'reload' scavalca la cache HTTP (GitHub Pages la tiene 10 minuti), altrimenti si precaricherebbero file vecchi
@@ -23,7 +28,7 @@ self.addEventListener('install', (e) => {
 
 self.addEventListener('activate', (e) => {
   e.waitUntil((async () => {
-    for (const k of await caches.keys()) if (k.startsWith('shell-') && k !== SHELL_CACHE) await caches.delete(k);
+    for (const k of await caches.keys()) if (k.startsWith(`${APP.prefix}shell-`) && k !== SHELL_CACHE) await caches.delete(k);
     await self.clients.claim();
   })());
 });
@@ -73,6 +78,8 @@ self.addEventListener('fetch', (e) => {
     return;
   }
   if (url.origin !== location.origin) return;
+  // la versione in bici ha il suo service worker: le sue pagine e i suoi dati non finiscono in queste cache
+  if (!APP.prefix && url.pathname.startsWith(new URL('bici/', self.registration.scope).pathname)) return;
   if (url.pathname.includes('/data/trails/')) {
     e.respondWith(trail(req));
     return;

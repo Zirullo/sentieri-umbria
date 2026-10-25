@@ -9,6 +9,12 @@ export function walkHours(lenM, up, down) {
   return Math.max(h, v) + Math.min(h, v) / 2;
 }
 
+// Tempo in bici (ore), stima per chi pedala con calma e qualche sosta:
+// in piano 15 km/h su ciclovia e 12 km/h in MTB, più il tempo della salita (600 o 500 m/h).
+export function rideHours(lenM, up, mtb = false) {
+  return lenM / 1000 / (mtb ? 12 : 15) + (up || 0) / (mtb ? 500 : 600);
+}
+
 // "2:30" / "PT2H30M" / "02:30:00" → ore decimali
 export function parseDuration(s) {
   if (!s) return null;
@@ -46,13 +52,6 @@ export function sunset(date, lat, lon) {
   const H = Math.acos(cosH) / rad / 360;
   return new Date(Date.UTC(2000, 0, 1, 12) + (Jtransit + H) * 86400000);
 }
-
-export const SCALE_LABEL = {
-  T: 'Turistico',
-  E: 'Escursionistico',
-  EE: 'Escursionisti Esperti',
-  EEA: 'Esperti con Attrezzatura',
-};
 
 export const directionsUrl = (lat, lon) =>
   `https://www.google.com/maps/dir/?api=1&destination=${lat.toFixed(5)},${lon.toFixed(5)}&travelmode=driving`;

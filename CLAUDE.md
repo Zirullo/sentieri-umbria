@@ -32,10 +32,18 @@ Rigenerare i dati: vedi README. `build_data.py` va lanciato con `python -P -E` (
 - Le icone piccole negli screenshot ingannano: verificare orientamenti e posizioni con misure
   (`getScreenCTM`, `getBoundingClientRect`), non a occhio.
 
+## Due versioni: a piedi e in bici
+
+- `app/` è la versione a piedi, `app/bici/` quella in bici: pagina, manifest, icone, dati e `sw.js` propri,
+  codice e CSS comuni (`../js`, `../css`). Le differenze stanno in `app/js/config.js`, scelte da
+  `<html data-mode="bici">`. Ogni modifica a `index.html` va ripetuta in `bici/index.html` (un test confronta gli id).
+- Stesso sito: chiavi di `localStorage` e nomi delle cache della bici hanno il prefisso `bici-` (`KEY_PREFIX`).
+- Test nel browser della bici: `http://127.0.0.1:8765/bici/?sim`.
+
 ## Vincoli
 
-- Il service worker precarica l'elenco `SHELL` in `app/sw.js`: ogni nuovo modulo JS va aggiunto lì
-  (`tests/shell.test.mjs` lo controlla).
+- Il service worker precarica gli elenchi `OWN` e `SHARED` in `app/sw.js`: ogni nuovo modulo JS va aggiunto
+  a `SHARED` (`tests/shell.test.mjs` lo controlla).
 - Logica di guida in `app/js/nav.js`, coperta dai test: ogni modifica va verificata anche con `noise_report`.
 - Mai mettere coordinate personali nel repository (è pubblico): i sentieri personali passano dal link
   `#sentiero=Nome|lat,lon;…` e restano nel `localStorage` del telefono.

@@ -1,8 +1,9 @@
 // Sfondo della mappa: topografica, satellite o stradale. La scelta vale per tutte le mappe e resta sul telefono.
 // La topografica rimane sempre sotto: è l'unica scaricata per l'offline, così senza rete,
 // al posto del satellite o della stradale, si vede comunque quella.
+import { KEY_PREFIX } from './config.js';
 
-const KEY = 'basemap';
+const KEY = `${KEY_PREFIX}basemap`;
 const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services';
 
 export const BASEMAPS = {

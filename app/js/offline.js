@@ -1,17 +1,22 @@
 // Scaricamento della mappa e della traccia di un sentiero per l'uso senza rete.
 import { latToTileY, lonToTileX } from './geo.js';
+import { BIKE, KEY_PREFIX } from './config.js';
 
-export const TILE_CACHE = 'tiles-v1';
-export const TRAIL_CACHE = 'trails-v1';
+// nomi uguali a quelli del service worker (sw.js)
+export const TILE_CACHE = `${KEY_PREFIX}tiles-v1`;
+export const TRAIL_CACHE = `${KEY_PREFIX}trails-v1`;
 export const TILE_URL = 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png';
 export const MAX_NATIVE_ZOOM = 16;
 const BBOX_ZOOMS = [10, 11, 12, 13];   // panoramica: tutto il riquadro del sentiero
 // dettaglio: corridoio attorno alla traccia, più largo ai livelli meno dettagliati,
-// così anche chi si allontana parecchio ha ancora una mappa per orientarsi
-const CORRIDOR_M = { 14: 2000, 15: 1000, 16: 500 };
+// così anche chi si allontana parecchio ha ancora una mappa per orientarsi.
+// In bici i percorsi sono lunghi e si resta su strade e piste: corridoio più stretto.
+const CORRIDOR_M = BIKE ? { 14: 1000, 15: 400, 16: 200 } : { 14: 2000, 15: 1000, 16: 500 };
 const BBOX_PAD_M = 3000;
+// oltre ~100 MB lo scaricamento pesa troppo sul telefono e sul server delle mappe
+export const MAX_TILES = 4000;
 const CONCURRENCY = 4;
-const REGISTRY_KEY = 'offline-trails';
+const REGISTRY_KEY = `${KEY_PREFIX}offline-trails`;
 
 // Chiave unica in cache, indipendente dal sottodominio a/b/c.
 export const tileKey = (z, x, y) => `https://tile.opentopomap.org/${z}/${x}/${y}.png`;
@@ -58,6 +63,8 @@ function saveRegistry(r) {
 export const isDownloaded = (id) => !!registry()[id]?.complete;
 
 export async function downloadTrail(trail, trailUrl, onProgress, signal) {
+  const tiles = tilesFor(trail);
+  if (tiles.length > MAX_TILES) throw new Error('troppo lungo da scaricare, scarica le singole tappe');
   if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
   if (trailUrl) { // i sentieri personali non hanno un file sul server
     const trailCache = await caches.open(TRAIL_CACHE);
@@ -66,7 +73,6 @@ export async function downloadTrail(trail, trailUrl, onProgress, signal) {
     await trailCache.put(new URL(trailUrl, location.href).href, res);
   }
 
-  const tiles = tilesFor(trail);
   const cache = await caches.open(TILE_CACHE);
   let done = 0;
   let failed = 0;
@@ -124,7 +130,7 @@ export async function deleteTrail(id, trailUrl) {
 
 // Quando i dati vengono rigenerati, le tracce già in cache vanno aggiornate per restare coerenti con l'indice.
 export async function syncDataVersion(version) {
-  const KEY = 'data-version';
+  const KEY = `${KEY_PREFIX}data-version`;
   let stored = null;
   try { stored = localStorage.getItem(KEY); } catch { return; }
   if (!version || stored === version) return;
