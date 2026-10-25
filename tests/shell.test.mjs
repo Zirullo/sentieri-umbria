@@ -37,3 +37,8 @@ test('le due app hanno la stessa struttura e cartelle sorelle', () => {
     assert.equal(m.start_url, './');
   }
 });
+
+test('la versione delle app è 1.0 o 1.xx (1.01, 1.02, …)', async () => {
+  const { VERSION } = await import(new URL('js/config.js', app));
+  assert.match(VERSION, /^1\.(0|\d\d)$/);
+});

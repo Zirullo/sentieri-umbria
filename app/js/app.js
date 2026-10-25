@@ -7,7 +7,7 @@ import { directionsUrl, fmtHours, fmtTime, parseDuration, rideHours, sunset, wal
 import { CUSTOM_SECTOR, importFromHash, loadCustom, removeCustom } from './custom.js';
 import { FILTERS, MAIN_ROAD_MAX, activeCount, isLoop, loadFilters, matches, noFilters, saveFilters } from './filters.js';
 import { BASEMAPS, addBaseMap, currentBase, setBase } from './basemap.js';
-import { ALERTS, BIKE, CLASSES, GUIDE, KEY_PREFIX, KIND_LABEL, LABEL_MIN_ZOOM, NO_CLASS_COLOR, SCALE_LABEL, SECTOR_ORDER, W, isOwnKey } from './config.js';
+import { ALERTS, BIKE, CLASSES, GUIDE, KEY_PREFIX, KIND_LABEL, LABEL_MIN_ZOOM, NO_CLASS_COLOR, SCALE_LABEL, SECTOR_ORDER, VERSION, W, isOwnKey } from './config.js';
 import { alertBack, alertOff, unlockSound } from './alert.js';
 
 const $ = (s) => document.querySelector(s);
@@ -343,7 +343,8 @@ function toggleMapPanel(btn) {
       ${cur !== 'topo' ? '<div class="mp-note">Senza rete si vede solo la topografica.</div>' : ''}
       <div class="mp-title">Legenda</div>
       ${legendRows(btn.id === 'nav-layers').map(([sym, text]) => `<div class="lg-row"><span class="lg-sym">${sym}</span><span>${text}</span></div>`).join('')}
-      <button class="mp-reset">Cancella tutti i dati dell'app…</button>`;
+      <button class="mp-reset">Cancella tutti i dati dell'app…</button>
+      <div class="mp-ver">Versione ${VERSION}</div>`;
   };
   render();
   panel.onclick = (e) => {

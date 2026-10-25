@@ -88,6 +88,7 @@ main { position: fixed; inset: calc(61px + var(--safe-t)) 0 0 0; }
 .mp-bases button { flex: 1; min-height: 40px; padding: 4px 2px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); font-size: 13px; }
 .mp-bases button.on { border: 2px solid var(--accent); font-weight: 700; }
 .mp-note { margin-top: 6px; font-size: 12px; color: var(--muted); }
+.mp-ver { padding: 0 8px; font-size: 12px; color: var(--muted); }
 .lg-row { display: flex; align-items: center; gap: 8px; min-height: 26px; line-height: 1.2; }
 .lg-sym { flex: none; width: 34px; display: flex; justify-content: center; }
 .lg-sw { display: block; width: 28px; height: 10px; }

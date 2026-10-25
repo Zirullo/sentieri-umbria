@@ -46,6 +46,9 @@ Rigenerare i dati: vedi README. `build_data.py` va lanciato con `python -P -E` (
 
 ## Vincoli
 
+- Versione unica per le due app in `app/js/config.js` (`VERSION`, visibile in fondo al pannello della legenda):
+  a ogni rilascio pubblicato va incrementata di uno, 1.0 → 1.01 → 1.02 … (formato controllato dai test).
+
 - Il service worker precarica gli elenchi `OWN` e `SHARED` in `app/sw-core.js`: ogni nuovo modulo JS va aggiunto
   a `SHARED` (`tests/shell.test.mjs` lo controlla).
 - Logica di guida in `app/js/nav.js`, coperta dai test: ogni modifica va verificata anche con `noise_report`.
