@@ -34,11 +34,18 @@
     a.app b { display: block; font-size: 19px; }
     a.app span { color: #5f6368; font-size: 14px; }
     small { display: block; margin-top: 8px; color: #5f6368; }
+    #vecchia { margin-bottom: 20px; padding: 14px 16px; border-radius: 12px; background: #fff3e0; color: #5d3a00; }
+    #vecchia b { display: block; margin-bottom: 4px; }
   </style>
 </head>
 <body>
   <main>
     <h1>Sentieri Umbria</h1>
+    <div id="vecchia" hidden>
+      <b>Questa è la vecchia app</b>
+      Disinstallala (tieni premuta l'icona → Disinstalla), poi apri qui sotto l'app che ti serve e installala
+      dal menu ⋮ di Chrome. Finché la vecchia resta sul telefono, Chrome dice «già installata».
+    </div>
     <p>Scegli l'app: ognuna si installa sul telefono per conto suo.</p>
     <a class="app" href="piedi/">
       <img src="piedi/icons/icon-192.png" alt="">
@@ -51,6 +58,8 @@
     <small>Per installarla: apri l'app, poi menu ⋮ di Chrome → «Installa app».</small>
   </main>
   <script>
+    // aperta come app installata = icona della vecchia app in radice, il cui ambito contiene piedi/ e bici/
+    if (matchMedia('(display-mode: standalone)').matches) document.getElementById('vecchia').hidden = false;
     // il vecchio service worker della cartella principale non serve più (vedi sw.js)
     navigator.serviceWorker?.getRegistrations().then((rs) => {
       for (const r of rs) if (r.scope === new URL('./', location.href).href) r.unregister();
