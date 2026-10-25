@@ -45,6 +45,16 @@ KEEP_TAGS = [
 
 MIN_ROUTE_M = 200  # relazioni quasi vuote (solo un cartello o pochi metri) non sono percorsi
 
+# Strade principali, dove il traffico è veloce e può essere pericoloso: statali e regionali/provinciali
+# di primo livello (primary, secondary). Non contano le provinciali minori di collegamento tra paesi
+# (tertiary, in Umbria spesso tranquille), le strade comunali, di campagna o residenziali,
+# né i tratti chiusi alle auto o con una pista ciclabile separata dalla carreggiata (cycleway=track).
+MAIN_HIGHWAYS = {
+    "motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link", "secondary", "secondary_link",
+}
+NO_CARS = {"no", "private", "agricultural", "forestry", "delivery", "permit"}
+CYCLEWAY_KEYS = ("cycleway", "cycleway:both", "cycleway:right", "cycleway:left")
+
 # mtb:scale (0–6) → scala CAI del cicloescursionismo, usata dal Sentiero Italia in bici
 MTB_SCALE = {"0": "TC", "1": "MC", "2": "BC", "3": "OC", "4": "EC", "5": "EC", "6": "EC"}
 LONG_BIKE_NETWORKS = ("icn", "ncn")
@@ -266,6 +276,40 @@ def sector_of(tags, inside):
     return "Altri sentieri"
 
 
+def is_main_road(tags):
+    if tags.get("highway") not in MAIN_HIGHWAYS:
+        return False
+    if any(tags.get(k) in NO_CARS for k in ("motor_vehicle", "motorcar", "vehicle", "access")):
+        return False
+    return not any(tags.get(k) == "track" for k in CYCLEWAY_KEYS)
+
+
+def main_road_share(members, way_tags):
+    """Quota della lunghezza del percorso su strade principali (0–1), o None se le strade non sono note."""
+    total = main = 0.0
+    for m in members:
+        if m["type"] != "way" or m.get("role", "") not in MAIN_ROLES or m["ref"] not in way_tags:
+            continue
+        length = seg_len(way_coords(m))
+        total += length
+        if is_main_road(way_tags[m["ref"]]):
+            main += length
+    return round(main / total, 2) if total else None
+
+
+def bike_codes(index):
+    """Codice breve per etichette ed elenco: il numero ufficiale se c'è ed è unico,
+    altrimenti C1, C2… per le ciclovie e M1, M2… per la MTB, in ordine di relazione OSM (stabile)."""
+    refs = [e["ref"] for e in index]
+    counters = {"road": 0, "mtb": 0}
+    for e in sorted(index, key=lambda e: e["id"]):
+        ref = e["ref"].strip()
+        if ref and len(ref) <= 6 and refs.count(e["ref"]) == 1:
+            continue
+        counters[e["kind"]] += 1
+        e["ref"] = f"{'C' if e['kind'] == 'road' else 'M'}{counters[e['kind']]}"
+
+
 def bike_sector(tags, inside):
     name = tags.get("name", "")
     if (tags.get("network") in LONG_BIKE_NETWORKS or "Tappa" in name) and inside >= 0.2:
@@ -299,9 +343,11 @@ def main(osm_path, dem_dir, out_dir, bike=False):
     (out / "trails").mkdir(parents=True, exist_ok=True)
 
     rels = {e["id"]: e for e in osm["elements"] if e["type"] == "relation"}
+    way_tags = {e["id"]: e["tags"] for e in osm["elements"] if e["type"] == "way" and "tags" in e and "highway" in e["tags"]}
     # nomi ripetuti (es. le tappe "SICAI Ciclo"): si distinguono con partenza e arrivo
     names = [t.get("name") for t in (r.get("tags", {}) for r in rels.values()) if t.get("from") and t.get("to")]
     index = []
+    details = {}
     total_pts = 0
 
     for rid, rel in rels.items():
@@ -370,14 +416,25 @@ def main(osm_path, dem_dir, out_dir, bike=False):
             "start": flat[0][:2],
             "end": flat[-1][:2],
             "gaps": len(detail_segs) - 1,
+            "main": main_road_share(members, way_tags),
             "geom": ov_segs,
         }
         if bike:
             entry["kind"] = "road" if tags.get("route") == "bicycle" else "mtb"
         index.append(entry)
-        detail = {k: v for k, v in entry.items() if k != "geom"}
-        detail.update({"tags": info, "segments": detail_segs, "extras": extras})
-        (out / "trails" / f"{rid}.json").write_text(json.dumps(detail, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        details[rid] = {"tags": info, "segments": detail_segs, "extras": extras}
+
+    if bike:
+        bike_codes(index)
+    # file di dettaglio scritti alla fine, quando i codici delle etichette sono definitivi
+    for entry in index:
+        detail = {k: v for k, v in entry.items() if k != "geom"} | details[entry["id"]]
+        (out / "trails" / f"{entry['id']}.json").write_text(json.dumps(detail, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    # percorsi spariti da OSM (o scartati): via anche i loro file
+    keep = {f"{e['id']}.json" for e in index}
+    for f in (out / "trails").glob("*.json"):
+        if f.name not in keep:
+            f.unlink()
 
     index.sort(key=lambda e: (e["sector"], e["ref"].zfill(6), e["name"]))
     (out / "index.json").write_text(json.dumps({"generated": osm.get("osm3s", {}).get("timestamp_osm_base"),

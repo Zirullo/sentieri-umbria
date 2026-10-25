@@ -10,8 +10,9 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-# Oltre alle relazioni, gallerie e ponti dei percorsi: lì il DEM dà la quota della montagna
-# o del fondovalle, non quella del percorso.
+# Oltre alle relazioni: gallerie e ponti dei percorsi (lì il DEM dà la quota della montagna
+# o del fondovalle, non quella del percorso) e le etichette di tutte le strade che li compongono
+# (per sapere quanta parte del percorso è su strade principali, con traffico).
 QUERY = """
 [out:json][timeout:600];
 area["name"="Umbria"]["admin_level"="4"]["boundary"="administrative"]->.u;
@@ -19,6 +20,8 @@ relation["type"="route"]["route"="hiking"](area.u)->.r;
 .r out geom;
 (way(r.r)["tunnel"]["tunnel"!="no"]; way(r.r)["bridge"]["bridge"!="no"];);
 out geom;
+way(r.r);
+out tags;
 """
 
 BIKE_QUERY = QUERY.replace('["route"="hiking"]', '["route"~"^(bicycle|mtb)$"]')

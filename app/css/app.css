@@ -177,6 +177,7 @@ main { position: fixed; inset: calc(61px + var(--safe-t)) 0 0 0; }
 .peek .chips { margin: 8px 0; gap: 4px; }
 .peek .chip { font-size: 13px; padding: 3px 8px; }
 .chip.ok { background: var(--green-soft); color: var(--green); }
+.chip.warn-chip { background: #fff4e0; color: #8a5300; }
 .peek-open {
   display: block; width: 100%; min-height: 44px; border: 1px solid var(--accent); border-radius: 12px;
   background: var(--bg); color: var(--accent); font-weight: 700; font-size: 15px;

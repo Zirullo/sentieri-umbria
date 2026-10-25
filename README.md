@@ -57,6 +57,12 @@ python -P -E tools/build_data.py --bici data/raw/osm_umbria_bici.json data/raw/d
 
 Insieme ai percorsi si scaricano gallerie e ponti: lì la quota si interpola tra gli estremi,
 perché il DEM darebbe quella della montagna sopra la galleria o del fondovalle sotto il ponte.
+Si scaricano anche le etichette di tutte le strade dei percorsi, per calcolare la quota su strade
+principali (statali, regionali, provinciali senza pista ciclabile separata): il filtro
+«Evita strade principali» esclude i percorsi che ne hanno più del 10%.
+
+Nella versione in bici ogni percorso ha un codice breve per etichette e ricerca: il numero ufficiale
+se c'è ed è unico, altrimenti C1, C2… (ciclovie) e M1, M2… (MTB), in ordine di relazione OSM.
 
 `build_data.py` richiede `numpy`, `shapely`, `tifffile`, `imagecodecs`.
 

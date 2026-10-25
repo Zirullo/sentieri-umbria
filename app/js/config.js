@@ -51,6 +51,9 @@ export const SECTOR_ORDER = BIKE
   : ['Alto Tevere', 'Alto Chiascio', 'Valle Umbra Nord', 'Valle Spoletina', 'Valnerina', 'Valle del Nera',
     'Amerino', 'Orvietano-Tuderte', 'Perugino-Trasimeno', 'Lunga percorrenza', 'Altri sentieri', 'Regioni confinanti'];
 
+// Etichette col numero sulla mappa: i percorsi in bici sono pochi e lunghi, si leggono anche da più lontano.
+export const LABEL_MIN_ZOOM = BIKE ? 10 : 12;
+
 // Guida: in bici si va più veloci, quindi tra due fix GPS si fa più strada e la freccia guarda più avanti.
 export const GUIDE = BIKE ? { maxSpeed: 14, lookahead: 60 } : { maxSpeed: 2.5, lookahead: 35 };
 

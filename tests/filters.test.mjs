@@ -40,6 +40,15 @@ test('in bici: tipo, difficoltà MTB, lunghezza', () => {
   assert.ok(!ok(mtb, f({ climb: 1 }, B), 3, B));     // ≤ 500 m
 });
 
+test('strade principali: al massimo il 10% del percorso, in entrambe le versioni', () => {
+  for (const groups of [H, BIKE_FILTERS]) {
+    const q = f({ quiet: true }, groups);
+    assert.ok(ok({ ...base, kind: 'road', main: 0.1 }, q, 3, groups));
+    assert.ok(!ok({ ...base, kind: 'road', main: 0.11 }, q, 3, groups));
+    assert.ok(!ok({ ...base, kind: 'road', main: null }, q, 3, groups)); // strade non note: escluso
+  }
+});
+
 test('anelli e percorsi personali', () => {
   const ring = { ...base, end: [43.0005, 12.5] };
   assert.ok(isLoop(ring));

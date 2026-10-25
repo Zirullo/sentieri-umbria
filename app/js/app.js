@@ -5,9 +5,9 @@ import { drawProfile } from './profile.js';
 import { MAX_NATIVE_ZOOM, TILE_URL, deleteTrail, downloadTrail, isDownloaded, registry, syncDataVersion } from './offline.js';
 import { directionsUrl, fmtHours, fmtTime, parseDuration, rideHours, sunset, walkHours } from './plan.js';
 import { CUSTOM_SECTOR, importFromHash, loadCustom, removeCustom } from './custom.js';
-import { FILTERS, activeCount, isLoop, loadFilters, matches, noFilters, saveFilters } from './filters.js';
+import { FILTERS, MAIN_ROAD_MAX, activeCount, isLoop, loadFilters, matches, noFilters, saveFilters } from './filters.js';
 import { BASEMAPS, addBaseMap, currentBase, setBase } from './basemap.js';
-import { ALERTS, BIKE, CLASSES, GUIDE, KEY_PREFIX, KIND_LABEL, NO_CLASS_COLOR, SCALE_LABEL, SECTOR_ORDER, W, isOwnKey } from './config.js';
+import { ALERTS, BIKE, CLASSES, GUIDE, KEY_PREFIX, KIND_LABEL, LABEL_MIN_ZOOM, NO_CLASS_COLOR, SCALE_LABEL, SECTOR_ORDER, W, isOwnKey } from './config.js';
 import { alertBack, alertOff, unlockSound } from './alert.js';
 
 const $ = (s) => document.querySelector(s);
@@ -44,6 +44,11 @@ function tileLayer() {
   return L.tileLayer(TILE_URL, { subdomains: 'abc', maxNativeZoom: MAX_NATIVE_ZOOM, maxZoom: 18, attribution: ATTRIB, crossOrigin: true });
 }
 
+// Quota su strade principali (statali, regionali, provinciali): evidenziata oltre la soglia del filtro.
+const mainPct = (t) => Math.round((t.main || 0) * 100);
+const mainRoadChip = (t) => (mainPct(t) >= 1
+  ? `<span class="chip${t.main > MAIN_ROAD_MAX ? ' warn-chip' : ''}">🚗 ${mainPct(t)}% su strade principali</span>` : '');
+
 function hoursOf(t, reversed = false) {
   const tag = t.tags?.[reversed ? 'duration:backward' : 'duration:forward'];
   const h = parseDuration(tag);
@@ -55,7 +60,6 @@ function hoursOf(t, reversed = false) {
 
 /* ---------- Mappa generale ---------- */
 
-const LABEL_MIN_ZOOM = 12;
 const LABEL_MAX = 120;
 const TAP_PX = 28; // raggio di tocco: circa un polpastrello
 
@@ -273,6 +277,7 @@ function renderPeek(t) {
     t.up != null ? `<span class="chip">↑ ${t.up} m</span>` : '',
     `<span class="chip">⏱ ${fmtHours(hoursOf(t).h)}</span>`,
     loop ? '<span class="chip">↻ anello</span>' : '',
+    mainRoadChip(t),
     myPos ? `<span class="chip">📍 ${fmtDist(distToTrail(t, myPos))} da te</span>` : '',
     isDownloaded(t.id) ? '<span class="chip ok">✓ offline</span>' : '',
   ].join('');
@@ -321,7 +326,7 @@ function legendRows(inNav) {
     ...CLASSES.map((c) => [swatch(c.color), c.label]),
     ...(BIKE ? [] : [[swatch(NO_CLASS_COLOR), 'difficoltà non indicata']]),
     [swatch('#ff6f00', 6), `${W.one} selezionato`],
-    [`<span class="lg-num">${BIKE ? 'SI-C' : '210'}</span>`, `numero del ${W.one} (da vicino)`],
+    [`<span class="lg-num">${BIKE ? 'M3' : '210'}</span>`, BIKE ? 'codice del percorso: C ciclovia, M MTB' : 'numero del sentiero (da vicino)'],
     [dot('#1565c0'), 'la tua posizione'],
   ];
 }
@@ -360,7 +365,8 @@ function distToTrail(t, p) {
 
 function itemHtml(t, extra = '') {
   const h = hoursOf(t).h;
-  const sub = [BIKE && KIND_LABEL[t.kind], t.scale, fmtDist(t.len), t.up != null ? `↑${t.up} m` : null, fmtHours(h), extra].filter(Boolean).join(' · ');
+  const sub = [BIKE && KIND_LABEL[t.kind], t.scale, fmtDist(t.len), t.up != null ? `↑${t.up} m` : null, fmtHours(h),
+    t.main > MAIN_ROAD_MAX ? `🚗 ${mainPct(t)}%` : null, extra].filter(Boolean).join(' · ');
   const saved = isDownloaded(t.id) ? ' ✓' : '';
   return `<button class="item" data-id="${t.id}">
     <span class="ref"><span>${esc(t.ref || '–')}</span></span>
@@ -515,6 +521,7 @@ function renderSheet(d) {
         <span class="chip">${fmtDist(d.len)}</span>
         ${d.up != null ? `<span class="chip">↑ ${reversed ? d.down : d.up} m · ↓ ${reversed ? d.up : d.down} m</span>` : ''}
         <span class="chip">⏱ ${fmtHours(h)} <small>(${src})</small></span>
+        ${mainRoadChip(d)}
       </div>
       <div class="plan" id="plan"></div>
       ${d.gaps ? `<div class="warn">La traccia ha ${d.gaps} ${d.gaps === 1 ? 'interruzione' : 'interruzioni'} nei dati: lì segui la segnaletica.</div>` : ''}
