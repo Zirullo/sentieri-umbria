@@ -83,6 +83,10 @@ main { position: fixed; inset: calc(61px + var(--safe-t)) 0 0 0; }
 .lg-sw { display: block; width: 28px; height: 10px; }
 .lg-dot { display: block; width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.35); }
 .lg-num { padding: 0 4px; border: 2px solid var(--red); border-radius: 5px; font-weight: 800; font-size: 11px; line-height: 1.3; }
+.mp-reset {
+  display: block; width: 100%; margin-top: 12px; padding: 8px; border: none; border-top: 1px solid var(--line);
+  background: none; color: var(--muted); font-size: 13px; text-align: left;
+}
 
 /* Elenco */
 .list { position: absolute; inset: 0; overflow-y: auto; background: var(--bg); z-index: 1050; padding-bottom: 40px; }

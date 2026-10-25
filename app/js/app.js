@@ -334,12 +334,14 @@ function toggleMapPanel(btn) {
       <div class="mp-bases">${Object.entries(BASEMAPS).map(([k, b]) => `<button data-base="${k}" class="${k === cur ? 'on' : ''}">${b.label}</button>`).join('')}</div>
       ${cur !== 'topo' ? '<div class="mp-note">Senza rete si vede solo la topografica.</div>' : ''}
       <div class="mp-title">Legenda</div>
-      ${legendRows(btn.id === 'nav-layers').map(([sym, text]) => `<div class="lg-row"><span class="lg-sym">${sym}</span><span>${text}</span></div>`).join('')}`;
+      ${legendRows(btn.id === 'nav-layers').map(([sym, text]) => `<div class="lg-row"><span class="lg-sym">${sym}</span><span>${text}</span></div>`).join('')}
+      <button class="mp-reset">Cancella tutti i dati dell'app…</button>`;
   };
   render();
   panel.onclick = (e) => {
     const b = e.target.closest('[data-base]');
     if (b) { setBase(b.dataset.base); render(); }
+    if (e.target.closest('.mp-reset')) resetApp();
   };
   panel.style.top = `${btn.getBoundingClientRect().bottom + 8}px`;
   panel.hidden = false;
@@ -871,8 +873,30 @@ async function resumeIfActive() {
   } catch { /* traccia non disponibile */ }
 }
 
+// Riporta l'app come appena aperta: cancella preferenze, navigazione in corso, sentieri personali,
+// mappe scaricate, cache e service worker di questo sito. Serve quando Chrome non lascia
+// disinstallare e reinstallare l'app. Si può chiamare anche aprendo l'indirizzo con ?reset.
+async function resetApp() {
+  if (!confirm('Cancellare tutti i dati dell\'app su questo telefono?\n\n'
+    + 'Si perdono le mappe scaricate, i sentieri personali (si riaggiungono dal loro link) e le preferenze.')) return false;
+  try { localStorage.clear(); } catch { /* ignorato */ }
+  try { sessionStorage.clear(); } catch { /* ignorato */ }
+  try {
+    for (const k of await caches.keys()) await caches.delete(k);
+  } catch { /* cache non disponibile */ }
+  try {
+    for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
+  } catch { /* service worker non disponibile */ }
+  location.replace(location.pathname); // ricarica senza ?reset né #…
+  return true;
+}
+
 async function main() {
   bind();
+  if (new URLSearchParams(location.search).has('reset')) {
+    if (await resetApp()) return;
+    history.replaceState(null, '', location.pathname);
+  }
   if ('serviceWorker' in navigator) {
     // nuova versione installata: ricarica, ma mai durante una navigazione
     const hadController = !!navigator.serviceWorker.controller;
