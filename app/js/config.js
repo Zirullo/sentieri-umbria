@@ -5,7 +5,7 @@ export const BIKE = globalThis.document?.documentElement.dataset.mode === 'bici'
 
 // Versione delle due app (escono sempre insieme), mostrata nel pannello della legenda.
 // A ogni rilascio: 1.01, 1.02, … (tests/shell.test.mjs controlla il formato).
-export const VERSION = '1.0';
+export const VERSION = '1.01';
 
 // Stesso sito per le due app: memoria del telefono e cache separate con un prefisso.
 export const KEY_PREFIX = BIKE ? 'bici-' : '';
@@ -55,8 +55,9 @@ export const SECTOR_ORDER = BIKE
   : ['Alto Tevere', 'Alto Chiascio', 'Valle Umbra Nord', 'Valle Spoletina', 'Valnerina', 'Valle del Nera',
     'Amerino', 'Orvietano-Tuderte', 'Perugino-Trasimeno', 'Lunga percorrenza', 'Altri sentieri', 'Regioni confinanti'];
 
-// Etichette col numero sulla mappa: i percorsi in bici sono pochi e lunghi, si leggono anche da più lontano.
-export const LABEL_MIN_ZOOM = BIKE ? 10 : 12;
+// Etichette col numero sulla mappa: i percorsi in bici sono pochi e lunghi, i codici si leggono
+// anche con tutta l'Italia centrale inquadrata.
+export const LABEL_MIN_ZOOM = BIKE ? 7 : 12;
 
 // Guida: in bici si va più veloci, quindi tra due fix GPS si fa più strada e la freccia guarda più avanti.
 export const GUIDE = BIKE ? { maxSpeed: 14, lookahead: 60 } : { maxSpeed: 2.5, lookahead: 35 };
