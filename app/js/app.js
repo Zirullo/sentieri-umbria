@@ -328,6 +328,7 @@ function legendRows(inNav) {
     [swatch('#ff6f00', 6), `${W.one} selezionato`],
     [`<span class="lg-num">${BIKE ? 'M3' : '210'}</span>`, BIKE ? 'codice del percorso: C ciclovia, M MTB' : 'numero del sentiero (da vicino)'],
     [dot('#1565c0'), 'la tua posizione'],
+    [swatch('#a64ac9', 1.5), `confine di regione (è disegnato sulla mappa, non è un ${W.one})`],
   ];
 }
 

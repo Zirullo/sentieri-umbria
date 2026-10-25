@@ -5,7 +5,7 @@ export const BIKE = globalThis.document?.documentElement.dataset.mode === 'bici'
 
 // Versione delle due app (escono sempre insieme), mostrata nel pannello della legenda.
 // A ogni rilascio: 1.01, 1.02, … (tests/shell.test.mjs controlla il formato).
-export const VERSION = '1.01';
+export const VERSION = '1.02';
 
 // Stesso sito per le due app: memoria del telefono e cache separate con un prefisso.
 export const KEY_PREFIX = BIKE ? 'bici-' : '';
@@ -40,7 +40,8 @@ export const NO_CLASS_COLOR = '#757575'; // grigio: non si confonde con l'aranci
 export const CLASSES = BIKE
   ? [
     { color: '#1565c0', label: '<b>Ciclovia</b> strada o sterrato facile', test: (t) => t.kind === 'road' },
-    { color: '#8e24aa', label: '<b>MTB</b> sterrato e sentiero', test: (t) => t.kind === 'mtb' },
+    // non viola: sulla topografica il viola sottile è il confine di regione
+    { color: '#c62828', label: '<b>MTB</b> sterrato e sentiero', test: (t) => t.kind === 'mtb' },
   ]
   : [
     { color: '#2e7d32', label: '<b>T</b> turistico', test: (t) => t.scale === 'T' },
