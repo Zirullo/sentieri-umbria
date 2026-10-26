@@ -1,6 +1,6 @@
 // Lingua dell'interfaccia: italiano o inglese. Il codice scrive le frasi in italiano dentro tr():
 // la frase italiana è la chiave del dizionario (en.js) e, se manca la traduzione, resta com'è.
-// Prima apertura: italiano se il telefono è in italiano, altrimenti inglese. La scelta si cambia dalla legenda
+// Prima apertura: italiano se il telefono è in italiano, altrimenti inglese. La scelta si cambia dalla barra in basso a sinistra sulla mappa
 // e vale per le due app (stesso sito, chiave senza prefisso). Fuori dal browser (test Node) sempre italiano.
 import { EN } from './en.js';
 

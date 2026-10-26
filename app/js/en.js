@@ -79,6 +79,7 @@ export const EN = {
   'Inquadra tutti i sentieri visibili': 'Zoom to all visible trails',
   'Inquadra tutti i percorsi visibili': 'Zoom to all visible routes',
   'La mia posizione': 'My location',
+  Lingua: 'Language',
   Chiudi: 'Close',
   fatti: 'done',
   mancanti: 'to go',

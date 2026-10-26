@@ -367,8 +367,6 @@ function toggleMapPanel(btn) {
       ${cur !== 'topo' ? `<div class="mp-note">${tr('Senza rete si vede solo la topografica.')}</div>` : ''}
       <div class="mp-title">${tr('Legenda')}</div>
       ${legendRows(btn.id === 'nav-layers').map(([sym, text]) => `<div class="lg-row"><span class="lg-sym">${sym}</span><span>${text}</span></div>`).join('')}
-      <div class="mp-title">Lingua · Language</div>
-      <div class="mp-bases">${Object.entries(LANGS).map(([k, name]) => `<button data-lang="${k}" class="${k === LANG ? 'on' : ''}">${name}</button>`).join('')}</div>
       <button class="mp-reset">${tr("Cancella tutti i dati dell'app…")}</button>
       <div class="mp-ver">${tr('Versione')} ${VERSION}</div>`;
   };
@@ -376,8 +374,6 @@ function toggleMapPanel(btn) {
   panel.onclick = (e) => {
     const b = e.target.closest('[data-base]');
     if (b) { setBase(b.dataset.base); render(); }
-    const l = e.target.closest('[data-lang]');
-    if (l && l.dataset.lang !== LANG) setLang(l.dataset.lang);
     if (e.target.closest('.mp-reset')) resetApp();
   };
   panel.style.top = `${btn.getBoundingClientRect().bottom + 8}px`;
@@ -913,6 +909,13 @@ function bind() {
   $('#list-note').onclick = showFilters;
   for (const b of document.querySelectorAll('#btn-layers, #nav-layers')) b.onclick = () => toggleMapPanel(b);
   $('#btn-fit').onclick = fitShown;
+  // lingua: sigle in basso a sinistra sulla mappa, il nome intero nel suggerimento
+  $('#lang-bar').innerHTML = Object.entries(LANGS).map(([k, name]) =>
+    `<button data-lang="${k}" lang="${k}" title="${name}" class="${k === LANG ? 'on' : ''}">${k.toUpperCase()}</button>`).join('');
+  $('#lang-bar').onclick = (e) => {
+    const b = e.target.closest('[data-lang]');
+    if (b && b.dataset.lang !== LANG) setLang(b.dataset.lang);
+  };
   // un tocco fuori dal riquadro della mappa lo chiude
   document.addEventListener('pointerdown', (e) => {
     const panel = $('#map-panel');

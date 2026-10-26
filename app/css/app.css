@@ -72,6 +72,13 @@ main { position: fixed; inset: calc(61px + var(--safe-t)) 0 0 0; }
 }
 
 /* Tipo di mappa e legenda */
+/* lingua in basso a sinistra; anteprima, elenco e schede ci passano sopra */
+.lang-bar {
+  position: absolute; left: 12px; bottom: calc(40px + var(--safe-b)); z-index: 900; display: flex; gap: 2px; padding: 3px;
+  border-radius: 22px; background: var(--bg); box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+.lang-bar button { min-width: 44px; height: 40px; border: none; border-radius: 20px; background: none; font-size: 14px; font-weight: 700; color: var(--muted); }
+.lang-bar button.on { background: var(--accent); color: #fff; }
 .map-btn {
   position: absolute; top: 10px; right: 10px; z-index: 900; width: 44px; height: 44px; padding: 0;
   display: grid; place-items: center; border: none; border-radius: 22px; background: var(--bg); box-shadow: 0 2px 8px rgba(0,0,0,.3);
