@@ -51,6 +51,10 @@ i testi vanno scritti con parole proprie, mai copiati da altri siti. Per un perc
 
 - Versione unica per le due app in `app/js/config.js` (`VERSION`, visibile in fondo al pannello della legenda):
   a ogni rilascio pubblicato va incrementata di uno, 1.0 → 1.01 → 1.02 … (formato controllato dai test).
+- Interfaccia in italiano e inglese (`app/js/i18n.js`, dizionario `app/js/en.js`): ogni testo visibile passa da
+  `tr('frase italiana', { param })`, con frase fissa (niente `${…}`: parametri `{x}`, parole del modo `{one}` `{many}`);
+  nelle pagine i testi fissi hanno `data-tr`. `tests/i18n.test.mjs` controlla che ogni frase abbia la traduzione.
+  Le descrizioni restano in italiano: `desc_en` nei file di dettaglio, se presente, ha la precedenza.
 
 - Il service worker precarica gli elenchi `OWN` e `SHARED` in `app/sw-core.js`: ogni nuovo modulo JS va aggiunto
   a `SHARED` (`tests/shell.test.mjs` lo controlla).

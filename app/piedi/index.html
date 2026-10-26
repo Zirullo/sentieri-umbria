@@ -27,9 +27,9 @@
     <div id="map"></div>
     <section id="list" class="list" hidden>
       <div class="seg" role="tablist">
-        <button data-sort="zone" class="on">Per zona</button>
-        <button data-sort="near">Vicino a me</button>
-        <button data-sort="saved">Scaricati</button>
+        <button data-sort="zone" class="on" data-tr>Per zona</button>
+        <button data-sort="near" data-tr>Vicino a me</button>
+        <button data-sort="saved" data-tr>Scaricati</button>
       </div>
       <button id="list-note" class="list-note" hidden></button>
       <div id="list-body"></div>
@@ -74,23 +74,23 @@
         </div>
         <div class="nav-stats">
           <div class="big" id="nav-target">–</div>
-          <div class="small" id="nav-hint">In attesa del GPS…</div>
+          <div class="small" id="nav-hint" data-tr>In attesa del GPS…</div>
           <div class="stats">
-            <div><span id="nav-done">–</span><small>fatti</small></div>
-            <div><span id="nav-left">–</span><small>mancanti</small></div>
-            <div><span id="nav-ele">–</span><small>quota</small></div>
+            <div><span id="nav-done">–</span><small data-tr>fatti</small></div>
+            <div><span id="nav-left">–</span><small data-tr>mancanti</small></div>
+            <div><span id="nav-ele">–</span><small data-tr>quota</small></div>
           </div>
           <div class="dest" id="nav-dest">
             <svg viewBox="0 0 20 20" aria-hidden="true"><path id="dest-arrow" d="M10 2 L15 17 L10 13 L5 17 Z"/></svg>
-            <span id="nav-dest-text">Arrivo –</span>
+            <span id="nav-dest-text" data-tr>Arrivo –</span>
           </div>
         </div>
       </div>
       <canvas id="profile" class="profile"></canvas>
       <div class="nav-buttons">
-        <button id="nav-exit">✕ Esci</button>
-        <button id="nav-reverse">⇄ Inverti</button>
-        <button id="nav-center">◎ Centra</button>
+        <button id="nav-exit" data-tr>✕ Esci</button>
+        <button id="nav-reverse" data-tr>⇄ Inverti</button>
+        <button id="nav-center" data-tr>◎ Centra</button>
       </div>
     </div>
   </section>

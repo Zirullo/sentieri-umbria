@@ -42,22 +42,31 @@
   <main>
     <h1>Sentieri Umbria</h1>
     <div id="vecchia" hidden>
-      <b>Questa è la vecchia app</b>
-      Disinstallala (tieni premuta l'icona → Disinstalla), poi apri qui sotto l'app che ti serve e installala
-      dal menu ⋮ di Chrome. Finché la vecchia resta sul telefono, Chrome dice «già installata».
+      <b data-en="This is the old app">Questa è la vecchia app</b>
+      <span data-en="Uninstall it (press and hold the icon → Uninstall), then open the app you need below and install it from the Chrome ⋮ menu. While the old one stays on the phone, Chrome says “already installed”.">Disinstallala (tieni premuta l'icona → Disinstalla), poi apri qui sotto l'app che ti serve e installala
+      dal menu ⋮ di Chrome. Finché la vecchia resta sul telefono, Chrome dice «già installata».</span>
     </div>
-    <p>Scegli l'app: ognuna si installa sul telefono per conto suo.</p>
+    <p data-en="Choose the app: each one installs on the phone on its own.">Scegli l'app: ognuna si installa sul telefono per conto suo.</p>
     <a class="app" href="piedi/">
       <img src="piedi/icons/icon-192.png" alt="">
-      <div><b>A piedi</b><span>Sentieri CAI con bussola di guida e avviso fuori sentiero</span></div>
+      <div><b data-en="On foot">A piedi</b><span data-en="CAI trails with a guiding compass and off-trail alert">Sentieri CAI con bussola di guida e avviso fuori sentiero</span></div>
     </a>
     <a class="app" href="bici/">
       <img src="bici/icons/icon-192.png" alt="">
-      <div><b>In bici</b><span>Ciclovie e percorsi MTB, con vibrazione e suono fuori percorso</span></div>
+      <div><b data-en="By bike">In bici</b><span data-en="Cycle routes and MTB routes, with vibration and sound when off route">Ciclovie e percorsi MTB, con vibrazione e suono fuori percorso</span></div>
     </a>
-    <small>Per installarla: apri l'app, poi menu ⋮ di Chrome → «Installa app».</small>
+    <small data-en="To install it: open the app, then Chrome ⋮ menu → “Install app”.">Per installarla: apri l'app, poi menu ⋮ di Chrome → «Installa app».</small>
   </main>
   <script>
+    // in inglese se scelto nelle app (chiave "lang", vedi js/i18n.js) o se il telefono non è in italiano
+    (() => {
+      let lang = null;
+      try { lang = localStorage.getItem('lang'); } catch { /* ignorato */ }
+      if (!lang) lang = (navigator.languages?.[0] || navigator.language || 'it').toLowerCase().startsWith('it') ? 'it' : 'en';
+      if (lang !== 'en') return;
+      document.documentElement.lang = 'en';
+      for (const el of document.querySelectorAll('[data-en]')) el.textContent = el.dataset.en;
+    })();
     // aperta come app installata = icona della vecchia app in radice, il cui ambito contiene piedi/ e bici/
     if (matchMedia('(display-mode: standalone)').matches) document.getElementById('vecchia').hidden = false;
     // il vecchio service worker della cartella principale non serve più (vedi sw.js)

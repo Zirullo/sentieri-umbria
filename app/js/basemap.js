@@ -2,22 +2,23 @@
 // La topografica rimane sempre sotto: è l'unica scaricata per l'offline, così senza rete,
 // al posto del satellite o della stradale, si vede comunque quella.
 import { KEY_PREFIX } from './config.js';
+import { tr } from './i18n.js';
 
 const KEY = `${KEY_PREFIX}basemap`;
 const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services';
 
 export const BASEMAPS = {
-  topo: { label: 'Topografica', layers: () => [] },
+  topo: { label: tr('Topografica'), layers: () => [] },
   sat: {
     label: 'Satellite',
     layers: () => [
-      L.tileLayer(`${ESRI}/World_Imagery/MapServer/tile/{z}/{y}/{x}`, { maxNativeZoom: 18, maxZoom: 18, zIndex: 2, attribution: 'Immagini © Esri, Maxar, Earthstar Geographics' }),
+      L.tileLayer(`${ESRI}/World_Imagery/MapServer/tile/{z}/{y}/{x}`, { maxNativeZoom: 18, maxZoom: 18, zIndex: 2, attribution: tr('Immagini © Esri, Maxar, Earthstar Geographics') }),
       // nomi di paesi e località sopra le immagini
       L.tileLayer(`${ESRI}/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}`, { maxNativeZoom: 18, maxZoom: 18, zIndex: 3 }),
     ],
   },
   road: {
-    label: 'Stradale',
+    label: tr('Stradale'),
     layers: () => [L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxNativeZoom: 19, maxZoom: 18, zIndex: 2, attribution: '© OpenStreetMap' })],
   },
 };

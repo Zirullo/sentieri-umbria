@@ -3,10 +3,11 @@
 //   https://…/sentieri-umbria/bici/#percorso=Nome|lat,lon;…   (versione in bici)
 // La parte dopo # non viene mai inviata al server, quindi le coordinate restano private.
 import { haversine } from './geo.js';
-import { BIKE, KEY_PREFIX, W } from './config.js';
+import { BIKE, KEY_PREFIX } from './config.js';
+import { tr } from './i18n.js';
 
 const KEY = `${KEY_PREFIX}custom-trails`;
-export const CUSTOM_SECTOR = `${W.Many} personali`;
+export const CUSTOM_SECTOR = tr('{Many} personali');
 
 function idFor(name) {
   let h = 0;

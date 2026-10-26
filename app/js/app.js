@@ -9,12 +9,13 @@ import { FILTERS, MAIN_ROAD_MAX, activeCount, isLoop, loadFilters, matches, noFi
 import { BASEMAPS, addBaseMap, currentBase, setBase } from './basemap.js';
 import { ALERTS, BIKE, CLASSES, GUIDE, KEY_PREFIX, KIND_LABEL, LABEL_MIN_ZOOM, NO_CLASS_COLOR, SCALE_LABEL, SECTOR_ORDER, VERSION, W, isOwnKey } from './config.js';
 import { alertBack, alertOff, unlockSound } from './alert.js';
+import { LANG, LANGS, dec, setLang, tr } from './i18n.js';
 
 const $ = (s) => document.querySelector(s);
 const SIM = new URLSearchParams(location.search).has('sim');
 const trailColor = (t) => CLASSES.find((c) => c.test(t))?.color || NO_CLASS_COLOR;
 const ACTIVE_KEY = `${KEY_PREFIX}active-nav`;
-const ATTRIB = 'Mappa © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA) · Dati © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+const ATTRIB = `${tr('Mappa')} © <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA) · ${tr('Dati')} © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>`;
 
 let trails = [];
 let byId = new Map();
@@ -47,7 +48,7 @@ function tileLayer() {
 // Quota su strade principali (statali, regionali, provinciali): evidenziata oltre la soglia del filtro.
 const mainPct = (t) => Math.round((t.main || 0) * 100);
 const mainRoadChip = (t) => (mainPct(t) >= 1
-  ? `<span class="chip${t.main > MAIN_ROAD_MAX ? ' warn-chip' : ''}">🚗 ${mainPct(t)}% su strade principali</span>` : '');
+  ? `<span class="chip${t.main > MAIN_ROAD_MAX ? ' warn-chip' : ''}">🚗 ${mainPct(t)}% ${tr('su strade principali')}</span>` : '');
 
 function hoursOf(t, reversed = false) {
   const tag = t.tags?.[reversed ? 'duration:backward' : 'duration:forward'];
@@ -55,7 +56,7 @@ function hoursOf(t, reversed = false) {
   if (h) return { h, src: 'CAI' };
   const up = reversed ? t.down : t.up;
   const down = reversed ? t.up : t.down;
-  return { h: BIKE ? rideHours(t.len, up, t.kind === 'mtb') : walkHours(t.len, up, down), src: 'stima' };
+  return { h: BIKE ? rideHours(t.len, up, t.kind === 'mtb') : walkHours(t.len, up, down), src: tr('stima') };
 }
 
 /* ---------- Mappa generale ---------- */
@@ -86,7 +87,7 @@ function initMap() {
 // non allargano la vista a mezza Italia. Con pochi si inquadrano interi.
 function fitShown() {
   const vis = trails.filter(shown);
-  if (!vis.length) return toast(`Nessun ${W.one} con questi filtri`);
+  if (!vis.length) return toast(tr('Nessun {one} con questi filtri'));
   closePeek();
   const many = vis.length >= 10;
   const pts = many
@@ -127,11 +128,11 @@ function renderFilters() {
       <div class="f-opts">${g.options.map((o, i) => `<button data-g="${g.key}" data-v="${i}" class="${on(i) ? 'on' : ''}">${o.label}</button>`).join('')}</div>`;
   };
   $('#filters-body').innerHTML = `
-    <h2>Filtri</h2>
+    <h2>${tr('Filtri')}</h2>
     ${FILTERS.map(group).join('')}
     <div class="actions">
-      <button id="f-reset" ${activeCount(filters) ? '' : 'disabled'}>Azzera</button>
-      <button id="f-done" class="primary">${count ? `Mostra ${count}` : `Nessun ${W.one}`}</button>
+      <button id="f-reset" ${activeCount(filters) ? '' : 'disabled'}>${tr('Azzera')}</button>
+      <button id="f-done" class="primary">${count ? tr('Mostra {n}', { n: count }) : tr('Nessun {one}')}</button>
     </div>`;
 }
 
@@ -228,7 +229,7 @@ function pickTrail(pt, latlng) {
   near.sort((a, b) => a[0] - b[0]);
   if (!near.length) return closePeek();
   if (near.length === 1) return previewTrail(near[0][1].id);
-  const html = `<div class="pick"><b>Quale ${W.one}?</b>${near.slice(0, 6).map(([, t]) =>
+  const html = `<div class="pick"><b>${tr('Quale {one}?')}</b>${near.slice(0, 6).map(([, t]) =>
     `<button data-id="${t.id}"><span class="ref"><span>${esc(t.ref || '–')}</span></span> ${esc(title(t))}</button>`).join('')}</div>`;
   const popup = L.popup({ closeButton: false, maxWidth: 280, className: 'pick-popup' }).setLatLng(latlng).setContent(html).openOn(map);
   popup.getElement().addEventListener('click', (ev) => {
@@ -287,7 +288,7 @@ function previewTrail(id, { zoom = false } = {}) {
 function renderPeek(t) {
   const loop = isLoop(t);
   const route = genericName(t.name) ? '' : [t.from, t.to].filter(Boolean).join(' → ');
-  const sub = [route, t.sector].filter(Boolean).join(' · ');
+  const sub = [route, tr(t.sector)].filter(Boolean).join(' · ');
   const scale = t.scale ? `${esc(t.scale)} · ${esc(SCALE_LABEL[t.scale] || '')}` : '';
   const chips = [
     // a piedi il colore è quello della difficoltà, in bici quello del tipo di percorso
@@ -297,19 +298,19 @@ function renderPeek(t) {
     `<span class="chip">${fmtDist(t.len)}</span>`,
     t.up != null ? `<span class="chip">↑ ${t.up} m</span>` : '',
     `<span class="chip">⏱ ${fmtHours(hoursOf(t).h)}</span>`,
-    loop ? '<span class="chip">↻ anello</span>' : '',
+    loop ? `<span class="chip">↻ ${tr('anello')}</span>` : '',
     mainRoadChip(t),
-    myPos ? `<span class="chip">📍 ${fmtDist(distToTrail(t, myPos))} da te</span>` : '',
+    myPos ? `<span class="chip">📍 ${tr('{d} da te', { d: fmtDist(distToTrail(t, myPos)) })}</span>` : '',
     isDownloaded(t.id) ? '<span class="chip ok">✓ offline</span>' : '',
   ].join('');
   $('#peek').innerHTML = `
     <div class="peek-head">
       <span class="ref"><span>${esc(t.ref || '–')}</span></span>
       <div class="peek-title"><b>${esc(title(t))}</b>${sub ? `<small>${esc(sub)}</small>` : ''}</div>
-      <button class="icon-btn peek-close" aria-label="Chiudi">✕</button>
+      <button class="icon-btn peek-close" aria-label="${tr('Chiudi')}">✕</button>
     </div>
     <div class="chips">${chips}</div>
-    <button class="peek-open">Dettagli e partenza ›</button>`;
+    <button class="peek-open">${tr('Dettagli e partenza ›')}</button>`;
   $('#peek').hidden = false;
   $('#btn-locate').style.bottom = `${$('#peek').offsetHeight + 24}px`;
 }
@@ -332,24 +333,24 @@ let mapPanelClosedAt = 0;
 function legendRows(inNav) {
   if (inNav) {
     return [
-      [swatch('#d50000', 5), `${W.one} da seguire`],
-      [swatch('#9e9e9e', 5), 'tratto già percorso'],
-      [swatch('#d50000', 3, '2 5'), 'dati mancanti: segui i segnavia'],
-      [swatch('#d50000', 2, '5 4'), 'variante'],
-      [swatch('#1565c0', 2, '3 4'), `direzione per tornare sul ${W.one}`],
-      ['<span class="dir-arrow"><span><svg viewBox="0 0 12 12"><path d="M6 1 L11 10.5 L6 8 L1 10.5 Z"/></svg></span></span>', 'verso di percorrenza'],
-      [dot('#2e7d32'), 'partenza'],
-      [dot('#111'), 'arrivo'],
-      [dot('#1565c0'), 'tu (il cono indica dove guardi)'],
+      [swatch('#d50000', 5), tr('{one} da seguire')],
+      [swatch('#9e9e9e', 5), tr('tratto già percorso')],
+      [swatch('#d50000', 3, '2 5'), tr('dati mancanti: segui i segnavia')],
+      [swatch('#d50000', 2, '5 4'), tr('variante')],
+      [swatch('#1565c0', 2, '3 4'), tr('direzione per tornare sul {one}')],
+      ['<span class="dir-arrow"><span><svg viewBox="0 0 12 12"><path d="M6 1 L11 10.5 L6 8 L1 10.5 Z"/></svg></span></span>', tr('verso di percorrenza')],
+      [dot('#2e7d32'), tr('partenza')],
+      [dot('#111'), tr('arrivo')],
+      [dot('#1565c0'), tr('tu (il cono indica dove guardi)')],
     ];
   }
   return [
     ...CLASSES.map((c) => [swatch(c.color), c.label]),
-    ...(BIKE ? [] : [[swatch(NO_CLASS_COLOR), 'difficoltà non indicata']]),
-    [swatch('#ff6f00', 6), `${W.one} selezionato`],
-    [`<span class="lg-num">${BIKE ? 'M3' : '210'}</span>`, BIKE ? 'codice del percorso: C ciclovia, M MTB' : 'numero del sentiero (da vicino)'],
-    [dot('#1565c0'), 'la tua posizione'],
-    [swatch('#a64ac9', 1.5), `confine di regione (è disegnato sulla mappa, non è un ${W.one})`],
+    ...(BIKE ? [] : [[swatch(NO_CLASS_COLOR), tr('difficoltà non indicata')]]),
+    [swatch('#ff6f00', 6), tr('{one} selezionato')],
+    [`<span class="lg-num">${BIKE ? 'M3' : '210'}</span>`, BIKE ? tr('codice del percorso: C ciclovia, M MTB') : tr('numero del sentiero (da vicino)')],
+    [dot('#1565c0'), tr('la tua posizione')],
+    [swatch('#a64ac9', 1.5), tr('confine di regione (è disegnato sulla mappa, non è un {one})')],
   ];
 }
 
@@ -360,18 +361,22 @@ function toggleMapPanel(btn) {
   const render = () => {
     const cur = currentBase();
     panel.innerHTML = `
-      <div class="mp-title">Mappa</div>
+      <div class="mp-title">${tr('Mappa')}</div>
       <div class="mp-bases">${Object.entries(BASEMAPS).map(([k, b]) => `<button data-base="${k}" class="${k === cur ? 'on' : ''}">${b.label}</button>`).join('')}</div>
-      ${cur !== 'topo' ? '<div class="mp-note">Senza rete si vede solo la topografica.</div>' : ''}
-      <div class="mp-title">Legenda</div>
+      ${cur !== 'topo' ? `<div class="mp-note">${tr('Senza rete si vede solo la topografica.')}</div>` : ''}
+      <div class="mp-title">${tr('Legenda')}</div>
       ${legendRows(btn.id === 'nav-layers').map(([sym, text]) => `<div class="lg-row"><span class="lg-sym">${sym}</span><span>${text}</span></div>`).join('')}
-      <button class="mp-reset">Cancella tutti i dati dell'app…</button>
-      <div class="mp-ver">Versione ${VERSION}</div>`;
+      <div class="mp-title">Lingua · Language</div>
+      <div class="mp-bases">${Object.entries(LANGS).map(([k, name]) => `<button data-lang="${k}" class="${k === LANG ? 'on' : ''}">${name}</button>`).join('')}</div>
+      <button class="mp-reset">${tr("Cancella tutti i dati dell'app…")}</button>
+      <div class="mp-ver">${tr('Versione')} ${VERSION}</div>`;
   };
   render();
   panel.onclick = (e) => {
     const b = e.target.closest('[data-base]');
     if (b) { setBase(b.dataset.base); render(); }
+    const l = e.target.closest('[data-lang]');
+    if (l && l.dataset.lang !== LANG) setLang(l.dataset.lang);
     if (e.target.closest('.mp-reset')) resetApp();
   };
   panel.style.top = `${btn.getBoundingClientRect().bottom + 8}px`;
@@ -402,29 +407,29 @@ function renderList() {
   const q = normalize($('#search').value.trim());
   const n = activeCount(filters);
   $('#list-note').hidden = !n || !!q || listSort === 'saved';
-  $('#list-note').textContent = `${n} ${n === 1 ? 'filtro attivo' : 'filtri attivi'} · modifica`;
+  $('#list-note').textContent = `${n} ${n === 1 ? tr('filtro attivo') : tr('filtri attivi')} · ${tr('modifica')}`;
   let pool = trails.filter(shown);
   if (q) {
     pool = trails.filter((t) => (t.search ??= normalize(`${t.ref} ${t.name} ${t.from} ${t.to} ${t.sector}`)).includes(q));
     pool.sort((a, b) => (normalize(b.ref) === q) - (normalize(a.ref) === q) || (normalize(b.ref).startsWith(q)) - (normalize(a.ref).startsWith(q)));
-    body.innerHTML = pool.length ? pool.slice(0, 100).map((t) => itemHtml(t)).join('') : `<div class="empty">Nessun ${W.one} trovato</div>`;
+    body.innerHTML = pool.length ? pool.slice(0, 100).map((t) => itemHtml(t)).join('') : `<div class="empty">${tr('Nessun {one} trovato')}</div>`;
     return;
   }
   if (listSort === 'near') {
     if (!myPos) {
-      body.innerHTML = '<div class="empty">Cerco la tua posizione…</div>';
+      body.innerHTML = `<div class="empty">${tr('Cerco la tua posizione…')}</div>`;
       locate(() => renderList());
       return;
     }
     const near = pool.map((t) => [t, distToTrail(t, myPos)]).sort((a, b) => a[1] - b[1]).slice(0, 60);
-    body.innerHTML = near.map(([t, d]) => itemHtml(t, `${fmtDist(d)} da te`)).join('');
+    body.innerHTML = near.map(([t, d]) => itemHtml(t, tr('{d} da te', { d: fmtDist(d) }))).join('');
     return;
   }
   if (listSort === 'saved') {
     const ids = Object.keys(registry()).map(Number);
     const saved = ids.map((id) => byId.get(id)).filter(Boolean);
     body.innerHTML = saved.length ? saved.map((t) => itemHtml(t)).join('')
-      : `<div class="empty">Nessun ${W.one} scaricato.<br>Apri un ${W.one} e premi «Scarica offline».</div>`;
+      : `<div class="empty">${tr('Nessun {one} scaricato.<br>Apri un {one} e premi «Scarica offline».')}</div>`;
     return;
   }
   const groups = new Map();
@@ -434,23 +439,23 @@ function renderList() {
   }
   const order = [CUSTOM_SECTOR, ...SECTOR_ORDER];
   body.innerHTML = order.filter((g) => groups.has(g))
-    .map((g) => `<div class="group-title">${esc(g)} (${groups.get(g).length})</div>${groups.get(g).map((t) => itemHtml(t)).join('')}`)
+    .map((g) => `<div class="group-title">${esc(tr(g))} (${groups.get(g).length})</div>${groups.get(g).map((t) => itemHtml(t)).join('')}`)
     .join('');
 }
 
 function showList(show) {
   $('#list').hidden = !show;
   $('#btn-view').textContent = show ? '🗺' : '☰';
-  $('#btn-view').setAttribute('aria-label', show ? 'Mostra mappa' : 'Mostra elenco');
+  $('#btn-view').setAttribute('aria-label', show ? tr('Mostra mappa') : tr('Mostra elenco'));
   if (show) renderList();
   else map.invalidateSize();
 }
 
 function locate(cb) {
-  if (!navigator.geolocation) return toast('GPS non disponibile');
+  if (!navigator.geolocation) return toast(tr('GPS non disponibile'));
   navigator.geolocation.getCurrentPosition(
     (p) => { myPos = [p.coords.latitude, p.coords.longitude]; cb?.(myPos); },
-    () => toast('Posizione non disponibile: controlla i permessi'),
+    () => toast(tr('Posizione non disponibile: controlla i permessi')),
     { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
   );
 }
@@ -483,13 +488,13 @@ async function openTrail(id) {
   highlight(t);
   const sheet = $('#sheet');
   sheet.hidden = false;
-  $('#sheet-body').innerHTML = `<h2>${esc(t.ref)} · ${esc(title(t))}</h2><div class="sub">Caricamento…</div>`;
+  $('#sheet-body').innerHTML = `<h2>${esc(t.ref)} · ${esc(title(t))}</h2><div class="sub">${tr('Caricamento…')}</div>`;
   let d;
   try {
     d = await loadDetail(id);
   } catch {
     $('#sheet-body').innerHTML = `<h2>${esc(t.ref)} · ${esc(title(t))}</h2>
-      <div class="warn">Traccia non disponibile offline. Scaricala quando hai rete.</div>`;
+      <div class="warn">${tr('Traccia non disponibile offline. Scaricala quando hai rete.')}</div>`;
     return;
   }
   renderSheet(d);
@@ -518,8 +523,8 @@ function renderSheet(d) {
   // verso predefinito: parti dall'estremo più vicino a te
   let reversed = false;
   if (myPos && !tags.roundtrip) reversed = haversine(myPos, d.end) < haversine(myPos, d.start);
-  const fromLabel = tags.from || 'Inizio';
-  const toLabel = tags.to || 'Fine';
+  const fromLabel = tags.from || tr('Inizio');
+  const toLabel = tags.to || tr('Fine');
   const loop = isLoop(d);
   // senso di un anello: segno dell'area (formula di Gauss) con x = longitudine, y = latitudine
   const ring = d.segments.flat();
@@ -530,8 +535,11 @@ function renderSheet(d) {
     area += x1 * y2 - x2 * y1;
   }
   const ccw = area > 0;
-  // descrizione (tools/describe.py): chiusa a poche righe finché non si chiede di leggerla tutta
-  const desc = d.desc || tags['description:it'] || tags.description || tags['note:it'] || '';
+  // descrizione (tools/describe.py): chiusa a poche righe finché non si chiede di leggerla tutta.
+  // In inglese desc_en quando c'è, altrimenti l'italiano con un avviso.
+  const own = LANG === 'it' ? '' : d[`desc_${LANG}`];
+  const desc = own || d.desc || tags['description:it'] || tags.description || tags['note:it'] || '';
+  const descNote = LANG !== 'it' && !own && desc ? `<div class="desc-note">${tr('Descrizione disponibile solo in italiano')}</div>` : '';
   const longDesc = desc.length > 220 || desc.includes('\n');
   let descOpen = false;
 
@@ -540,7 +548,7 @@ function renderSheet(d) {
     const saved = isDownloaded(d.id);
     $('#sheet-body').innerHTML = `
       <h2>${esc(d.ref)} · ${esc(title(d))}</h2>
-      <div class="sub">${esc(reversed ? toLabel : fromLabel)} → ${esc(reversed ? fromLabel : toLabel)}${loop ? ' (anello)' : ''} · ${esc(d.sector)}</div>
+      <div class="sub">${esc(reversed ? toLabel : fromLabel)} → ${esc(reversed ? fromLabel : toLabel)}${loop ? ` (${tr('anello')})` : ''} · ${esc(tr(d.sector))}</div>
       <div class="chips">
         ${BIKE ? `<span class="chip scale" style="background:${trailColor(d)}">${KIND_LABEL[d.kind] || ''}</span>` : ''}
         ${d.scale ? `<span class="chip ${BIKE ? '' : 'scale'}" title="${esc(SCALE_LABEL[d.scale] || '')}">${esc(d.scale)}</span>` : ''}
@@ -550,29 +558,29 @@ function renderSheet(d) {
         ${mainRoadChip(d)}
       </div>
       <div class="plan" id="plan"></div>
-      ${d.gaps ? `<div class="warn">La traccia ha ${d.gaps} ${d.gaps === 1 ? 'interruzione' : 'interruzioni'} nei dati: lì segui la segnaletica.</div>` : ''}
-      ${!saved && !navigator.onLine ? `<div class="warn">Sei offline e questo ${W.one} non è scaricato: la mappa potrebbe mancare.</div>` : ''}
-      ${desc ? `<div class="desc${longDesc && !descOpen ? ' clamp' : ''}">${esc(desc)}</div>` : ''}
-      ${longDesc ? `<button class="desc-more" id="desc-more">${descOpen ? 'Riduci' : 'Leggi tutto'}</button>` : ''}
-      <div class="dir-title">Verso di percorrenza${loop ? ' (anello)' : ''}</div>
+      ${d.gaps ? `<div class="warn">${tr(d.gaps === 1 ? 'La traccia ha 1 interruzione nei dati: lì segui la segnaletica.' : 'La traccia ha {n} interruzioni nei dati: lì segui la segnaletica.', { n: d.gaps })}</div>` : ''}
+      ${!saved && !navigator.onLine ? `<div class="warn">${tr('Sei offline e questo {one} non è scaricato: la mappa potrebbe mancare.')}</div>` : ''}
+      ${descNote}${desc ? `<div class="desc${longDesc && !descOpen ? ' clamp' : ''}">${esc(desc)}</div>` : ''}
+      ${longDesc ? `<button class="desc-more" id="desc-more">${descOpen ? tr('Riduci') : tr('Leggi tutto')}</button>` : ''}
+      <div class="dir-title">${tr('Verso di percorrenza')}${loop ? ` (${tr('anello')})` : ''}</div>
       <div class="dir-choice">
-        <button data-rev="0" class="${reversed ? '' : 'on'}">${loop ? (ccw ? '↺ antiorario' : '↻ orario') : `${esc(fromLabel)} → ${esc(toLabel)}`}</button>
-        <button data-rev="1" class="${reversed ? 'on' : ''}">${loop ? (ccw ? '↻ orario' : '↺ antiorario') : `${esc(toLabel)} → ${esc(fromLabel)}`}</button>
+        <button data-rev="0" class="${reversed ? '' : 'on'}">${loop ? (ccw ? `↺ ${tr('antiorario')}` : `↻ ${tr('orario')}`) : `${esc(fromLabel)} → ${esc(toLabel)}`}</button>
+        <button data-rev="1" class="${reversed ? 'on' : ''}">${loop ? (ccw ? `↻ ${tr('orario')}` : `↺ ${tr('antiorario')}`) : `${esc(toLabel)} → ${esc(fromLabel)}`}</button>
       </div>
       <div class="actions">
-        <button id="btn-dl" class="${saved ? 'ok' : ''}">${saved ? '✓ Offline' : '⬇ Scarica offline'}</button>
-        <a href="${directionsUrl(...(reversed ? d.end : d.start))}" target="_blank" rel="noopener">🚗 Come arrivare</a>
+        <button id="btn-dl" class="${saved ? 'ok' : ''}">${saved ? '✓ Offline' : `⬇ ${tr('Scarica offline')}`}</button>
+        <a href="${directionsUrl(...(reversed ? d.end : d.start))}" target="_blank" rel="noopener">🚗 ${tr('Come arrivare')}</a>
       </div>
       <div class="progress" id="dl-progress" hidden><div></div></div>
-      <div class="actions"><button id="btn-go" class="primary">▶ Inizia</button></div>
-      ${d.custom ? `<div class="src">${W.One} personale, salvato solo su questo telefono ·
-        <a href="#" id="btn-del-custom">elimina</a></div>`
-    : `<div class="src">Dati © OpenStreetMap contributors (ODbL) ·
-        <a href="https://www.openstreetmap.org/relation/${d.id}" target="_blank" rel="noopener">relazione ${d.id}</a>
-        ${tags['survey:date'] ? ` · rilievo ${esc(tags['survey:date'])}` : ''}</div>`}`;
+      <div class="actions"><button id="btn-go" class="primary">▶ ${tr('Inizia')}</button></div>
+      ${d.custom ? `<div class="src">${tr('{One} personale, salvato solo su questo telefono')} ·
+        <a href="#" id="btn-del-custom">${tr('elimina')}</a></div>`
+    : `<div class="src">${tr('Dati')} © OpenStreetMap contributors (ODbL) ·
+        <a href="https://www.openstreetmap.org/relation/${d.id}" target="_blank" rel="noopener">${tr('relazione')} ${d.id}</a>
+        ${tags['survey:date'] ? ` · ${tr('rilievo')} ${esc(tags['survey:date'])}` : ''}</div>`}`;
     $('#btn-del-custom')?.addEventListener('click', (e) => {
       e.preventDefault();
-      if (!confirm(`Eliminare il ${W.one} «${d.name}»?`)) return;
+      if (!confirm(tr('Eliminare il {one} «{name}»?', { name: d.name }))) return;
       removeCustom(d.name);
       location.reload();
     });
@@ -596,8 +604,8 @@ function renderPlan(d, hours, reversed) {
     const late = today && latest && Date.now() > latest.getTime();
     const ymd = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     el.innerHTML = `📅 <input type="date" id="plan-date" value="${ymd}">
-      tramonto <b>${fmtTime(ss)}</b> · parti entro le <b>${fmtTime(latest)}</b>
-      ${late ? '<div class="warn">Oggi è tardi per completarlo con la luce.</div>' : ''}`;
+      ${tr('tramonto')} <b>${fmtTime(ss)}</b> · ${tr('parti entro le')} <b>${fmtTime(latest)}</b>
+      ${late ? `<div class="warn">${tr('Oggi è tardi per completarlo con la luce.')}</div>` : ''}`;
     $('#plan-date').onchange = (e) => {
       const [y, m, dd] = e.target.value.split('-').map(Number);
       if (y) draw(new Date(y, m - 1, dd, 12));
@@ -609,7 +617,7 @@ function renderPlan(d, hours, reversed) {
 async function download(d, rerender) {
   const btn = $('#btn-dl');
   const bar = $('#dl-progress');
-  if (!navigator.onLine) return toast('Serve una connessione per scaricare');
+  if (!navigator.onLine) return toast(tr('Serve una connessione per scaricare'));
   btn.disabled = true;
   bar.hidden = false;
   try {
@@ -617,17 +625,17 @@ async function download(d, rerender) {
       btn.textContent = `⬇ ${Math.round((n / tot) * 100)}%`;
       bar.firstElementChild.style.width = `${(n / tot) * 100}%`;
     });
-    toast(res.failed ? `Scaricato con ${res.failed} riquadri mancanti: riprova` : `Pronto offline (${(res.bytes / 1e6).toFixed(1)} MB)`);
+    toast(res.failed ? tr('Scaricato con {n} riquadri mancanti: riprova', { n: res.failed }) : tr('Pronto offline ({mb} MB)', { mb: dec(res.bytes / 1e6, 1) }));
   } catch (e) {
-    toast(`Download non riuscito: ${e.message}`);
+    toast(tr('Download non riuscito: {msg}', { msg: e.message }));
   }
   rerender();
 }
 
 async function removeDownload(d, rerender) {
-  if (!confirm(`Eliminare la mappa offline di questo ${W.one}?`)) return;
+  if (!confirm(tr('Eliminare la mappa offline di questo {one}?'))) return;
   await deleteTrail(d.id, d.custom ? null : trailUrl(d.id));
-  toast('Mappa offline eliminata');
+  toast(tr('Mappa offline eliminata'));
   rerender();
 }
 
@@ -635,7 +643,7 @@ async function removeDownload(d, rerender) {
 
 const nav = { map: null, guide: null, track: null, watch: null, compass: null, wake: null, follow: true, last: null, layers: {} };
 
-const endName = (d, reversed) => (reversed ? d.tags?.from : d.tags?.to) || 'Arrivo';
+const endName = (d, reversed) => (reversed ? d.tags?.from : d.tags?.to) || tr('Arrivo');
 
 function buildTrack(d, reversed) {
   const pts = [];
@@ -677,7 +685,7 @@ async function startNav(d, reversed) {
   drawNavTrack();
   nav.map.invalidateSize();
   nav.map.fitBounds(nav.layers.line.getBounds(), { padding: [30, 30] });
-  setBanner('approach', 'In attesa del GPS…');
+  setBanner('approach', tr('In attesa del GPS…'));
 
   nav.compass?.stop();
   nav.compass = new Compass(scheduleArrow);
@@ -716,8 +724,8 @@ function directionLayer(track, m) {
     arrows,
     L.circleMarker([a[0], a[1]], { radius: 8, color: '#fff', weight: 3, fillColor: '#2e7d32', fillOpacity: 1, interactive: false }),
     L.circleMarker([z[0], z[1]], { radius: 8, color: '#fff', weight: 3, fillColor: '#111', fillOpacity: 1, interactive: false }),
-    ep(a, 'start', 'Partenza'),
-    ep(z, 'end', '🏁 Arrivo'),
+    ep(a, 'start', tr('Partenza')),
+    ep(z, 'end', `🏁 ${tr('Arrivo')}`),
   ]);
   group.on('add', () => { m.on('zoomend', draw); draw(); });
   group.on('remove', () => m.off('zoomend', draw));
@@ -762,17 +770,17 @@ function onFix(p) {
   if (nav.follow) nav.map.setView(myPos, Math.max(nav.map.getZoom(), 16), { animate: false });
 
   const dir = cardinal(r.targetBearing);
-  if (r.weak) setBanner('weak', `Segnale GPS debole (±${Math.round(accuracy)} m)`);
-  else if (r.mode === 'off') setBanner('off', `⚠ FUORI ${W.one.toUpperCase()} · ${fmtDist(r.distToTrack)}`);
-  else if (r.mode === 'approach') setBanner('approach', `Raggiungi il ${W.one} · ${fmtDist(r.distToTrack)} verso ${dir}`);
-  else if (r.mode === 'arrived') setBanner('arrived', '🏁 Arrivato!');
-  else setBanner('on', `✓ Sul ${W.one}`);
+  if (r.weak) setBanner('weak', tr('Segnale GPS debole (±{m} m)', { m: Math.round(accuracy) }));
+  else if (r.mode === 'off') setBanner('off', `⚠ ${tr('FUORI {ONE}', { ONE: W.one.toUpperCase() })} · ${fmtDist(r.distToTrack)}`);
+  else if (r.mode === 'approach') setBanner('approach', tr('Raggiungi il {one} · {d} verso {dir}', { d: fmtDist(r.distToTrack), dir }));
+  else if (r.mode === 'arrived') setBanner('arrived', `🏁 ${tr('Arrivato!')}`);
+  else setBanner('on', `✓ ${tr('Sul {one}')}`);
   if (ALERTS) soundAlert(r.mode);
 
-  $('#nav-target').textContent = r.mode === 'on' ? `${fmtDist(r.remaining)}` : r.mode === 'arrived' ? 'Arrivo' : fmtDist(r.targetDist);
-  nav.hint = r.mode === 'on' ? `all'arrivo · ↑${r.climb[0]} m ↓${r.climb[1]} m`
-    : r.mode === 'arrived' ? 'Percorso completato'
-    : `Torna sul ${W.one} verso ${dir}`;
+  $('#nav-target').textContent = r.mode === 'on' ? `${fmtDist(r.remaining)}` : r.mode === 'arrived' ? tr('Arrivo') : fmtDist(r.targetDist);
+  nav.hint = r.mode === 'on' ? `${tr("all'arrivo")} · ↑${r.climb[0]} m ↓${r.climb[1]} m`
+    : r.mode === 'arrived' ? tr('Percorso completato')
+    : tr('Torna sul {one} verso {dir}', { dir });
   $('#nav-done').textContent = r.mode === 'approach' ? '–' : fmtDist(r.done);
   $('#nav-left').textContent = fmtDist(r.remaining);
   $('#nav-ele').textContent = r.ele != null ? `${Math.round(r.ele)} m` : '–';
@@ -792,7 +800,7 @@ function soundAlert(mode) {
 }
 
 function onGeoError(e) {
-  const msg = e.code === 1 ? 'Permesso GPS negato: abilitalo nelle impostazioni del browser' : 'GPS non disponibile, riprovo…';
+  const msg = e.code === 1 ? tr('Permesso GPS negato: abilitalo nelle impostazioni del browser') : tr('GPS non disponibile, riprovo…');
   setBanner('weak', msg);
 }
 
@@ -825,10 +833,10 @@ function renderArrow() {
   renderArrow.prev = next;
   arrow.style.transform = `rotate(${next}deg)`;
   $('#dest-arrow').style.transform = `rotate(${r.destBearing - heading}deg)`;
-  $('#nav-dest-text').textContent = `🏁 ${nav.endName} · ${fmtDist(r.destDist)} ${cardinal(r.destBearing)} in linea d'aria`;
+  $('#nav-dest-text').textContent = `🏁 ${nav.endName} · ${tr("{d} {dir} in linea d'aria", { d: fmtDist(r.destDist), dir: cardinal(r.destBearing) })}`;
   const cone = document.querySelector('.me .cone');
   if (cone) { cone.style.display = c?.heading == null ? 'none' : ''; cone.style.transform = `rotate(${heading}deg)`; }
-  $('#nav-hint').textContent = nav.hint + (c?.heading == null && r.mode !== 'arrived' ? ' · senza bussola: in alto = nord' : '');
+  $('#nav-hint').textContent = nav.hint + (c?.heading == null && r.mode !== 'arrived' ? ` · ${tr('senza bussola: in alto = nord')}` : '');
 }
 
 async function keepAwake() {
@@ -853,6 +861,14 @@ function stopNav() {
 }
 
 /* ---------- Avvio ---------- */
+
+// Testi fissi della pagina (index.html, marcati data-tr), etichette accessibili e segnaposto della ricerca.
+function translatePage() {
+  if (LANG === 'it') return;
+  for (const el of document.querySelectorAll('[data-tr]')) el.textContent = tr(el.textContent.trim());
+  for (const el of document.querySelectorAll('[aria-label]')) el.setAttribute('aria-label', tr(el.getAttribute('aria-label')));
+  $('#search').placeholder = tr($('#search').placeholder);
+}
 
 function bind() {
   $('#btn-view').onclick = () => showList($('#list').hidden);
@@ -905,7 +921,7 @@ function bind() {
     drawNavTrack();
     try { localStorage.setItem(ACTIVE_KEY, JSON.stringify({ id: nav.detail.id, reversed: nav.reversed, at: Date.now() })); } catch { /* ignorato */ }
     drawProfile($('#profile'), nav.track, null);
-    toast('Verso invertito');
+    toast(tr('Verso invertito'));
     if (myPos) onFix({ coords: { latitude: myPos[0], longitude: myPos[1], accuracy: 10 } });
   };
   $('#nav-center').onclick = () => { nav.follow = true; if (myPos) nav.map.setView(myPos, Math.max(nav.map.getZoom(), 16)); };
@@ -925,7 +941,7 @@ async function resumeIfActive() {
     renderSheet(d);
     $('#sheet').hidden = false;
     startNav(d, a.reversed);
-    toast('Navigazione ripresa');
+    toast(tr('Navigazione ripresa'));
   } catch { /* traccia non disponibile */ }
 }
 
@@ -934,8 +950,8 @@ async function resumeIfActive() {
 // reinstallare l'app. Si può chiamare anche aprendo l'indirizzo con ?reset.
 // Tocca solo questa versione: l'altra (a piedi o in bici) sullo stesso sito resta com'è.
 async function resetApp() {
-  if (!confirm('Cancellare tutti i dati dell\'app su questo telefono?\n\n'
-    + `Si perdono le mappe scaricate, i ${W.many} personali (si riaggiungono dal loro link) e le preferenze.`)) return false;
+  if (!confirm(`${tr("Cancellare tutti i dati dell'app su questo telefono?")}\n\n`
+    + tr('Si perdono le mappe scaricate, i {many} personali (si riaggiungono dal loro link) e le preferenze.'))) return false;
   try {
     for (const k of Object.keys(localStorage)) if (isOwnKey(k)) localStorage.removeItem(k);
   } catch { /* ignorato */ }
@@ -951,6 +967,7 @@ async function resetApp() {
 }
 
 async function main() {
+  translatePage();
   bind();
   if (new URLSearchParams(location.search).has('reset')) {
     if (await resetApp()) return;
@@ -969,11 +986,11 @@ async function main() {
     const r = await fetch('data/index.json');
     const idx = await r.json();
     const added = importFromHash();
-    if (added) setTimeout(() => toast(`${W.One} «${added}» aggiunto`), 500);
+    if (added) setTimeout(() => toast(tr('{One} «{name}» aggiunto', { name: added })), 500);
     trails = [...loadCustom(), ...idx.trails];
     syncDataVersion(idx.generated).catch(() => {});
   } catch {
-    toast(`Impossibile caricare l'elenco dei ${W.many}`, 6000);
+    toast(tr("Impossibile caricare l'elenco dei {many}"), 6000);
     return;
   }
   byId = new Map(trails.map((t) => [t.id, t]));

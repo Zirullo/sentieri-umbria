@@ -1,4 +1,5 @@
 // Pianificazione minima dell'escursione: tempo di percorrenza e luce disponibile.
+import { LOCALE } from './i18n.js';
 
 // Tempo di percorrenza (ore) secondo DIN 33466, usato anche da CAI/DAV:
 // 4 km/h in piano, 300 m/h in salita, 500 m/h in discesa;
@@ -34,7 +35,7 @@ export function fmtHours(h) {
   return `${hh}h${String(mm).padStart(2, '0')}`;
 }
 
-export const fmtTime = (d) => (d ? d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) : '–');
+export const fmtTime = (d) => (d ? d.toLocaleTimeString(LOCALE, { hour: '2-digit', minute: '2-digit' }) : '–');
 
 // Tramonto (algoritmo NOAA semplificato, precisione ~1-2 minuti), funziona offline.
 export function sunset(date, lat, lon) {

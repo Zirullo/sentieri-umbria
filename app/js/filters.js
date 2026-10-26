@@ -2,7 +2,8 @@
 // Tre tipi di gruppo: multi (più scelte insieme, nessuna = tutti), one (una fascia, la prima = qualsiasi), check.
 // Lo stato salvato è { chiave: [indici] | indice | true/false }.
 import { haversine } from './geo.js';
-import { BIKE, KEY_PREFIX, W } from './config.js';
+import { BIKE, KEY_PREFIX } from './config.js';
+import { tr } from './i18n.js';
 
 const KEY = `${KEY_PREFIX}filters`;
 
@@ -10,33 +11,33 @@ const KEY = `${KEY_PREFIX}filters`;
 export const isLoop = (t) => t.tags?.roundtrip === 'yes' || haversine(t.start, t.end) < Math.min(150, t.len / 10);
 
 const opt = (label, test) => ({ label, test });
-const any = opt('Qualsiasi', () => true);
+const any = opt(tr('Qualsiasi'), () => true);
 const upTo = (m) => opt(`≤ ${m} m`, (t) => t.up != null && t.up <= m);
 const hours = (lo, hi, label) => opt(label, (t, h) => h >= lo && h < hi);
 const km = (lo, hi, label) => opt(label, (t) => t.len >= lo * 1000 && t.len < hi * 1000);
 const scales = (list) => list.map(([s, label]) => opt(`<b>${s}</b> ${label}`, (t) => t.scale === s));
-const loop = { key: 'loop', type: 'check', label: 'Solo anelli (torni alla partenza)', test: isLoop };
+const loop = { key: 'loop', type: 'check', label: tr('Solo anelli (torni alla partenza)'), test: isLoop };
 // strade statali, regionali e provinciali: traffico veloce (vedi build_data.py, campo "main")
 export const MAIN_ROAD_MAX = 0.1;
 const quiet = {
-  key: 'quiet', type: 'check', label: 'Evita strade principali (oltre il 10%)',
+  key: 'quiet', type: 'check', label: tr('Evita strade principali (oltre il 10%)'),
   test: (t) => t.main != null && t.main <= MAIN_ROAD_MAX,
 };
 
 export const HIKE_FILTERS = [
-  { key: 'scales', type: 'multi', title: 'Difficoltà', options: scales([['T', 'turistico'], ['E', 'escursionistico'], ['EE', 'esperti'], ['EEA', 'attrezzato']]) },
-  { key: 'dur', type: 'one', title: 'Durata stimata', options: [any, hours(0, 2, '≤ 2 h'), hours(2, 4, '2–4 h'), hours(4, 6, '4–6 h'), hours(6, Infinity, '> 6 h')] },
-  { key: 'climb', type: 'one', title: 'Salita totale', options: [any, upTo(300), upTo(600), upTo(1000)] },
+  { key: 'scales', type: 'multi', title: tr('Difficoltà'), options: scales([['T', tr('turistico')], ['E', tr('escursionistico')], ['EE', tr('esperti')], ['EEA', tr('attrezzato')]]) },
+  { key: 'dur', type: 'one', title: tr('Durata stimata'), options: [any, hours(0, 2, '≤ 2 h'), hours(2, 4, '2–4 h'), hours(4, 6, '4–6 h'), hours(6, Infinity, '> 6 h')] },
+  { key: 'climb', type: 'one', title: tr('Salita totale'), options: [any, upTo(300), upTo(600), upTo(1000)] },
   loop,
   quiet,
-  { key: 'cai', type: 'check', label: `Solo ${W.many} CAI`, test: (t) => t.cai },
+  { key: 'cai', type: 'check', label: tr('Solo {many} CAI'), test: (t) => t.cai },
 ];
 
 export const BIKE_FILTERS = [
-  { key: 'kinds', type: 'multi', title: 'Tipo', options: [opt('<b>Ciclovia</b>', (t) => t.kind === 'road'), opt('<b>MTB</b>', (t) => t.kind === 'mtb')] },
-  { key: 'scales', type: 'multi', title: 'Difficoltà MTB (scala CAI)', options: scales([['TC', 'turistico'], ['MC', 'media'], ['BC', 'buona'], ['OC', 'ottima'], ['EC', 'eccellente']]) },
-  { key: 'len', type: 'one', title: 'Lunghezza', options: [any, km(0, 20, '≤ 20 km'), km(20, 50, '20–50 km'), km(50, 100, '50–100 km'), km(100, Infinity, '> 100 km')] },
-  { key: 'climb', type: 'one', title: 'Salita totale', options: [any, upTo(500), upTo(1000), upTo(2000)] },
+  { key: 'kinds', type: 'multi', title: tr('Tipo'), options: [opt(tr('<b>Ciclovia</b>'), (t) => t.kind === 'road'), opt('<b>MTB</b>', (t) => t.kind === 'mtb')] },
+  { key: 'scales', type: 'multi', title: tr('Difficoltà MTB (scala CAI)'), options: scales([['TC', tr('turistico')], ['MC', tr('media')], ['BC', tr('buona')], ['OC', tr('ottima')], ['EC', tr('eccellente')]]) },
+  { key: 'len', type: 'one', title: tr('Lunghezza'), options: [any, km(0, 20, '≤ 20 km'), km(20, 50, '20–50 km'), km(50, 100, '50–100 km'), km(100, Infinity, '> 100 km')] },
+  { key: 'climb', type: 'one', title: tr('Salita totale'), options: [any, upTo(500), upTo(1000), upTo(2000)] },
   loop,
   quiet,
 ];

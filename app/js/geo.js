@@ -1,4 +1,6 @@
 // Funzioni geometriche su coordinate [lat, lon].
+import { dec, tr } from './i18n.js';
+
 const R = 6371008.8;
 const rad = (d) => (d * Math.PI) / 180;
 const deg = (r) => (r * 180) / Math.PI;
@@ -24,13 +26,14 @@ export const norm360 = (a) => ((a % 360) + 360) % 360;
 // Differenza angolare con segno in -180..180.
 export const angleDiff = (a, b) => ((b - a + 540) % 360) - 180;
 
-const DIRS = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO'];
+// in inglese Ovest diventa West: SW, W, NW
+const DIRS = ['N', 'NE', 'E', 'SE', 'S', tr('SO'), tr('O'), tr('NO')];
 export const cardinal = (b) => DIRS[Math.round(norm360(b) / 45) % 8];
 
 export function fmtDist(m) {
   if (m == null || !isFinite(m)) return '–';
   if (m < 1000) return `${Math.round(m)} m`;
-  return `${(m / 1000).toFixed(m < 10000 ? 1 : 0).replace('.', ',')} km`;
+  return `${dec(m / 1000, m < 10000 ? 1 : 0)} km`;
 }
 
 // Traccia ordinata con distanze progressive e ricerca del punto più vicino.

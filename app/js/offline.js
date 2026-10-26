@@ -1,6 +1,7 @@
 // Scaricamento della mappa e della traccia di un sentiero per l'uso senza rete.
 import { latToTileY, lonToTileX } from './geo.js';
 import { BIKE, KEY_PREFIX } from './config.js';
+import { tr } from './i18n.js';
 
 // nomi uguali a quelli del service worker (sw.js)
 export const TILE_CACHE = `${KEY_PREFIX}tiles-v1`;
@@ -64,7 +65,7 @@ export const isDownloaded = (id) => !!registry()[id]?.complete;
 
 export async function downloadTrail(trail, trailUrl, onProgress, signal) {
   const tiles = tilesFor(trail);
-  if (tiles.length > MAX_TILES) throw new Error('troppo lungo da scaricare, scarica le singole tappe');
+  if (tiles.length > MAX_TILES) throw new Error(tr('troppo lungo da scaricare, scarica le singole tappe'));
   if (navigator.storage?.persist) navigator.storage.persist().catch(() => {});
   if (trailUrl) { // i sentieri personali non hanno un file sul server
     const trailCache = await caches.open(TRAIL_CACHE);

@@ -1,5 +1,6 @@
 // Profilo altimetrico su canvas, con marcatore della posizione.
 import { fmtDist } from './geo.js';
+import { tr } from './i18n.js';
 
 export function drawProfile(canvas, track, posS = null) {
   const dpr = window.devicePixelRatio || 1;
@@ -19,7 +20,7 @@ export function drawProfile(canvas, track, posS = null) {
   if (eles.length < 2) {
     ctx.fillStyle = '#888';
     ctx.font = '12px system-ui';
-    ctx.fillText('Quote non disponibili', 8, h / 2);
+    ctx.fillText(tr('Quote non disponibili'), 8, h / 2);
     return;
   }
   let lo = Math.min(...eles);
