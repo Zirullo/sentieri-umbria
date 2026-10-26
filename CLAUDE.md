@@ -54,7 +54,8 @@ i testi vanno scritti con parole proprie, mai copiati da altri siti. Per un perc
 - Interfaccia in italiano e inglese (`app/js/i18n.js`, dizionario `app/js/en.js`): ogni testo visibile passa da
   `tr('frase italiana', { param })`, con frase fissa (niente `${…}`: parametri `{x}`, parole del modo `{one}` `{many}`);
   nelle pagine i testi fissi hanno `data-tr`. `tests/i18n.test.mjs` controlla che ogni frase abbia la traduzione.
-  Le descrizioni restano in italiano: `desc_en` nei file di dettaglio, se presente, ha la precedenza.
+  Le descrizioni restano solo in italiano e si traducono al momento: traduttore del telefono (Translator API) se
+  c'è, altrimenti link a Google Traduttore. `desc_en` nei file di dettaglio, se presente, avrebbe la precedenza.
 
 - Il service worker precarica gli elenchi `OWN` e `SHARED` in `app/sw-core.js`: ogni nuovo modulo JS va aggiunto
   a `SHARED` (`tests/shell.test.mjs` lo controlla).

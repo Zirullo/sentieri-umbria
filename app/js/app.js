@@ -9,7 +9,7 @@ import { FILTERS, MAIN_ROAD_MAX, activeCount, isLoop, loadFilters, matches, noFi
 import { BASEMAPS, addBaseMap, currentBase, setBase } from './basemap.js';
 import { ALERTS, BIKE, CLASSES, GUIDE, KEY_PREFIX, KIND_LABEL, LABEL_MIN_ZOOM, NO_CLASS_COLOR, SCALE_LABEL, SECTOR_ORDER, VERSION, W, isOwnKey } from './config.js';
 import { alertBack, alertOff, unlockSound } from './alert.js';
-import { LANG, LANGS, dec, setLang, tr } from './i18n.js';
+import { LANG, LANGS, dec, googleTranslateUrl, machineAvailability, machineTranslate, setLang, tr } from './i18n.js';
 
 const $ = (s) => document.querySelector(s);
 const SIM = new URLSearchParams(location.search).has('sim');
@@ -25,6 +25,7 @@ let myPos = null;        // [lat, lon] ultima posizione nota
 let listSort = 'zone';
 let filters = loadFilters();
 let currentId = null;    // sentiero in anteprima o nella scheda
+const translated = new Map(); // descrizione italiana → traduzione fatta sul telefono
 
 const trailUrl = (id) => `data/trails/${id}.json`;
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -536,14 +537,32 @@ function renderSheet(d) {
   }
   const ccw = area > 0;
   // descrizione (tools/describe.py): chiusa a poche righe finché non si chiede di leggerla tutta.
-  // In inglese desc_en quando c'è, altrimenti l'italiano con un avviso.
+  // In inglese desc_en quando c'è, altrimenti tradotta al momento (vedi machineTranslate in i18n.js).
   const own = LANG === 'it' ? '' : d[`desc_${LANG}`];
-  const desc = own || d.desc || tags['description:it'] || tags.description || tags['note:it'] || '';
-  const descNote = LANG !== 'it' && !own && desc ? `<div class="desc-note">${tr('Descrizione disponibile solo in italiano')}</div>` : '';
-  const longDesc = desc.length > 220 || desc.includes('\n');
+  const original = own || d.desc || tags['description:it'] || tags.description || tags['note:it'] || '';
+  // traduttore: 'checking', 'available' (traduzione in corso), 'downloadable', 'downloading', 'unavailable', 'done'
+  let mt = LANG === 'it' || own || !original ? 'none' : translated.has(original) ? 'done' : 'checking';
   let descOpen = false;
+  const translate = () => {
+    mt = 'available';
+    machineTranslate(original).then((text) => { translated.set(original, text); mt = 'done'; })
+      .catch(() => { mt = 'unavailable'; })
+      .finally(() => { if (currentId === d.id && !$('#sheet').hidden) render(); });
+  };
+  if (mt === 'checking') {
+    machineAvailability().then((a) => {
+      mt = a;
+      if (a === 'available') translate();
+      if (currentId === d.id && !$('#sheet').hidden) render();
+    });
+  }
 
   const render = () => {
+    const desc = mt === 'done' ? translated.get(original) : original;
+    const longDesc = desc.length > 220 || desc.includes('\n');
+    const mtLine = mt === 'available' ? `<div class="desc-note">${tr('Traduzione in corso…')}</div>`
+      : mt === 'downloadable' || mt === 'downloading' ? `<button class="desc-more" id="desc-translate">${tr('Traduci (scarica la lingua sul telefono)')}</button>`
+        : mt === 'unavailable' ? `<a class="desc-more" href="${googleTranslateUrl(original)}" target="_blank" rel="noopener">${tr('Traduci con Google ›')}</a>` : '';
     const { h, src } = hoursOf(d, reversed);
     const saved = isDownloaded(d.id);
     $('#sheet-body').innerHTML = `
@@ -560,8 +579,8 @@ function renderSheet(d) {
       <div class="plan" id="plan"></div>
       ${d.gaps ? `<div class="warn">${tr(d.gaps === 1 ? 'La traccia ha 1 interruzione nei dati: lì segui la segnaletica.' : 'La traccia ha {n} interruzioni nei dati: lì segui la segnaletica.', { n: d.gaps })}</div>` : ''}
       ${!saved && !navigator.onLine ? `<div class="warn">${tr('Sei offline e questo {one} non è scaricato: la mappa potrebbe mancare.')}</div>` : ''}
-      ${descNote}${desc ? `<div class="desc${longDesc && !descOpen ? ' clamp' : ''}">${esc(desc)}</div>` : ''}
-      ${longDesc ? `<button class="desc-more" id="desc-more">${descOpen ? tr('Riduci') : tr('Leggi tutto')}</button>` : ''}
+      ${desc ? `<div class="desc${longDesc && !descOpen ? ' clamp' : ''}">${esc(desc)}</div>` : ''}
+      ${longDesc || mtLine ? `<div class="desc-actions">${longDesc ? `<button class="desc-more" id="desc-more">${descOpen ? tr('Riduci') : tr('Leggi tutto')}</button>` : ''}${mtLine}</div>` : ''}
       <div class="dir-title">${tr('Verso di percorrenza')}${loop ? ` (${tr('anello')})` : ''}</div>
       <div class="dir-choice">
         <button data-rev="0" class="${reversed ? '' : 'on'}">${loop ? (ccw ? `↺ ${tr('antiorario')}` : `↻ ${tr('orario')}`) : `${esc(fromLabel)} → ${esc(toLabel)}`}</button>
@@ -588,6 +607,7 @@ function renderSheet(d) {
     showDirection(d, reversed);
     for (const b of document.querySelectorAll('.dir-choice button')) b.onclick = () => { reversed = b.dataset.rev === '1'; render(); };
     $('#desc-more')?.addEventListener('click', () => { descOpen = !descOpen; render(); });
+    $('#desc-translate')?.addEventListener('click', () => { translate(); render(); });
     $('#btn-go').onclick = () => startNav(d, reversed);
     $('#btn-dl').onclick = () => (isDownloaded(d.id) ? removeDownload(d, render) : download(d, render));
   };

@@ -34,6 +34,33 @@ export function tr(s, params = {}) {
 // numero con i decimali indicati e la virgola in italiano
 export const dec = (x, digits) => (LANG === 'it' ? x.toFixed(digits).replace('.', ',') : x.toFixed(digits));
 
+// Descrizioni: scritte in italiano, tradotte al momento. Col traduttore del telefono (Translator API di Chrome,
+// dove c'è) senza rete né chiavi: 'available' traduce subito, 'downloadable' scarica prima la lingua e il
+// browser lo permette solo dopo un tocco. Altrimenti si apre Google Traduttore.
+export async function machineAvailability() {
+  if (LANG === 'it' || !globalThis.Translator) return 'unavailable';
+  try {
+    return await Translator.availability({ sourceLanguage: 'it', targetLanguage: LANG });
+  } catch {
+    return 'unavailable';
+  }
+}
+
+let translator = null;
+// da chiamare subito nel gestore del tocco (nessun await prima di create) quando la lingua va scaricata
+export async function machineTranslate(text) {
+  translator ??= Translator.create({ sourceLanguage: 'it', targetLanguage: LANG });
+  try {
+    return await (await translator).translate(text);
+  } catch (e) {
+    translator = null;
+    throw e;
+  }
+}
+
+export const googleTranslateUrl = (text) =>
+  `https://translate.google.com/?sl=it&tl=${LANG}&op=translate&text=${encodeURIComponent(text)}`;
+
 // cambia lingua e ricarica: le etichette si costruiscono all'avvio (una navigazione in corso riprende da sola)
 export function setLang(l) {
   try { localStorage.setItem(KEY, l); } catch { /* ignorato */ }
