@@ -72,7 +72,8 @@ main { position: fixed; inset: calc(61px + var(--safe-t)) 0 0 0; }
 }
 
 /* Tipo di mappa e legenda */
-/* lingua in basso a sinistra; anteprima, elenco e schede ci passano sopra */
+/* lingua in basso a sinistra; anteprima, elenco e schede ci passano sopra.
+   Oltre quattro lingue la barra non sta più accanto al pulsante della posizione: servirà un menu. */
 .lang-bar {
   position: absolute; left: 12px; bottom: calc(40px + var(--safe-b)); z-index: 900; display: flex; gap: 2px; padding: 3px;
   border-radius: 22px; background: var(--bg); box-shadow: 0 2px 8px rgba(0,0,0,.3);

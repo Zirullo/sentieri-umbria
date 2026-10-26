@@ -26,8 +26,8 @@ export const norm360 = (a) => ((a % 360) + 360) % 360;
 // Differenza angolare con segno in -180..180.
 export const angleDiff = (a, b) => ((b - a + 540) % 360) - 180;
 
-// in inglese Ovest diventa West: SW, W, NW
-const DIRS = ['N', 'NE', 'E', 'SE', 'S', tr('SO'), tr('O'), tr('NO')];
+// sigle tradotte: in inglese Ovest è West (SW, W, NW), in tedesco Est è Ost (NO, O, SO)
+const DIRS = ['N', tr('NE'), tr('E'), tr('SE'), 'S', tr('SO'), tr('O'), tr('NO')];
 export const cardinal = (b) => DIRS[Math.round(norm360(b) / 45) % 8];
 
 export function fmtDist(m) {

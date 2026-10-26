@@ -9,7 +9,7 @@ import { FILTERS, MAIN_ROAD_MAX, activeCount, isLoop, loadFilters, matches, noFi
 import { BASEMAPS, addBaseMap, currentBase, setBase } from './basemap.js';
 import { ALERTS, BIKE, CLASSES, GUIDE, KEY_PREFIX, KIND_LABEL, LABEL_MIN_ZOOM, NO_CLASS_COLOR, SCALE_LABEL, SECTOR_ORDER, VERSION, W, isOwnKey } from './config.js';
 import { alertBack, alertOff, unlockSound } from './alert.js';
-import { LANG, LANGS, dec, googleTranslateUrl, machineAvailability, machineTranslate, setLang, tr } from './i18n.js';
+import { LANG, LANGS, dec, googleTranslate, googleTranslateUrl, machineAvailability, machineTranslate, setLang, tr } from './i18n.js';
 
 const $ = (s) => document.querySelector(s);
 const SIM = new URLSearchParams(location.search).has('sim');
@@ -404,7 +404,7 @@ function renderList() {
   const q = normalize($('#search').value.trim());
   const n = activeCount(filters);
   $('#list-note').hidden = !n || !!q || listSort === 'saved';
-  $('#list-note').textContent = `${n} ${n === 1 ? tr('filtro attivo') : tr('filtri attivi')} · ${tr('modifica')}`;
+  $('#list-note').textContent = `${tr('{n} filtri attivi', { n })} · ${tr('modifica')}`;
   let pool = trails.filter(shown);
   if (q) {
     pool = trails.filter((t) => (t.search ??= normalize(`${t.ref} ${t.name} ${t.from} ${t.to} ${t.sector}`)).includes(q));
@@ -536,19 +536,20 @@ function renderSheet(d) {
   // In inglese desc_en quando c'è, altrimenti tradotta al momento (vedi machineTranslate in i18n.js).
   const own = LANG === 'it' ? '' : d[`desc_${LANG}`];
   const original = own || d.desc || tags['description:it'] || tags.description || tags['note:it'] || '';
-  // traduttore: 'checking', 'available' (traduzione in corso), 'downloadable', 'downloading', 'unavailable', 'done'
+  // stato della traduzione: 'checking', 'busy', 'downloadable'/'downloading' (traduttore del telefono da scaricare),
+  // 'unavailable' (niente traduttore: Google su richiesta), 'failed' (Google non risponde), 'done'
   let mt = LANG === 'it' || own || !original ? 'none' : translated.has(original) ? 'done' : 'checking';
   let descOpen = false;
-  const translate = () => {
-    mt = 'available';
-    machineTranslate(original).then((text) => { translated.set(original, text); mt = 'done'; })
-      .catch(() => { mt = 'unavailable'; })
+  const translate = (how, onError) => {
+    mt = 'busy';
+    how(original).then((text) => { translated.set(original, text); mt = 'done'; })
+      .catch(() => { mt = onError; })
       .finally(() => { if (currentId === d.id && !$('#sheet').hidden) render(); });
   };
   if (mt === 'checking') {
     machineAvailability().then((a) => {
       mt = a;
-      if (a === 'available') translate();
+      if (a === 'available') translate(machineTranslate, 'unavailable');
       if (currentId === d.id && !$('#sheet').hidden) render();
     });
   }
@@ -556,9 +557,10 @@ function renderSheet(d) {
   const render = () => {
     const desc = mt === 'done' ? translated.get(original) : original;
     const longDesc = desc.length > 220 || desc.includes('\n');
-    const mtLine = mt === 'available' ? `<div class="desc-note">${tr('Traduzione in corso…')}</div>`
+    const mtLine = mt === 'busy' ? `<div class="desc-note">${tr('Traduzione in corso…')}</div>`
       : mt === 'downloadable' || mt === 'downloading' ? `<button class="desc-more" id="desc-translate">${tr('Traduci (scarica la lingua sul telefono)')}</button>`
-        : mt === 'unavailable' ? `<a class="desc-more" href="${googleTranslateUrl(original)}" target="_blank" rel="noopener">${tr('Traduci con Google ›')}</a>` : '';
+        : mt === 'unavailable' ? `<button class="desc-more" id="desc-google">${tr('Traduci con Google')}</button>`
+          : mt === 'failed' ? `<a class="desc-more" href="${googleTranslateUrl(original)}" target="_blank" rel="noopener">${tr('Apri in Google Traduttore ›')}</a>` : '';
     const { h, src } = hoursOf(d, reversed);
     const saved = isDownloaded(d.id);
     $('#sheet-body').innerHTML = `
@@ -603,7 +605,8 @@ function renderSheet(d) {
     showDirection(d, reversed);
     for (const b of document.querySelectorAll('.dir-choice button')) b.onclick = () => { reversed = b.dataset.rev === '1'; render(); };
     $('#desc-more')?.addEventListener('click', () => { descOpen = !descOpen; render(); });
-    $('#desc-translate')?.addEventListener('click', () => { translate(); render(); });
+    $('#desc-translate')?.addEventListener('click', () => { translate(machineTranslate, 'unavailable'); render(); });
+    $('#desc-google')?.addEventListener('click', () => { translate(googleTranslate, 'failed'); render(); });
     $('#btn-go').onclick = () => startNav(d, reversed);
     $('#btn-dl').onclick = () => (isDownloaded(d.id) ? removeDownload(d, render) : download(d, render));
   };

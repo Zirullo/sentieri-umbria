@@ -1,12 +1,12 @@
 // Le due versioni dell'app, a piedi (sentieri) e in bici (percorsi), condividono il codice:
 // la pagina sceglie quale con <html data-mode="bici">. Qui sta tutto ciò che le distingue.
-import { setWords, tr } from './i18n.js';
+import { setMode, tr } from './i18n.js';
 
 export const BIKE = globalThis.document?.documentElement.dataset.mode === 'bici';
 
 // Versione delle due app (escono sempre insieme), mostrata nel pannello della legenda.
 // A ogni rilascio: 1.01, 1.02, … (tests/shell.test.mjs controlla il formato).
-export const VERSION = '1.08';
+export const VERSION = '1.09';
 
 // Stesso sito per le due app: memoria del telefono e cache separate con un prefisso.
 export const KEY_PREFIX = BIKE ? 'bici-' : '';
@@ -14,8 +14,9 @@ export const KEY_PREFIX = BIKE ? 'bici-' : '';
 export const isOwnKey = (k) => (BIKE ? k.startsWith(KEY_PREFIX) : !k.startsWith('bici-'));
 
 // Parole dell'interfaccia: "sentiero" e "percorso" hanno gli stessi articoli (in inglese "trail" e "route"),
-// basta sostituire il nome: nelle frasi di tr() sono {one}, {many}, {One}, {Many}.
-export const W = setWords(BIKE
+// basta sostituire il nome: nelle frasi di tr() sono {one}, {many}, {One}, {Many}. Nelle lingue dove articoli e
+// casi cambiano (tedesco: der Weg, die Route) il dizionario ha la frase per ciascuna versione (vedi i18n.js).
+export const W = setMode(BIKE, BIKE
   ? { one: tr('percorso'), many: tr('percorsi'), One: tr('Percorso'), Many: tr('Percorsi') }
   : { one: tr('sentiero'), many: tr('sentieri'), One: tr('Sentiero'), Many: tr('Sentieri') });
 

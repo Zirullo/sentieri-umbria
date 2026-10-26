@@ -16,7 +16,7 @@ const OWN = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon.svg', 'icon
 const SHARED = [
   'css/app.css',
   'js/app.js', 'js/geo.js', 'js/nav.js', 'js/compass.js', 'js/offline.js', 'js/plan.js', 'js/profile.js', 'js/custom.js',
-  'js/filters.js', 'js/basemap.js', 'js/config.js', 'js/alert.js', 'js/i18n.js', 'js/en.js',
+  'js/filters.js', 'js/basemap.js', 'js/config.js', 'js/alert.js', 'js/i18n.js', 'js/en.js', 'js/de.js',
   'vendor/leaflet/leaflet.js', 'vendor/leaflet/leaflet.css',
 ];
 const SHELL = [...OWN, ...SHARED.map((f) => APP.shared + f)];
