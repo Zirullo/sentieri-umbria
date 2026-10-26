@@ -57,6 +57,9 @@ python -I tools/fetch_osm.py --bici data/raw/osm_umbria_bici.json
 python -P -E tools/build_data.py --bici data/raw/osm_umbria_bici.json data/raw/dem app/bici/data
 ```
 
+Se c'è `data/raw/luoghi.json` (vedi sotto), `build_data.py` scambia partenza e arrivo dei tag OSM
+quando sono al contrario rispetto al verso della traccia (lo stampa a video).
+
 Poi le descrizioni (`build_data.py` riscrive i file dei percorsi senza):
 
 ```sh
@@ -65,9 +68,17 @@ python -P -E tools/describe.py data/descrizioni.json app/piedi/data data/raw/luo
 python -P -E tools/describe.py data/descrizioni.json app/bici/data data/raw/luoghi.json
 ```
 
-I testi stanno in `data/descrizioni.json`: note su cammini, luoghi, zone e settori, scritte da zero
-a partire da informazioni trovate online (niente testo copiato da altri siti). Ogni percorso riceve
-il testo del cammino di cui fa parte, fino a tre note sui luoghi che tocca (partenza, arrivo, `via`,
+I testi stanno in `data/descrizioni.json`: il testo proprio di ogni percorso (sezione `percorsi`,
+per id della relazione OSM) e note su cammini, luoghi, zone e settori, scritte da zero a partire dai
+dati e da informazioni trovate online (niente testo copiato da altri siti). Il testo di un percorso
+si scrive dalla sua scheda dati (luoghi attraversati in ordine con progressiva e quota, tratti con
+nome e fondo, salite, incroci con altri percorsi):
+
+```sh
+python -P -E tools/schede_percorsi.py data/raw/osm_umbria.json data/raw/luoghi.json app/piedi/data schede.txt [id …]
+```
+
+Ogni percorso riceve il suo testo, quello del cammino di cui fa parte, fino a tre note sui luoghi che tocca (partenza, arrivo, `via`,
 o luoghi lungo il tracciato) e, se non ce ne sono, quella della zona o del settore; in coda le
 avvertenze delle note OSM (frane, tratti chiusi). Un test controlla che nessun percorso resti senza.
 

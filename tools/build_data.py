@@ -9,6 +9,7 @@ Produce:
 """
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -337,6 +338,48 @@ def drop_return_legs(index, details, near_m=1000, overlap=0.85, tol_m=50):
     index[:] = [e for e in index if e["id"] not in dropped]
 
 
+LINKED_REF = re.compile(r"(?:percors[oi]|sentiero|sent\.|bivio|innesto|intersezione|\bn\.?)\s*N?([0-9]{2,3}[A-Z]?)\b", re.I)
+
+
+def fix_from_to(index, details, places_path):
+    """Partenza e arrivo dei tag OSM a volte sono al contrario rispetto al verso della traccia: l'app li
+    mostrerebbe scambiati (scheda, scelta del verso). Si scambiano quando un estremo dichiarato (un luogo con
+    quel nome, o il sentiero di cui si dice l'incrocio) è nettamente più vicino all'altro capo della traccia."""
+    places = {}
+    if places_path.exists():
+        for e in json.load(open(places_path, encoding="utf-8"))["elements"]:
+            t, c = e.get("tags", {}), e if "lat" in e else e.get("center")
+            if t.get("name") and c:
+                places.setdefault(t["name"].lower(), []).append((c["lat"], c["lon"]))
+    by_ref = {}
+    for e in index:
+        by_ref.setdefault(e["ref"], []).append(e)
+
+    def dist_to_ends(entry, label):
+        m = LINKED_REF.search(label)
+        pts = [p for o in by_ref.get(m.group(1), []) if o["id"] != entry["id"] for seg in o["geom"] for p in seg] if m else []
+        if not pts:
+            pts = [c for c in places.get(label.split(" - ")[0].split(",")[0].strip().lower(), [])
+                   if min(haversine(*entry["start"], *c), haversine(*entry["end"], *c)) < 5000]
+        if not pts:
+            return None
+        return (min(haversine(*entry["start"], *p) for p in pts), min(haversine(*entry["end"], *p) for p in pts))
+
+    def near_end(d):  # (distanza dalla partenza, dall'arrivo): vicino all'arrivo, lontano dalla partenza
+        return d is not None and d[1] < 1500 and d[0] > 300 and d[1] < d[0] / 2
+
+    for e in index:
+        if not e["from"] or not e["to"] or haversine(*e["start"], *e["end"]) < 300:
+            continue
+        f, t = dist_to_ends(e, e["from"]), dist_to_ends(e, e["to"])
+        t_near_start = t and near_end((t[1], t[0]))
+        if (near_end(f) and (t is None or t_near_start)) or (t_near_start and f is None):
+            print(f"partenza e arrivo scambiati: {e['id']} {e['ref']} {e['from']!r} ↔ {e['to']!r}")
+            e["from"], e["to"] = e["to"], e["from"]
+            tags = details[e["id"]]["tags"]
+            tags["from"], tags["to"] = e["from"], e["to"]
+
+
 def bike_codes(index):
     """Codice breve per etichette ed elenco: il numero ufficiale se c'è ed è unico,
     altrimenti C1, C2… per le ciclovie e M1, M2… per la MTB, in ordine di relazione OSM (stabile)."""
@@ -468,6 +511,7 @@ def main(osm_path, dem_dir, out_dir, bike=False):
         # solo in bici: a piedi itinerari diversi (CAI, cammini) condividono tratti in senso opposto
         drop_return_legs(index, details)
         bike_codes(index)
+    fix_from_to(index, details, Path(osm_path).with_name("luoghi.json"))
     # file di dettaglio scritti alla fine, quando i codici delle etichette sono definitivi
     for entry in index:
         detail = {k: v for k, v in entry.items() if k != "geom"} | details[entry["id"]]

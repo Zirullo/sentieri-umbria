@@ -17,7 +17,8 @@ Rigenerare i dati: vedi README. `build_data.py` va lanciato con `python -P -E` (
 `imagecodecs` è installato con `--user` e `-I` ignorerebbe i pacchetti utente.
 `data/raw/` (OSM, confine regionale, DEM Copernicus ~230 MB) è in `.gitignore`.
 Dopo `build_data.py` rilanciare sempre `tools/describe.py` (descrizioni da `data/descrizioni.json`):
-i testi vanno scritti con parole proprie, mai copiati da altri siti.
+i testi vanno scritti con parole proprie, mai copiati da altri siti. Per un percorso nuovo: scheda con
+`tools/schede_percorsi.py … <id>`, testo in `percorsi` di `data/descrizioni.json` (solo fatti della scheda o di fonti).
 
 ## Ambiente Windows
 

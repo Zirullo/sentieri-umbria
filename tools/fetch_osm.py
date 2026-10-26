@@ -41,6 +41,8 @@ PLACES_QUERY = """
   nwr["amenity"="place_of_worship"]["name"];
   nwr["waterway"="waterfall"]["name"];
   nwr["leisure"="nature_reserve"]["name"];
+  nwr["natural"="spring"];
+  nwr["amenity"~"^(drinking_water|shelter)$"];
 );
 out center tags;
 """

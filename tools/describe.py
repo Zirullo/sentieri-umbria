@@ -1,7 +1,9 @@
 """Scrive una breve descrizione di ogni percorso nei file di dettaglio (campo "desc").
 
-I testi stanno in data/descrizioni.json: note originali su cammini, luoghi e zone, scritte a partire da
-informazioni raccolte online e riformulate (niente testo copiato). Per ogni percorso si sceglie:
+I testi stanno in data/descrizioni.json: note originali su percorsi, cammini, luoghi e zone, scritte a
+partire dai dati (tools/schede_percorsi.py) e da informazioni raccolte online, riformulate (niente testo
+copiato). Per ogni percorso si sceglie:
+  0. il testo proprio del percorso, se c'è (sezione "percorsi", per id della relazione OSM);
   1. il cammino a tappe di cui fa parte (dal nome, dal codice o dalle note OSM);
   2. fino a tre note sui luoghi di partenza, arrivo e passaggio (tag from/to/via, nome del percorso)
      o sui luoghi che il tracciato tocca (data/raw/luoghi.json, se c'è: tools/fetch_osm.py --luoghi);
@@ -95,7 +97,12 @@ def load_pois(path, places):
         if re.match(r"(san|santa|santo|sant'|madonna|chiesa)\b", norm(name)) and "place" not in t:
             continue
         out.append((name, c["lat"], c["lon"], t.get("place") in ("city", "town")))
-    return out
+    # stesso nome in posti lontani (c'è un Monte Cucco anche in Toscana): non si sa a quale va la nota
+    spread = {}
+    for name, lat, lon, _ in out:
+        spread.setdefault(norm(name), []).append((lat, lon))
+    ambiguous = {n for n, ps in spread.items() if any(haversine(*a, *b) > 20000 for a in ps for b in ps)}
+    return [p for p in out if norm(p[0]) not in ambiguous]
 
 
 def along(d, pois, places):
@@ -165,7 +172,8 @@ def describe(d, texts, places, pois, sector_of):
                                                      ("note:it", "description:it", "note", "description", "mtb:description")]
     route = next((it for it in texts["itinerari"]
                   if any(f and re.search(it["cerca"], f, re.I) for f in fields)), None)
-    out = [route["testo"]] if route else []
+    own = texts["percorsi"].get(str(d["id"]))
+    out = ([own] if own else []) + ([route["testo"]] if route else [])
 
     names = [d.get("from", ""), d.get("to", "")] + tags.get("via", "").split(";")
     if not route:
@@ -178,9 +186,9 @@ def describe(d, texts, places, pois, sector_of):
     for k in keys:
         if places.notes[k] not in notes and places.notes[k] not in out:
             notes.append(places.notes[k])
-    out += notes[:MAX_PLACES]
+    out += notes[:MAX_PLACES - 1 if own else MAX_PLACES]
 
-    if not notes:
+    if not notes and not own:
         z = zone_of(d, texts["zone"])
         text = (places.notes.get(z["luogo"]) if z and "luogo" in z else z and z.get("testo"))
         if not text and not route:
