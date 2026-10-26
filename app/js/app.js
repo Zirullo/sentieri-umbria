@@ -46,9 +46,9 @@ function tileLayer() {
   return L.tileLayer(TILE_URL, { subdomains: 'abc', maxNativeZoom: MAX_NATIVE_ZOOM, maxZoom: 18, attribution: ATTRIB, crossOrigin: true });
 }
 
-// Quota su strade principali (statali, regionali, provinciali): evidenziata oltre la soglia del filtro.
+// Quota su strade aperte al traffico (anche comunali), su tutti i percorsi: evidenziata oltre la soglia del filtro.
 const mainPct = (t) => Math.round((t.main || 0) * 100);
-const mainRoadChip = (t) => (mainPct(t) >= 1
+const mainRoadChip = (t) => (t.main != null
   ? `<span class="chip${t.main > MAIN_ROAD_MAX ? ' warn-chip' : ''}">🚗 ${mainPct(t)}% ${tr('su strade principali')}</span>` : '');
 
 function hoursOf(t, reversed = false) {

@@ -46,12 +46,12 @@ KEEP_TAGS = [
 
 MIN_ROUTE_M = 200  # relazioni quasi vuote (solo un cartello o pochi metri) non sono percorsi
 
-# Strade principali, dove il traffico è veloce e può essere pericoloso: statali e regionali/provinciali
-# di primo livello (primary, secondary). Non contano le provinciali minori di collegamento tra paesi
-# (tertiary, in Umbria spesso tranquille), le strade comunali, di campagna o residenziali,
-# né i tratti chiusi alle auto o con una pista ciclabile separata dalla carreggiata (cycleway=track).
+# Strade principali, per chi cammina: qualunque strada aperta al traffico, anche comunale, residenziale o di
+# servizio (statali, provinciali, comunali, vicinali asfaltate), dove le auto passano vicino a chi è a piedi.
+# Non contano i tratti chiusi alle auto o con una pista ciclabile separata dalla carreggiata (cycleway=track).
 MAIN_HIGHWAYS = {
     "motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link", "secondary", "secondary_link",
+    "tertiary", "tertiary_link", "unclassified", "residential", "living_street", "service", "road",
 }
 NO_CARS = {"no", "private", "agricultural", "forestry", "delivery", "permit"}
 CYCLEWAY_KEYS = ("cycleway", "cycleway:both", "cycleway:right", "cycleway:left")
