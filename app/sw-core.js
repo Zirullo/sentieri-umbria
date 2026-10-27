@@ -12,7 +12,7 @@ const SEEN_CACHE = `${APP.prefix}tiles-seen-v1`;   // riquadri visti navigando o
 const SEEN_MAX = 2500;
 
 // file propri di ciascuna app (nella sua cartella) e file comuni (nella cartella principale)
-const OWN = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'data/index.json'];
+const OWN = ['./', 'index.html', 'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'data/index.json', 'data/extra.json'];
 const SHARED = [
   'css/app.css',
   'js/app.js', 'js/geo.js', 'js/nav.js', 'js/compass.js', 'js/offline.js', 'js/plan.js', 'js/profile.js', 'js/custom.js',

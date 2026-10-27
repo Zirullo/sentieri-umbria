@@ -592,6 +592,9 @@ function renderSheet(d) {
       <div class="actions"><button id="btn-go" class="primary">▶ ${tr('Inizia')}</button></div>
       ${d.custom ? `<div class="src">${tr('{One} personale, salvato solo su questo telefono')} ·
         <a href="#" id="btn-del-custom">${tr('elimina')}</a></div>`
+    : d.extra ? `<div class="src">${tr('Fonte')}: ${d.extra.url
+        ? `<a href="${esc(d.extra.url)}" target="_blank" rel="noopener">${esc(d.extra.fonte)}</a>` : esc(d.extra.fonte)}
+        ${d.extra.autore ? ` · ${tr('segnalato da')} ${esc(d.extra.autore)}` : ''}</div>`
     : `<div class="src">${tr('Dati')} © OpenStreetMap contributors (ODbL) ·
         <a href="https://www.openstreetmap.org/relation/${d.id}" target="_blank" rel="noopener">${tr('relazione')} ${d.id}</a>
         ${tags['survey:date'] ? ` · ${tr('rilievo')} ${esc(tags['survey:date'])}` : ''}</div>`}`;
@@ -1011,9 +1014,11 @@ async function main() {
   try {
     const r = await fetch('data/index.json');
     const idx = await r.json();
+    // percorsi aggiuntivi da tracce GPX (tools/build_extra.py), in un file a parte; se manca si va avanti senza
+    const extra = await fetch('data/extra.json').then((x) => (x.ok ? x.json() : { trails: [] })).catch(() => ({ trails: [] }));
     const added = importFromHash();
     if (added) setTimeout(() => toast(tr('{One} «{name}» aggiunto', { name: added })), 500);
-    trails = [...loadCustom(), ...idx.trails];
+    trails = [...loadCustom(), ...idx.trails, ...extra.trails];
     syncDataVersion(idx.generated).catch(() => {});
   } catch {
     toast(tr("Impossibile caricare l'elenco dei {many}"), 6000);

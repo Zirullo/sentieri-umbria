@@ -153,6 +153,8 @@ export const EN = {
   elimina: 'delete',
   relazione: 'relation',
   rilievo: 'surveyed',
+  Fonte: 'Source',
+  'segnalato da': 'reported by',
   'Eliminare il {one} «{name}»?': 'Delete the {one} “{name}”?',
   tramonto: 'sunset',
   'parti entro le': 'start by',

@@ -165,6 +165,8 @@ export const DE = {
   elimina: 'löschen',
   relazione: 'Relation',
   rilievo: 'erfasst',
+  Fonte: 'Quelle',
+  'segnalato da': 'gemeldet von',
   'Eliminare il {one} «{name}»?': '{One} „{name}“ löschen?',
   tramonto: 'Sonnenuntergang',
   'parti entro le': 'Start bis',

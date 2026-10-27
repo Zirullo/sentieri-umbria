@@ -526,9 +526,10 @@ def main(osm_path, dem_dir, out_dir, bike=False):
         detail = {k: v for k, v in entry.items() if k != "geom"} | details[entry["id"]]
         (out / "trails" / f"{entry['id']}.json").write_text(json.dumps(detail, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
     # percorsi spariti da OSM (o scartati): via anche i loro file
+    # (restano quelli dei percorsi aggiuntivi da GPX, di tools/build_extra.py: id da 9000000000)
     keep = {f"{e['id']}.json" for e in index}
     for f in (out / "trails").glob("*.json"):
-        if f.name not in keep:
+        if f.name not in keep and int(f.stem) < 9_000_000_000:
             f.unlink()
 
     index.sort(key=lambda e: (e["sector"], e["ref"].zfill(6), e["name"]))

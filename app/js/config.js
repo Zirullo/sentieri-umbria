@@ -6,7 +6,7 @@ export const BIKE = globalThis.document?.documentElement.dataset.mode === 'bici'
 
 // Versione delle due app (escono sempre insieme), mostrata nel pannello della legenda.
 // A ogni rilascio: 1.01, 1.02, … (tests/shell.test.mjs controlla il formato).
-export const VERSION = '1.11';
+export const VERSION = '1.12';
 
 // Stesso sito per le due app: memoria del telefono e cache separate con un prefisso.
 export const KEY_PREFIX = BIKE ? 'bici-' : '';

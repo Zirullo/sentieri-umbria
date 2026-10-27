@@ -208,6 +208,8 @@ def main(texts_path, data_dir, pois_path=None):
     empty = 0
     for f in files:
         d = json.loads(f.read_text(encoding="utf-8"))
+        if d.get("extra"):  # percorso aggiuntivo da GPX (build_extra.py): ha già il suo testo
+            continue
         d["desc"] = describe(d, texts, places, pois, sector_of)
         empty += not d["desc"]
         f.write_text(json.dumps(d, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")

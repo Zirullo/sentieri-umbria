@@ -88,6 +88,13 @@ Si scaricano anche le etichette di tutte le strade dei percorsi, per calcolare l
 principali (qualunque strada aperta alle auto, anche comunale, asfaltata e senza pista ciclabile separata): il filtro
 «Evita strade principali» esclude i percorsi che ne hanno più del 10%.
 
+Percorsi aggiuntivi da tracce GPX (database separato da OSM, in `data/extra/`): la traccia si converte in coordinate senza orari e i dati del percorso (nome, codice, fonte, autore, testo) si scrivono in `data/extra/extra.json`, con id da 9000000000. Poi `build_extra.py` li scrive in `app/*/data/extra.json` e `trails/` (letti dall'app accanto a `index.json`; la scheda cita la fonte):
+
+```sh
+python -X utf8 -P -E tools/build_extra.py add traccia.gpx slug
+python -X utf8 -P -E tools/build_extra.py build data/raw/dem
+```
+
 Nella versione in bici ogni percorso ha un codice breve per etichette e ricerca: il numero ufficiale
 se c'è ed è unico, altrimenti C1, C2… (ciclovie) e M1, M2… (MTB), in ordine di relazione OSM.
 
