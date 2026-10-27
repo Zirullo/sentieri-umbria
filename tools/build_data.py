@@ -48,10 +48,17 @@ MIN_ROUTE_M = 200  # relazioni quasi vuote (solo un cartello o pochi metri) non 
 
 # Strade principali, per chi cammina: qualunque strada aperta al traffico, anche comunale, residenziale o di
 # servizio (statali, provinciali, comunali, vicinali asfaltate), dove le auto passano vicino a chi è a piedi.
-# Non contano i tratti chiusi alle auto o con una pista ciclabile separata dalla carreggiata (cycleway=track).
+# Non contano le sterrate (surface non asfaltato), i tratti chiusi alle auto e quelli con una pista ciclabile
+# separata dalla carreggiata (cycleway=track).
 MAIN_HIGHWAYS = {
     "motorway", "motorway_link", "trunk", "trunk_link", "primary", "primary_link", "secondary", "secondary_link",
     "tertiary", "tertiary_link", "unclassified", "residential", "living_street", "service", "road",
+}
+# Fondi con cui una strada è asfaltata o lastricata; con un altro fondo indicato (ghiaia, terra, compattato…)
+# la strada è una sterrata, quindi non conta come strada principale. Senza tag "surface" si assume asfalto.
+PAVED = {
+    "asphalt", "paved", "concrete", "concrete:plates", "concrete:lanes", "paving_stones", "sett", "cobblestone",
+    "chipseal", "bricks", "metal",
 }
 NO_CARS = {"no", "private", "agricultural", "forestry", "delivery", "permit"}
 CYCLEWAY_KEYS = ("cycleway", "cycleway:both", "cycleway:right", "cycleway:left")
@@ -281,6 +288,8 @@ def is_main_road(tags):
     if tags.get("highway") not in MAIN_HIGHWAYS:
         return False
     if any(tags.get(k) in NO_CARS for k in ("motor_vehicle", "motorcar", "vehicle", "access")):
+        return False
+    if tags.get("surface", "asphalt") not in PAVED:
         return False
     return not any(tags.get(k) == "track" for k in CYCLEWAY_KEYS)
 

@@ -85,7 +85,7 @@ avvertenze delle note OSM (frane, tratti chiusi). Un test controlla che nessun p
 Insieme ai percorsi si scaricano gallerie e ponti: lì la quota si interpola tra gli estremi,
 perché il DEM darebbe quella della montagna sopra la galleria o del fondovalle sotto il ponte.
 Si scaricano anche le etichette di tutte le strade dei percorsi, per calcolare la quota su strade
-principali (qualunque strada aperta alle auto, anche comunale, senza pista ciclabile separata): il filtro
+principali (qualunque strada aperta alle auto, anche comunale, asfaltata e senza pista ciclabile separata): il filtro
 «Evita strade principali» esclude i percorsi che ne hanno più del 10%.
 
 Nella versione in bici ogni percorso ha un codice breve per etichette e ricerca: il numero ufficiale
